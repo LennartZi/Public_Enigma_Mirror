@@ -1,0 +1,9 @@
+services:
+  backend:
+    build: backend
+    image: localhost/backend:latest
+    environment:
+      - FLASK_DEBUG=1
+  frontend:
+    build: frontend
+    image: localhost/frontend:latest

@@ -1,0 +1,28 @@
+ARG context=local
+
+FROM python:3.11-alpine as base
+
+FROM base as base-local
+RUN pip install pipenv
+WORKDIR /build
+COPY pyproject.toml Pipfile /build
+RUN pipenv install --dev
+COPY backend /build/backend
+RUN pipenv run python3 -m build
+RUN mv dist /dist
+
+FROM base as base-ci
+COPY dist/ /dist
+
+FROM base-${context} AS context
+
+
+FROM python:3.11-alpine
+
+COPY --from=context /dist/ /opt
+RUN pip install /opt/backend-*.whl
+
+RUN touch /etc/enigma.yaml
+
+ENV FLASK_APP=backend
+CMD ["flask", "run", "--host", "0.0.0.0"]

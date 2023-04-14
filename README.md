@@ -1,6 +1,19 @@
 # Enigma
 
 
+## Dev
+
+```console
+{docker,podman}-compose -f compose.yml -f compose.dev.yml up
+docker-compose -f compose.yml -f compose.dev.yml down
+```
+
+## Prod
+
+```console
+{docker,podman}-compose -f compose.yml up
+docker-compose -f compose.yml down
+```
 
 ## Getting started
 
