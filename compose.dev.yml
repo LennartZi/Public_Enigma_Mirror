@@ -1,6 +1,9 @@
 services:
   backend:
-    build: backend
+    build:
+      context: backend
+      args:
+        context: local
     image: localhost/backend:latest
     environment:
       - FLASK_DEBUG=1
