@@ -1,0 +1,12 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools", "wheel"]
+
+[project]
+name = "backend"
+version = "0.1.0"
+dependencies = [
+  "Flask == 2.2",
+  "PyYaml == 6.0",
+]
+

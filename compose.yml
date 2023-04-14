@@ -1,0 +1,14 @@
+services:
+  backend:
+    image: registry.mygit.th-deg.de/programming-group-42/ci-test/backend:latest
+    volumes:
+      - type: bind
+        source: ./enigma.yaml
+        target: /etc/enigma.yaml
+        read_only: true
+    ports:
+      - 5000:5000
+  frontend:
+    image: registry.mygit.th-deg.de/programming-group-42/ci-test/frontend:latest
+    ports:
+      - 8080:80
