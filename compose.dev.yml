@@ -2,11 +2,14 @@ services:
   backend:
     build:
       context: backend
+      dockerfile: Containerfile
       args:
         context: local
     image: localhost/backend:latest
     environment:
       - FLASK_DEBUG=1
   frontend:
-    build: frontend
+    build:
+      context: frontend
+      dockerfile: Containerfile
     image: localhost/frontend:latest
