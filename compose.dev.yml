@@ -13,3 +13,8 @@ services:
       context: frontend
       dockerfile: Containerfile
     image: localhost/frontend:latest
+    volumes:
+      - type: bind
+        source: ./frontend/src
+        target: /usr/share/nginx/html
+        read_only: true
