@@ -1,0 +1,76 @@
+openapi: 3.0.3
+info:
+  title: Enigma Backend
+  version: 0.0.1
+servers:
+  - url: http://localhost:5000
+tags:
+  - name: variant
+    description: The variant of the Enigma
+  - name: wheel
+paths:
+  /variants:
+    get:
+      tags:
+        - variant
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+  /variant:
+    put:
+      tags:
+        - variant
+      parameters:
+        - name: variant
+          in: header
+          required: true
+      responses:
+        "200":
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: variant=B
+  /wheels:
+    get:
+      tags:
+        - wheel
+      description: The `variant` cookie has to be set.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    entry:
+                      type: boolean
+                    reflector:
+                      type: boolean
+  /wheel/{wheelnr}:
+    put:
+      tags:
+        - wheel
+      description: The `variant` cookie has to be set.
+      parameters:
+        - name: wheelnr
+          in: path
+        - name: wheel
+          in: header
+          required: true
+      responses:
+        "200":
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: "wheels={ 0: ETW }"
