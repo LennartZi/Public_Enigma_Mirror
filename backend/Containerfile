@@ -23,6 +23,7 @@ FROM base-${context} AS context
 
 
 FROM python:3.11-alpine
+#RUN apk update && apk upgrade # upgrade packages to fix vulnerabilities
 
 COPY --from=context /dist/ /opt
 RUN pip install /opt/backend-*.whl
