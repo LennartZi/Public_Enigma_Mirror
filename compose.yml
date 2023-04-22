@@ -1,4 +1,4 @@
-version: 2
+version: "2"
 services:
   backend:
     image: registry.mygit.th-deg.de/jd17123/enigma/backend:latest
