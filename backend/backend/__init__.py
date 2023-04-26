@@ -11,6 +11,7 @@ def create_app(test_config=None):
     @app.after_request
     def add_cors(response):
         response.headers.set('Access-Control-Allow-Origin', '*')
+        response.headers.set('Access-Control-Allow-Methods', 'GET, PUT')
         return response
 
     with app.app_context():
