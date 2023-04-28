@@ -13,6 +13,7 @@ def create_app(test_config=None):
         response.headers.set('Access-Control-Allow-Origin', '*')
         response.headers.set('Access-Control-Allow-Methods', 'GET, PUT')
         response.headers.set('Access-Control-Expose-Headers', '*')
+        response.headers.set('Access-Control-Allow-Headers', '*')
         response.headers.set('Access-Control-Allow-Credentials', 'true')
         return response
 
