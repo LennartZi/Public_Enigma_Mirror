@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request, json
 from flask import current_app as app
-from .Enigma_B import EnigmaB
+from .enigma import EnigmaB
 import yaml
 
 
