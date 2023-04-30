@@ -1,9 +1,11 @@
-class EnigmaB:
-    def __init__(self, rotor1, rotor2, rotor3, start_pos1, start_pos2, start_pos3, reflector, plugboard=None):
+class Enigma:
+    def __init__(self, rotor1, rotor2, rotor3, start_pos1, start_pos2, start_pos3, reflector, notch_rotor1,
+                 notch_rotor2, notch_rotor3, plugboard=None):
         self.rotors = [rotor3, rotor2, rotor1]
         self.rotor_positions = [start_pos3, start_pos2, start_pos1]
         self.reflector = reflector
         self.plugboard = plugboard or {}
+        self.notches = [notch_rotor3, notch_rotor2, notch_rotor1]
 
     def set_rotor_positions(self, pos1, pos2, pos3):
         self.rotor_positions = [pos1, pos2, pos3]
@@ -12,12 +14,12 @@ class EnigmaB:
         self.plugboard = plugboard
 
     def step_rotors(self):
-        if self.rotor_positions[1] == 'Z':
+        if self.rotor_positions[1] == self.notches[1] and self.rotor_positions[2] == self.notches[2]:
             if self.rotor_positions[0] == 'Z':
                 self.rotor_positions[0] = 'A'
             else:
                 self.rotor_positions[0] = chr(ord(self.rotor_positions[0]) + 1)
-        if self.rotor_positions[2] == 'Q':
+        if self.rotor_positions[2] == self.notches[2]:
             if self.rotor_positions[1] == 'Z':
                 self.rotor_positions[1] = 'A'
             else:
@@ -50,7 +52,6 @@ class EnigmaB:
 
             letter_idx = ord(letter) - ord('A')
             letter_idx = (letter_idx + rotor_offset[i]) % 26
-            # rotor_offset[i-1 % 2] = rotor_offset[i-1 % 2] - rotor_offset[i]
             letter = chr((ord(self.rotors[i][letter_idx])))
 
             if temp_offset is not None:
@@ -62,11 +63,23 @@ class EnigmaB:
         letter = self.reflector[letter_idx]
 
         # Encode through rotors in reverse direction (Reflector -> III -> II -> I)
-        """for i in range(3):
-            letter_idx = ord(letter) - ord('A')
-            rotor_offset = ord(self.rotor_positions[i]) - ord('A')
-            letter_idx = (letter_idx + rotor_offset) % 26
-            letter = chr((ord(self.rotors[i][letter_idx])))"""
+        for i in range(3):
+            if i == 1 and rotor_offset[0] != 0:
+                temp_offset = rotor_offset[i]
+                rotor_offset[i] = rotor_offset[i] - rotor_offset[i-1]
+            elif i == 2 and rotor_offset[1] != 0:
+                temp_offset = rotor_offset[i]
+                rotor_offset[i] = rotor_offset[i] - rotor_offset[i-1]
+
+            letter_idx = self.rotors[i].index(chr(((ord(letter) - ord('A') + rotor_offset[i]) % 26) + ord('A')))
+            letter = chr(letter_idx + ord('A'))
+
+            if temp_offset is not None:
+                rotor_offset[i] = temp_offset
+                temp_offset = None
+
+        # Offset of last rotor in reverse direction
+        letter = chr(((ord(letter) - ord('A') - rotor_offset[2]) % 26) + ord('A'))
 
         # Apply plugboard
         letter = self.plugboard.get(letter, letter)
@@ -91,7 +104,7 @@ if __name__ == '__main__':
     rotor_III = ['B', 'D', 'F', 'H', 'J', 'L', 'C', 'P', 'R', 'T', 'X', 'V', 'Z', 'N', 'Y', 'E', 'I', 'W', 'G', 'A',
                  'K', 'M', 'U', 'S', 'Q', 'O']
 
-    enigma_b = EnigmaB(rotor_I, rotor_II, rotor_III, "A", "H", "D", ukw_b)
+    enigma_b = Enigma(rotor_I, rotor_II, rotor_III, "A", "A", "A", ukw_b, "Q", "E", "V")
 
     # loop for encryption
     while True:

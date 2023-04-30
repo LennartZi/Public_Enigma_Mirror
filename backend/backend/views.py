@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request, json
 from flask import current_app as app
-from .enigma import EnigmaB
+from .enigma import Enigma
 import yaml
 
 
@@ -94,7 +94,8 @@ def encrypt_letter():
         second_position = "A"
         third_position = "A"
 
-    enigma_b = EnigmaB(rotor_I, rotor_II, rotor_III, first_position, second_position, third_position, ukw_b)
+    enigma_b = Enigma(rotor_I, rotor_II, rotor_III, first_position, second_position, third_position, ukw_b, "Q", "E",
+                      "V")
 
     letter = request.headers.get('letter')
     letter = enigma_b.encode_letter(letter)
