@@ -1,0 +1,111 @@
+STANDARD_WIRING = {
+            'A': 'A',
+            'B': 'B',
+            'C': 'C',
+            'D': 'D',
+            'E': 'E',
+            'F': 'F',
+            'G': 'G',
+            'H': 'H',
+            'I': 'I',
+            'J': 'J',
+            'K': 'K',
+            'L': 'L',
+            'M': 'M',
+            'N': 'N',
+            'O': 'O',
+            'P': 'P',
+            'Q': 'Q',
+            'R': 'R',
+            'S': 'S',
+            'T': 'T',
+            'U': 'U',
+            'V': 'V',
+            'W': 'W',
+            'X': 'X',
+            'Y': 'Y',
+            'Z': 'Z'
+        }
+
+
+class Plugboard:
+
+    def __init__(self):
+        self.wiring = STANDARD_WIRING
+
+    def update_wiring(self, letter_1, letter_2):
+        self.wiring[letter_1] = letter_2
+        self.wiring[letter_2] = letter_1
+
+    def reset_wiring(self, letter_1, letter_2):
+        self.wiring = STANDARD_WIRING
+
+    def swap(self, letter):
+        return self.wiring[letter]
+
+
+
+
+class Enigma:
+    def __init__(self):
+        self.enigma_type = None
+
+        self.available_rotors = None
+        self.used_rotors = None
+
+        self.available_reflectors = None
+        self.used_reflector = None
+
+        self.plugboard = Plugboard()
+
+    def change_enigma_type(self, model):
+        # Keep plugboard wiring?
+        self.enigma_type = model
+
+        if model == "B":
+            pass
+            # TODO : Wiring not clear as Model B has very different sub-versions
+            # Change self.available_rotors
+            # Swap reflector
+
+        else:  # M3 or Enigma 1:
+            # Both versions had the same available rotors and two identical reflectors
+            self.available_rotors = ["EKMFLGDQVZNTOWYHXUSPAIBRCJ", "AJDKSIRUXBLHWTMCQGZNPYFVOE",
+                                     "BDFHJLCPRTXVZNYEIWGAKMUSQO", "ESOVPZJAYQUIRHXLNFTGKDCMWB",
+                                     "VZBRGITYUPSDNHLXAWMJQOFECK"]
+            self.available_reflectors = ["YRUHQSLDPXNGOKMIEBFZCWVJAT", "FVPJIAOYEDRZXWGCTKUQSBNMHL"]
+
+            if model == "1":  # Model 1 had an additional reflector option
+                self.available_reflectors.append("EJMZALYXVBWFCRQUONTSPIKHGD")
+
+    def set_rotor(self, rot_position, new_rotor_wheel):
+        """
+        If the user decides to set a rotor at a given position, the new rotor wheel will replace the old one
+        :param new_rotor_wheel:
+        :param rot_position:
+        :return:
+        """
+        self.rotors[rot_position] = new_rotor_wheel
+
+    def set_reflector(self, new_reflector):
+        self.used_reflector = self.available_reflectors[new_reflector]
+
+    def encrypt(self, plain_letter):
+        """
+        Encrypts a given plaintext letter by passing through the Enigma circuit
+        :param plain_letter:
+        :return: this represents the ciphertext letter
+        """
+
+        # Plugboard
+        letter = self.plugboard.swap(plain_letter)
+
+        # Rotors and Reflector
+        for rotor in self.rotors:
+            letter = rotor.forward(letter)
+        letter = self.reflector.reflect()
+
+        # Plugboard again
+        cipher = self.plugboard.swap(letter)
+
+        return cipher
