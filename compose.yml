@@ -7,9 +7,9 @@ services:
         source: ./enigma.yaml
         target: /etc/enigma.yaml
         read_only: true
-    ports:
-      - 5000:5000
   frontend:
     image: registry.mygit.th-deg.de/jd17123/enigma/frontend:latest
+  reverse-proxy:
+    image: registry.mygit.th-deg.de/jd17123/enigma/reverse-proxy:latest
     ports:
-      - 8080:80
+      - 8000:80

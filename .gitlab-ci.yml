@@ -59,6 +59,17 @@ containerize-backend:
   after_script:
     - podman rmi ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG}
 
+containerize-reverse-proxy:
+  stage: package
+  image: quay.io/podman/stable
+  before_script:
+    - podman login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+  script:
+    - podman build reverse-proxy -t ${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG}
+    - podman push ${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG}
+  after_script:
+    - podman rmi ${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG}
+
 # e2e-test:
 #   stage: e2e
 #   image: quay.io/podman/stable
@@ -85,6 +96,7 @@ remove-container:
   script:
     - /bin/skopeo delete docker://${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG}
     - /bin/skopeo delete docker://${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG}
+    - /bin/skopeo delete docker://${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG}
   except:
     variables:
       - $CI_COMMIT_TAG
@@ -115,3 +127,4 @@ add-latest-tag:
   script:
     - /bin/skopeo copy docker://${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG} docker://${CI_REGISTRY_IMAGE}/frontend:latest
     - /bin/skopeo copy docker://${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG} docker://${CI_REGISTRY_IMAGE}/backend:latest
+    - /bin/skopeo copy docker://${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG} docker://${CI_REGISTRY_IMAGE}/reverse-proxy:latest
