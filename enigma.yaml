@@ -25,4 +25,35 @@ variants:
       'UKW-A': EJMZALYXVBWFCRQUONTSPIKHGD
       'UKW-B': YRUHQSLDPXNGOKMIEBFZCWVJAT
       'UKW-C': FVPJIAOYEDRZXWGCTKUQSBNMHL
-  'M3': null
+  'M3':
+    plugboard: true
+    entry: ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    rotors:
+      installable: 3
+      'I':
+        substitution: EKMFLGDQVZNTOWYHXUSPAIBRCJ
+        turnover: Q
+      'II':
+        substitution: AJDKSIRUXBLHWTMCQGZNPYFVOE
+        turnover: E
+      'III':
+        substitution: BDFHJLCPRTXVZNYEIWGAKMUSQO
+        turnover: V
+      'IV':
+        substitution: ESOVPZJAYQUIRHXLNFTGKDCMWB
+        turnover: J
+      'V':
+        substitution: VZBRGITYUPSDNHLXAWMJQOFECK
+        turnover: Z
+      'VI':
+        substitution: JPGVOUMFYQBENHZRDKASXLICTW
+        turnover: ZM
+      'VII':
+        substitution: NZJHGRCXMYSWBOUFAIVLPEKQDT
+        turnover: ZM
+      'VIII':
+        substitution: FKQHTLXOCBJSPDZRAMEWNIUYGV
+        turnover: ZM
+    reflectors:
+      'UKW-B': YRUHQSLDPXNGOKMIEBFZCWVJAT
+      'UKW-C': FVPJIAOYEDRZXWGCTKUQSBNMHL
