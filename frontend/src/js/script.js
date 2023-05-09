@@ -3,6 +3,11 @@ const keyboard_input = document.getElementById('keyboard_input');
 const maxHistoryLength = 140;
 const backendUrl = 'http://localhost:5000';
 
+const rows = [
+  'qwertyuiop',
+  'asdfghjkl',
+  'zxcvbnm'
+];
 
 // Senden und Empfangen von Daten vom Backend
 async function putToBackend(directory, data) {
@@ -52,3 +57,25 @@ function getVariants() {
 function putVariant(data) {
   return putToBackend('/variant', data);
 }
+
+// Erstellen der Tasten
+function createKeys(keyboardDiv) {
+  for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+    const row = document.createElement('div');
+    row.classList.add('row');
+    const keys = rows[rowIndex];
+
+    for (let i = 0; i < keys.length; i++) {
+      const key = document.createElement('div');
+      key.classList.add('key_input');
+      key.textContent = keys[i].toUpperCase();
+
+      row.appendChild(key);
+    }
+
+    keyboardDiv.appendChild(row);
+  }
+}
+
+createKeys(keyboard_input);
+
