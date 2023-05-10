@@ -79,3 +79,45 @@ function createKeys(keyboardDiv) {
 
 createKeys(keyboard_input);
 
+
+// Event-Listener zum Abfangen von Tastenanschlägen
+document.addEventListener('keydown', async (event) => {
+  const key = event.key;
+
+  // Prüfe, ob der gedrückte Buchstabe in den `rows` enthalten ist
+  const isValidKey = rows.some(row => row.includes(key.toLowerCase()));
+
+  if (!event.repeat && isValidKey) {
+    findAndHighlightKey(keyboard_input, key , true);
+    const response = await putKey({letter: key})
+    console.log(response);
+    // Senden ans Backend
+    outputHistory.textContent = (response + outputHistory.textContent).substring(0, maxHistoryLength);
+  }
+});
+
+document.addEventListener('keyup', async (event) => {
+  const key = event.key;
+
+  findAndHighlightKey(keyboard_input, key , false);
+
+});
+
+
+
+// Hilfsfunktion, um die Tasten zu finden und hervorzuheben
+function findAndHighlightKey(keyboardDiv, key, highlight) {
+  const keys = keyboardDiv.getElementsByClassName('key_input');
+  const highlightClass = 'highlight';
+  for (let k of keys) {
+    if (k.textContent.toLowerCase() === key.toLowerCase()) {
+      if (highlight) {
+        k.classList.add(highlightClass);
+      } else {
+        k.classList.remove(highlightClass);
+      }
+      break;
+    }
+  }
+}
+
