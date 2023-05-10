@@ -1,6 +1,9 @@
 history: 140
 variants:
-  'B': null
+  'B':
+    plugboard: false
+    rotors:
+      installable: 2
   'I':
     plugboard: true
     entry: ABCDEFGHIJKLMNOPQRSTUVWXYZ
