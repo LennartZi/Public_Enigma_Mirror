@@ -107,4 +107,9 @@ def encrypt_letter():
         response = app.make_response(letter)
         set_cookie(response, "positions", json.dumps(positions))
 
+        history = request.cookies.get("history") or str()
+        history += letter
+        history = history[-140:]
+        set_cookie(response, "history", history)
+
         return response
