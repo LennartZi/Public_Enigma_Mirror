@@ -5,6 +5,9 @@ from .enigma import Enigma
 import yaml
 
 
+def set_cookie(response, key: str, value):
+    response.set_cookie(key, str(value), max_age=3600*24*365, path="/", samesite="Lax")
+
 @app.route("/config")
 def config():
     with open("/etc/enigma.yaml", "r") as stream:
@@ -87,17 +90,12 @@ def encrypt_letter():
         return str(), 423
 
     with single_request:
-        positions = request.cookies.get("positions")
+        positions = request.cookies.get("positions") or '["A", "A", "A"]'
 
-        if positions:
-            positions = json.loads(positions)
-            first_position = positions[0]
-            second_position = positions[1]
-            third_position = positions[2]
-        else:
-            first_position = "A"
-            second_position = "A"
-            third_position = "A"
+        positions = json.loads(positions)
+        first_position = positions[0]
+        second_position = positions[1]
+        third_position = positions[2]
 
         enigma_b = Enigma(rotor_I, rotor_II, rotor_III, first_position, second_position, third_position, ukw_b, "Q", "E",
                           "V")
@@ -106,9 +104,7 @@ def encrypt_letter():
         letter = enigma_b.encode_letter(letter)
         positions = enigma_b.rotor_positions
 
-        print(positions)
-
         response = app.make_response(letter)
-        response.set_cookie("positions", f'{{0: "{positions[0]}", 1: "{positions[1]}", 2: "{positions[2]}"}}')
+        set_cookie(response, "positions", json.dumps(positions))
 
         return response
