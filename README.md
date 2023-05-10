@@ -13,7 +13,7 @@ docker-compose -f compose.yml -f compose.dev.yml down
 Check source:
 
 ```console
-docker build --progress=plain --build-arg context=local-check -t backend:local-check backend # or
+docker build --progress=plain --build-arg context=local-check -t backend:local-check -f backend/Containerfile backend # or
 podman build --build-arg context=local-check -t backend:local-check backend
 ```
 

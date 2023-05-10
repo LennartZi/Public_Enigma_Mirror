@@ -18,3 +18,8 @@ services:
         source: ./frontend/src
         target: /usr/share/nginx/html
         read_only: true
+  reverse-proxy:
+    build:
+      context: reverse-proxy
+      dockerfile: Containerfile
+    image: localhost/reverse-proxy:latest
