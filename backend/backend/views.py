@@ -1,5 +1,6 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, json
 from flask import current_app as app
+from .enigma import Enigma
 import yaml
 
 
@@ -69,7 +70,40 @@ def rotor_position(rotornr):
 # Endpoint for encrypting a letter
 @app.route('/encrypt', methods=['PUT'])
 def encrypt_letter():
+    ukw_b = ['Y', 'R', 'U', 'H', 'Q', 'S', 'L', 'D', 'P', 'X', 'N', 'G', 'O', 'K', 'M', 'I', 'E', 'B',
+             'F', 'Z', 'C', 'W', 'V', 'J', 'A', 'T']
+
+    rotor_I = ['E', 'K', 'M', 'F', 'L', 'G', 'D', 'Q', 'V', 'Z', 'N', 'T', 'O', 'W', 'Y', 'H', 'X', 'U', 'S', 'P', 'A',
+               'I', 'B', 'R', 'C', 'J']
+
+    rotor_II = ['A', 'J', 'D', 'K', 'S', 'I', 'R', 'U', 'X', 'B', 'L', 'H', 'W', 'T', 'M', 'C', 'Q', 'G', 'Z', 'N', 'P',
+                'Y', 'F', 'V', 'O', 'E']
+
+    rotor_III = ['B', 'D', 'F', 'H', 'J', 'L', 'C', 'P', 'R', 'T', 'X', 'V', 'Z', 'N', 'Y', 'E', 'I', 'W', 'G', 'A',
+                 'K', 'M', 'U', 'S', 'Q', 'O']
+
+    positions = request.cookies.get("positions")
+
+    if positions:
+        positions = json.loads(positions)
+        first_position = positions[0]
+        second_position = positions[1]
+        third_position = positions[2]
+    else:
+        first_position = "A"
+        second_position = "A"
+        third_position = "A"
+
+    enigma_b = Enigma(rotor_I, rotor_II, rotor_III, first_position, second_position, third_position, ukw_b, "Q", "E",
+                      "V")
+
     letter = request.headers.get('letter')
+    letter = enigma_b.encode_letter(letter)
+    positions = enigma_b.rotor_positions
+
+    print(positions)
+
     response = app.make_response(letter)
-    response.headers['Set-Cookie'] = 'history=abc ; position={0: 26, 1: 12, 2:1}'
+    response.set_cookie("positions", f'{{0: "{positions[0]}", 1: "{positions[1]}", 2: "{positions[2]}"}}')
+    # response.headers['Set-Cookie'] = 'history=abc ; position={0: 26, 1: 12, 2:1}'
     return response
