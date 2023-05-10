@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, json
 from flask import current_app as app
+from threading import Lock
 from .enigma import Enigma
 import yaml
 
@@ -66,7 +67,7 @@ def rotor_position(rotornr):
         response.headers['Set-Cookie'] = f'position={{{rotornr}: {position}}}'
         return response
 
-
+single_request = Lock()
 # Endpoint for encrypting a letter
 @app.route('/encrypt', methods=['PUT'])
 def encrypt_letter():
@@ -82,28 +83,32 @@ def encrypt_letter():
     rotor_III = ['B', 'D', 'F', 'H', 'J', 'L', 'C', 'P', 'R', 'T', 'X', 'V', 'Z', 'N', 'Y', 'E', 'I', 'W', 'G', 'A',
                  'K', 'M', 'U', 'S', 'Q', 'O']
 
-    positions = request.cookies.get("positions")
+    if single_request.locked():
+        return str(), 423
 
-    if positions:
-        positions = json.loads(positions)
-        first_position = positions[0]
-        second_position = positions[1]
-        third_position = positions[2]
-    else:
-        first_position = "A"
-        second_position = "A"
-        third_position = "A"
+    with single_request:
+        positions = request.cookies.get("positions")
 
-    enigma_b = Enigma(rotor_I, rotor_II, rotor_III, first_position, second_position, third_position, ukw_b, "Q", "E",
-                      "V")
+        if positions:
+            positions = json.loads(positions)
+            first_position = positions[0]
+            second_position = positions[1]
+            third_position = positions[2]
+        else:
+            first_position = "A"
+            second_position = "A"
+            third_position = "A"
 
-    letter = request.headers.get('letter')
-    letter = enigma_b.encode_letter(letter)
-    positions = enigma_b.rotor_positions
+        enigma_b = Enigma(rotor_I, rotor_II, rotor_III, first_position, second_position, third_position, ukw_b, "Q", "E",
+                          "V")
 
-    print(positions)
+        letter = request.headers.get('letter')
+        letter = enigma_b.encode_letter(letter)
+        positions = enigma_b.rotor_positions
 
-    response = app.make_response(letter)
-    response.set_cookie("positions", f'{{0: "{positions[0]}", 1: "{positions[1]}", 2: "{positions[2]}"}}')
-    # response.headers['Set-Cookie'] = 'history=abc ; position={0: 26, 1: 12, 2:1}'
-    return response
+        print(positions)
+
+        response = app.make_response(letter)
+        response.set_cookie("positions", f'{{0: "{positions[0]}", 1: "{positions[1]}", 2: "{positions[2]}"}}')
+
+        return response
