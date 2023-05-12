@@ -121,3 +121,22 @@ function findAndHighlightKey(keyboardDiv, key, highlight) {
   }
 }
 
+// Funktion zum Hinzufügen des Mausklick-Event-Listeners
+function addClickListener(key) {
+  key.addEventListener('click', async () => {
+    const keyText = key.textContent;
+
+    findAndHighlightKey(keyboard_input, keyText, true);
+    const response = await putKey({ letter: keyText });
+    console.log(response);
+
+    // Senden ans Backend
+    outputHistory.textContent = (response + outputHistory.textContent).substring(0, maxHistoryLength);
+
+    // Entfernen der Hervorhebung nach einer kurzen Verzögerung
+    setTimeout(() => {
+      findAndHighlightKey(keyboard_input, keyText, false);
+    }, 2000);
+  });
+}
+
