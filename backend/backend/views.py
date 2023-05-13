@@ -100,11 +100,12 @@ def encrypt_letter():
         enigma_b = Enigma(rotor_I, rotor_II, rotor_III, first_position, second_position, third_position, ukw_b, "Q", "E",
                           "V")
 
-        letter = request.headers.get('letter')
+        data = request.get_json()
+        letter = data.get('letter')
         letter = enigma_b.encode_letter(letter)
         positions = enigma_b.rotor_positions
 
-        response = app.make_response(letter)
+        response = jsonify(letter)
         set_cookie(response, "positions", json.dumps(positions))
 
         history = request.cookies.get("history") or str()
