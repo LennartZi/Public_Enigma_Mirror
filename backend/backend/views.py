@@ -105,7 +105,7 @@ def encrypt_letter():
         letter = enigma_b.encode_letter(letter)
         positions = enigma_b.rotor_positions
 
-        response = app.make_response(letter)
+        response = jsonify(letter)
         set_cookie(response, "positions", json.dumps(positions))
 
         history = request.cookies.get("history") or str()
