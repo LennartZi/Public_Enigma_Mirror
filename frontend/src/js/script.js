@@ -69,7 +69,10 @@ function createKeys(keyboardDiv) {
       const key = document.createElement('div');
       key.classList.add('key_input');
       key.textContent = keys[i].toUpperCase();
-
+      // Füge den Mausklick-Event-Listener hinzu, wenn das Tasten-Element erstellt wird
+      if (keyboardDiv === keyboard_input) {
+        addClickListener(key);
+      }
       row.appendChild(key);
     }
 
