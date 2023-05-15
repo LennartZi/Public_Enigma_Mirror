@@ -30,6 +30,12 @@ class Enigma:
             self.rotor_positions[2] = chr(ord(self.rotor_positions[2]) + 1)
 
     def encode_letter(self, letter):
+
+        if letter.islower():
+            letter = letter.upper()
+        else:
+            pass
+
         # Step rotors
         self.step_rotors()
 
