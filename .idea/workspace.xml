@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="0c26102e-9394-44ec-932d-e2716b7d20e0" name="Changes" comment="" />
+    <list default="true" id="0c26102e-9394-44ec-932d-e2716b7d20e0" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/backend/backend/enigma.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/backend/enigma.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -50,7 +52,7 @@
       <workItem from="1683963160996" duration="4290000" />
       <workItem from="1684063098045" duration="342000" />
       <workItem from="1684100756053" duration="1664000" />
-      <workItem from="1684182106009" duration="658000" />
+      <workItem from="1684182106009" duration="943000" />
     </task>
     <servers />
   </component>
