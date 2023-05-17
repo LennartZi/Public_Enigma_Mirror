@@ -81,6 +81,7 @@ e2e-test:
         backend:
           image: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG}
           volumes: !reset
+          volumes: []
         frontend:
           image: ${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG}
         reverse-proxy:
