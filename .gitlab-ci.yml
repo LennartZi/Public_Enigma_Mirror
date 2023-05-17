@@ -87,7 +87,8 @@ e2e-test:
           image: ${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG}
           ports: [80]" > compose.e2e.yml
     - cat compose.e2e.yml
-    - docker compose -f compose.e2e.yml up
+    - docker compose -f compose.e2e.yml up --detach
+    - cat enigma.yaml | docker compose -f compose.e2e.yml exec -i backend tee /etc/enigma.yaml
     - docker compose -f compose.e2e.yml port reverse-proxy 80
   after_script:
     - docker-compose -f compose.e2e.yml down
