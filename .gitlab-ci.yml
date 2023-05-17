@@ -80,7 +80,7 @@ e2e-test:
       echo -e "services:
         backend:
           image: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG}
-          volumes: []
+          volumes: !reset
         frontend:
           image: ${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG}
         reverse-proxy:
