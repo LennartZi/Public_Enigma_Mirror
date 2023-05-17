@@ -15,8 +15,12 @@ Cypress.Commands.add('testUserInput', (inp) => {
 })
 
 // Url
-let url = 'http://localhost:8000/'
-let api_encrypt = 'http://localhost:8000/api/encrypt'
+let main_service = 'localhost:8000'
+if process.env.MAIN_SERVICE {
+  main_service = process.env.MAIN_SERVICE {
+}
+let url = 'http://' + main_service
+let api_encrypt = url + '/api/encrypt'
 
 
 // Test Frontpage Loading
