@@ -93,8 +93,7 @@ e2e-test:
     - docker build e2e_enigma -t e2e-tests -f e2e_enigma/Containerfile
     - docker run --rm --env MAIN_SERVICE=$MAIN_SERVICE e2e-tests
   after_script:
-    - docker-compose -f compose.e2e.yml down
-    - docker image prune --all --force
+    - docker-compose -f compose.e2e.yml down --rmi
 
 remove-container:
   stage: cleanup
