@@ -1,5 +1,62 @@
 history: 140
 variants:
-  'B': null
-  'I': null
-  'M3': null
+  'B':
+    plugboard: false
+    rotors:
+      installable: 2
+  'I':
+    plugboard: true
+    entry: ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    rotors:
+      installable: 3
+      'I':
+        substitution: EKMFLGDQVZNTOWYHXUSPAIBRCJ
+        turnover: Q
+      'II':
+        substitution: AJDKSIRUXBLHWTMCQGZNPYFVOE
+        turnover: E
+      'III':
+        substitution: BDFHJLCPRTXVZNYEIWGAKMUSQO
+        turnover: V
+      'IV':
+        substitution: ESOVPZJAYQUIRHXLNFTGKDCMWB
+        turnover: J
+      'V':
+        substitution: VZBRGITYUPSDNHLXAWMJQOFECK
+        turnover: Z
+    reflectors:
+      'UKW-A': EJMZALYXVBWFCRQUONTSPIKHGD
+      'UKW-B': YRUHQSLDPXNGOKMIEBFZCWVJAT
+      'UKW-C': FVPJIAOYEDRZXWGCTKUQSBNMHL
+  'M3':
+    plugboard: true
+    entry: ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    rotors:
+      installable: 3
+      'I':
+        substitution: EKMFLGDQVZNTOWYHXUSPAIBRCJ
+        turnover: Q
+      'II':
+        substitution: AJDKSIRUXBLHWTMCQGZNPYFVOE
+        turnover: E
+      'III':
+        substitution: BDFHJLCPRTXVZNYEIWGAKMUSQO
+        turnover: V
+      'IV':
+        substitution: ESOVPZJAYQUIRHXLNFTGKDCMWB
+        turnover: J
+      'V':
+        substitution: VZBRGITYUPSDNHLXAWMJQOFECK
+        turnover: Z
+      'VI':
+        substitution: JPGVOUMFYQBENHZRDKASXLICTW
+        turnover: ZM
+      'VII':
+        substitution: NZJHGRCXMYSWBOUFAIVLPEKQDT
+        turnover: ZM
+      'VIII':
+        substitution: FKQHTLXOCBJSPDZRAMEWNIUYGV
+        turnover: ZM
+    reflectors:
+      'UKW-B': YRUHQSLDPXNGOKMIEBFZCWVJAT
+      'UKW-C': FVPJIAOYEDRZXWGCTKUQSBNMHL
