@@ -19,11 +19,13 @@ class Enigma:
                 self.rotor_positions[0] = 'A'
             else:
                 self.rotor_positions[0] = chr(ord(self.rotor_positions[0]) + 1)
+
         if self.rotor_positions[2] == self.notches[2]:
             if self.rotor_positions[1] == 'Z':
                 self.rotor_positions[1] = 'A'
             else:
                 self.rotor_positions[1] = chr(ord(self.rotor_positions[1]) + 1)
+
         if self.rotor_positions[2] == 'Z':
             self.rotor_positions[2] = 'A'
         else:
@@ -85,7 +87,3 @@ class Enigma:
         letter = self.plugboard.get(letter, letter)
 
         return letter
-
-
-def enigma(a):
-    return a

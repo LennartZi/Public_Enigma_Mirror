@@ -19,45 +19,76 @@ def enigma_machine():
         reflector=['Y', 'R', 'U', 'H', 'Q', 'S', 'L', 'D', 'P', 'X', 'N', 'G', 'O', 'K', 'M', 'I', 'E', 'B', 'F', 'Z',
                    'C', 'W', 'V', 'J', 'A', 'T'],
 
-        notch_rotor1='B', notch_rotor2='X', notch_rotor3='F')
+        notch_rotor1='Q', notch_rotor2='E', notch_rotor3='V')
 
-    enigma_machine.set_plugboard({'A': 'Z', 'B': 'Y', 'C': 'X', 'D': 'W', 'E': 'V', 'F': 'U', 'G': 'T', 'H': 'S',
-                                  'I': 'R', 'J': 'Q', 'K': 'P', 'L': 'O', 'M': 'N'})
-    enigma_machine.set_rotor_positions('A', 'B', 'C')
+    enigma_machine.set_rotor_positions('A', 'A', 'A')
 
     yield enigma_machine
 
     # teardown code
     enigma_machine.set_rotor_positions('A', 'B', 'C')
-    enigma_machine.set_plugboard({'A': 'Z', 'B': 'Y', 'C': 'X', 'D': 'W', 'E': 'V', 'F': 'U', 'G': 'T', 'H': 'S',
-                                  'I': 'R', 'J': 'Q', 'K': 'P', 'L': 'O', 'M': 'N'})
 
 
 def test_step_one_rotor(enigma_machine):
     # Test one rotor stepping
-    enigma_machine.set_rotor_positions('A', 'B', 'C')
+    enigma_machine.set_rotor_positions('A', 'B', 'R')
     enigma_machine.step_rotors()
-    assert enigma_machine.rotor_positions == ['A', 'B', 'D']
+    assert enigma_machine.rotor_positions == ['A', 'B', 'S']
 
     # second step
     enigma_machine.step_rotors()
-    assert enigma_machine.rotor_positions == ['A', 'B', 'E']
+    assert enigma_machine.rotor_positions == ['A', 'B', 'T']
 
     # stepping through the whole range up to 'B', the notch position
     for i in range(23):
         enigma_machine.step_rotors()
-    assert enigma_machine.rotor_positions == ['A', 'B', 'B']
+    assert enigma_machine.rotor_positions == ['A', 'B', 'Q']
 
 
 def test_step_two_rotors(enigma_machine):
     # Test two rotors stepping
-    enigma_machine.set_rotor_positions('A', 'B', 'B')
+    enigma_machine.set_rotor_positions('A', 'B', 'Q')
     enigma_machine.step_rotors()
-    assert enigma_machine.rotor_positions == ['A', 'C', 'C']
+    assert enigma_machine.rotor_positions == ['A', 'C', 'R']
 
 
 def test_step_three_rotors(enigma_machine):
     # Test three rotors stepping
-    enigma_machine.set_rotor_positions('A', 'B', 'B')
+    enigma_machine.set_rotor_positions('A', 'E', 'Q')
     enigma_machine.step_rotors()
-    assert enigma_machine.rotor_positions == ['A', 'C', 'C']
+    assert enigma_machine.rotor_positions == ['B', 'F', 'R']
+
+
+def test_encrypt_sentence(enigma_machine):
+    # Tests the encryption of a sentence
+    enigma_machine.set_rotor_positions('A', 'A', 'A')
+
+    # Sentence currently without spaces and all uppercase!
+    sentence = "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS"
+    encrypted_word = ""
+
+    # Sentence is split into letters and encrypted one by one
+    for letter in sentence:
+        encrypted_letter = enigma_machine.encode_letter(letter)
+        encrypted_word += encrypted_letter
+
+    # expected result from https://people.physik.hu-berlin.de/~palloks/js/enigma/enigma-u_v20.html
+    assert encrypted_word == "ZPJJSVSPGBWNXCQXOPCCFYXRPWVYUAXQRZBKKMJZNOFHLCCPGICCVZZ"
+
+
+def test_decrypt_sentence(enigma_machine):
+    # Tests the decryption of a sentence
+    enigma_machine.set_rotor_positions('A', 'A', 'A')
+
+    # Sentence currently without spaces and all uppercase!
+    sentence = "ZPJJSVSPGBWNXCQXOPCCFYXRPWVYUAXQRZBKKMJZNOFHLCCPGICCVZZ"
+    decrypted_word = ""
+
+    # Sentence is split into letters and encrypted one by one
+    for letter in sentence:
+        encrypted_letter = enigma_machine.encode_letter(letter)
+        decrypted_word += encrypted_letter
+
+    assert decrypted_word == "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS"
+
+
