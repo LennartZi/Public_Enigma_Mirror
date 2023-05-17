@@ -91,7 +91,7 @@ e2e-test:
     - cat enigma.yaml | docker compose -f compose.e2e.yml exec -i backend tee /etc/enigma.yaml
     - export MAIN_SERVICE=$(docker compose -f compose.e2e.yml port reverse-proxy 80)
     - docker build e2e_enigma -t e2e-tests -f e2e_enigma/Containerfile
-    - docker run -it --rm --env MAIN_SERVICE=$MAIN_SERVICE e2e-tests
+    - docker run --rm --env MAIN_SERVICE=$MAIN_SERVICE e2e-tests
   after_script:
     - docker-compose -f compose.e2e.yml down
     - docker image prune --all --force
