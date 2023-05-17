@@ -1,6 +1,6 @@
 FROM cypress/browsers:node16.16.0-chrome107-ff107-edge
 
-COPY e2e_Enigma /workdir
+COPY E2E_Enigma /workdir
 WORKDIR /workdir
 
 RUN npm ci

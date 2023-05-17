@@ -94,7 +94,7 @@ e2e-test:
     - docker run -it --rm --env MAIN_SERVICE=$MAIN_SERVICE e2e-tests
   after_script:
     - docker-compose -f compose.e2e.yml down
-    - docker image prune --all
+    - docker image prune --all --force
 
 remove-container:
   stage: cleanup
