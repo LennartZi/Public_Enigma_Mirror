@@ -77,21 +77,20 @@ e2e-test:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
   script:
     - |
-      echo -e "services:
+      echo -e "version: '2'
+      services:
         backend:
           image: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG}
-          volumes: !reset
-          volumes: []
         frontend:
           image: ${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG}
         reverse-proxy:
           image: ${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG}
           ports: [80]" > compose.e2e.yml
     - cat compose.e2e.yml
-    - docker compose -f compose.yml -f compose.e2e.yml up
-    - docker compose -f compose.yml -f compose.e2e.yml port reverse-proxy 80
+    - docker compose compose.e2e.yml up
+    - docker compose -f compose.e2e.yml port reverse-proxy 80
   after_script:
-    - docker-compose -f compose.yml -f compose.e2e.yml down
+    - docker-compose -f compose.e2e.yml down
     - docker image prune --all
 
 remove-container:
