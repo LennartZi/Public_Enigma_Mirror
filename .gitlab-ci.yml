@@ -90,10 +90,11 @@ e2e-test:
     - docker compose -f compose.e2e.yml up --detach
     - cat enigma.yaml | docker compose -f compose.e2e.yml exec -i backend tee /etc/enigma.yaml
     - export MAIN_SERVICE=$(docker compose -f compose.e2e.yml port reverse-proxy 80)
-    - docker build e2e_enigma -t e2e-tests -f e2e_enigma/Containerfile
-    - docker run --rm --env MAIN_SERVICE=$MAIN_SERVICE e2e-tests
+    - docker build e2e_enigma -t e2e-tests:${CI_COMMIT_REF_SLUG} -f e2e_enigma/Containerfile
+    - docker run --rm --env CYPRESS_MAIN_SERVICE=$MAIN_SERVICE e2e-tests:${CI_COMMIT_REF_SLUG}
   after_script:
     - docker-compose -f compose.e2e.yml down --rmi
+    - docker rmi e2e-tests:${CI_COMMIT_REF_SLUG}
 
 remove-container:
   stage: cleanup

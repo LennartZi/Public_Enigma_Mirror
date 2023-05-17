@@ -16,8 +16,8 @@ Cypress.Commands.add('testUserInput', (inp) => {
 
 // Url
 let main_service = 'localhost:8000'
-if (process.env.MAIN_SERVICE) {
-  main_service = process.env.MAIN_SERVICE
+if (cy.env('MAIN_SERVICE')) {
+  main_service = cy.env('MAIN_SERVICE')
 }
 let url = 'http://' + main_service
 let api_encrypt = url + '/api/encrypt'
