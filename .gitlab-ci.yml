@@ -80,8 +80,7 @@ e2e-test:
       echo -e "services:
         backend:
           image: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG}
-          volumes_from:
-            - container:$(docker ps -q -f "label=com.gitlab.gitlab-runner.job.id=$CI_JOB_ID"):ro
+          volumes: []
         frontend:
           image: ${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG}
         reverse-proxy:
