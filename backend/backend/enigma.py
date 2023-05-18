@@ -14,22 +14,18 @@ class Enigma:
         self.plugboard = plugboard
 
     def step_rotors(self):
+        """
+        Rotates the first rotor as well as the other two if they are needed
+        """
+        # Checking if we need to rotate the third and or second rotor
         if self.rotor_positions[1] == self.notches[1] and self.rotor_positions[2] == self.notches[2]:
-            if self.rotor_positions[0] == 'Z':
-                self.rotor_positions[0] = 'A'
-            else:
-                self.rotor_positions[0] = chr(ord(self.rotor_positions[0]) + 1)
+            self.rotor_positions[0] = next_letter(self.rotor_positions[0])
 
         if self.rotor_positions[2] == self.notches[2]:
-            if self.rotor_positions[1] == 'Z':
-                self.rotor_positions[1] = 'A'
-            else:
-                self.rotor_positions[1] = chr(ord(self.rotor_positions[1]) + 1)
+            self.rotor_positions[1] = next_letter(self.rotor_positions[1])
 
-        if self.rotor_positions[2] == 'Z':
-            self.rotor_positions[2] = 'A'
-        else:
-            self.rotor_positions[2] = chr(ord(self.rotor_positions[2]) + 1)
+        # rotates the first rotor by one step (A -> B -> C...).
+        self.rotor_positions[2] = next_letter(self.rotor_positions[2])
 
     def encode_letter(self, letter):
         # Step rotors
@@ -87,3 +83,15 @@ class Enigma:
         letter = self.plugboard.get(letter, letter)
 
         return letter
+
+
+def next_letter(letter):
+    """
+    Returns the next letter in the alphabet looping at Z
+    """
+    if letter == 'Z':
+        next_letter_result = 'A'
+    else:
+        next_letter_result = chr(ord(letter) + 1)
+
+    return next_letter_result
