@@ -3,6 +3,7 @@ Cypress.Commands.add('testUserInput', (inp) => {
   for (let i = 0; i < inp.length; i++) {
     cy.contains(inp[i]).click()
     cy.contains(inp[i]).should('have.class', 'highlight')
+    cy.wait(65)
   }
 
   for (let i = 0; i < inp.length; i++) {
@@ -15,8 +16,9 @@ Cypress.Commands.add('testUserInput', (inp) => {
 })
 
 // Url
-let url = 'http://localhost:8000/'
-let api_encrypt = 'http://localhost:8000/api/encrypt'
+let main_service = Cypress.env('MAIN_SERVICE')
+let url = 'http://' + main_service
+let api_encrypt = url + '/api/encrypt'
 
 
 // Test Frontpage Loading
@@ -48,6 +50,7 @@ describe('Test Click', () => {
     cy.contains('Q').should('have.class', 'highlight')
     cy.contains('Q').not('have.class', 'highlight')
     
+    cy.wait(65)
     cy.get(".output").invoke('text').then((text) => {
       expect(text).to.have.length(1)
   });
@@ -61,6 +64,7 @@ describe('Test Keyboard Input', () => {
   it('Single User Interation', () => {
     cy.visit(url)
     cy.get('body').type('{q}');
+    cy.wait(65)
     cy.get(".output").invoke('text').then((text) => {
       expect(text).to.have.length(1)
   });
