@@ -5,4 +5,4 @@ WORKDIR /workdir
 
 RUN npm ci
 
-CMD ["npx", "cypress", "run", "--browser", "firefox"]
+CMD ["npx", "cypress", "run", "--browser", "firefox", "--headless", "--reporter", "junit"]
