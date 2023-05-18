@@ -93,7 +93,7 @@ e2e-test:
     - docker build e2e_enigma -t e2e-tests:${CI_COMMIT_REF_SLUG} -f e2e_enigma/Containerfile
     - docker run --env CYPRESS_MAIN_SERVICE=$MAIN_SERVICE --network=host --name e2e-tests-${CI_COMMIT_REF_SLUG} e2e-tests:${CI_COMMIT_REF_SLUG}
   after_script:
-    - docker-compose -f compose.e2e.yml down --rmi
+    - docker-compose -f compose.e2e.yml down --rmi all
     - docker copy e2e-tests-${CI_COMMIT_REF_SLUG}:test-results.xml e2e-test-results.xml
     - docker copy e2e-tests-${CI_COMMIT_REF_SLUG}:cypress/videos .
     - docker copy e2e-tests-${CI_COMMIT_REF_SLUG}:cypress/screenshots .
