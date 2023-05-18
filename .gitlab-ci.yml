@@ -98,7 +98,6 @@ e2e-test:
     - export MAIN_SERVICE=$(docker compose -f compose.e2e.yml port reverse-proxy 80)
     - docker build e2e_enigma -t e2e-tests:${CI_COMMIT_REF_SLUG} -f e2e_enigma/Containerfile
     - docker run --env CYPRESS_MAIN_SERVICE=$MAIN_SERVICE --network=host --name e2e-tests-${CI_COMMIT_REF_SLUG} e2e-tests:${CI_COMMIT_REF_SLUG}
-    - docker exec e2e-tests-${CI_COMMIT_REF_SLUG} ls /workdir /workdir/cypress /workdir/cypress/videos /workdir/cypress/screenshots /workdir/cypress/videos/** /workdir/cypress/screenshots/**
   after_script:
     - docker-compose -f compose.e2e.yml down --rmi all || true
     - docker cp e2e-tests-${CI_COMMIT_REF_SLUG}:/workdir/test-results.xml e2e-test-results.xml || true
