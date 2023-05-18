@@ -1,7 +1,7 @@
 const outputHistory = document.getElementById('outputHistory');
 const keyboard_input = document.getElementById('keyboard_input');
 const maxHistoryLength = 140;
-const backendUrl = 'http://localhost:8000/api';
+const backendUrl = 'http://' + location.host + '/api';
 
 const rows = [
   'qwertyuiop',

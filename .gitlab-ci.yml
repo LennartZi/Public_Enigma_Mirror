@@ -6,23 +6,23 @@ stages:
   - cleanup
   - release
 
-# unit-test-backend:
-#   stage: test
-#   image: python:3.11-alpine
-#   script:
-#     - pip install pipenv
-#     - cd backend
-#     - pipenv install --dev
-#     - pipenv run coverage run -m pytest --junitxml=report.xml tests/unit
-#     - pipenv run coverage report
-#     - pipenv run coverage xml
-#   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
-#   artifacts:
-#     reports:
-#       junit: backend/report.xml
-#       coverage_report:
-#         coverage_format: cobertura
-#         path: backend/coverage.xml
+unit-test-backend:
+  stage: test
+  image: python:3.11-alpine
+  script:
+    - pip install pipenv
+    - cd backend
+    - pipenv install --dev
+    - pipenv run coverage run -m pytest --junitxml=report.xml tests/unit
+    - pipenv run coverage report
+    - pipenv run coverage xml
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts:
+    reports:
+      junit: backend/report.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: backend/coverage.xml
 
 build-backend:
   stage: build
