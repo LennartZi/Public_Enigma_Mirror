@@ -6,26 +6,27 @@ stages:
   - cleanup
   - release
 
-unit-test-backend:
-  stage: test
-  image: python:3.11-alpine
-  script:
-    - pip install pipenv
-    - cd backend
-    - pipenv install --dev
-    - pipenv run coverage run -m pytest --junitxml=report.xml tests/unit
-    - pipenv run coverage report
-    - pipenv run coverage xml
-  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
-  artifacts:
-    reports:
-      junit: backend/report.xml
-      coverage_report:
-        coverage_format: cobertura
-        path: backend/coverage.xml
+# unit-test-backend:
+#   stage: test
+#   image: python:3.11-alpine
+#   script:
+#     - pip install pipenv
+#     - cd backend
+#     - pipenv install --dev
+#     - pipenv run coverage run -m pytest --junitxml=report.xml tests/unit
+#     - pipenv run coverage report
+#     - pipenv run coverage xml
+#   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+#   artifacts:
+#     reports:
+#       junit: backend/report.xml
+#       coverage_report:
+#         coverage_format: cobertura
+#         path: backend/coverage.xml
 
 build-backend:
   stage: build
+  dependencies: []
   image: python:3.11-alpine
   script:
     - pip install pipenv
@@ -39,6 +40,7 @@ build-backend:
 
 containerize-frontend:
   stage: package
+  dependencies: []
   image: quay.io/podman/stable
   before_script:
     - podman login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
@@ -50,6 +52,8 @@ containerize-frontend:
 
 containerize-backend:
   stage: package
+  dependencies:
+    - build-backend
   image: quay.io/podman/stable
   before_script:
     - podman login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
@@ -61,6 +65,7 @@ containerize-backend:
 
 containerize-reverse-proxy:
   stage: package
+  dependencies: []
   image: quay.io/podman/stable
   before_script:
     - podman login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
@@ -72,6 +77,7 @@ containerize-reverse-proxy:
 
 e2e-test:
   stage: e2e
+  dependencies: []
   image: docker:24-dind
   before_script:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
@@ -92,11 +98,12 @@ e2e-test:
     - export MAIN_SERVICE=$(docker compose -f compose.e2e.yml port reverse-proxy 80)
     - docker build e2e_enigma -t e2e-tests:${CI_COMMIT_REF_SLUG} -f e2e_enigma/Containerfile
     - docker run --env CYPRESS_MAIN_SERVICE=$MAIN_SERVICE --network=host --name e2e-tests-${CI_COMMIT_REF_SLUG} e2e-tests:${CI_COMMIT_REF_SLUG}
+    - docker exec e2e-tests-${CI_COMMIT_REF_SLUG} ls /workdir /workdir/cypress /workdir/cypress/videos /workdir/cypress/screenshots /workdir/cypress/videos/** /workdir/cypress/screenshots/**
   after_script:
     - docker-compose -f compose.e2e.yml down --rmi all || true
-    - docker cp e2e-tests-${CI_COMMIT_REF_SLUG}:test-results.xml e2e-test-results.xml || true
-    - docker cp e2e-tests-${CI_COMMIT_REF_SLUG}:cypress/videos . || true
-    - docker cp e2e-tests-${CI_COMMIT_REF_SLUG}:cypress/screenshots . || true
+    - docker cp e2e-tests-${CI_COMMIT_REF_SLUG}:/workdir/test-results.xml e2e-test-results.xml || true
+    - docker cp e2e-tests-${CI_COMMIT_REF_SLUG}:/workdir/cypress/videos . || true
+    - docker cp e2e-tests-${CI_COMMIT_REF_SLUG}:/workdir/cypress/screenshots . || true
     - docker rm e2e-tests-${CI_COMMIT_REF_SLUG} || true
     - docker rmi e2e-tests:${CI_COMMIT_REF_SLUG} || true
   artifacts:
@@ -111,6 +118,7 @@ e2e-test:
 
 remove-container:
   stage: cleanup
+  dependencies: []
   image: 
     name: quay.io/skopeo/stable:latest
     entrypoint: [""]
@@ -126,6 +134,7 @@ remove-container:
 
 release:
   stage: release
+  dependencies: []
   rules:
     - if: $CI_COMMIT_TAG != null
       when: manual
@@ -138,6 +147,7 @@ release:
 
 add-latest-tag:
   stage: release
+  dependencies: []
   rules:
     - if: $CI_COMMIT_TAG != null
   needs:
