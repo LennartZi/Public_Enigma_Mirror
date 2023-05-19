@@ -27,47 +27,51 @@ class Enigma:
         # rotates the first rotor by one step (A -> B -> C...).
         self.rotor_positions[2] = next_letter(self.rotor_positions[2])
 
-    def encode_letter(self, letter):
-        # Step rotors
-        self.step_rotors()
+    def apply_plugboard(self, letter):
+        return self.plugboard.get(letter, letter)
 
-        # Apply plugboard
-        letter = self.plugboard.get(letter, letter)
-
-        # Rotor offsets
-        rotor_offset = [ord(self.rotor_positions[0]) - ord('A'), ord(self.rotor_positions[1]) - ord('A'),
+    def calculate_rotor_offset(self):
+        rotor_offset = [ord(self.rotor_positions[0]) - ord('A'),
+                        ord(self.rotor_positions[1]) - ord('A'),
                         ord(self.rotor_positions[2]) - ord('A')]
+        return rotor_offset
+
+    def encode_forward(self, letter, rotor_offset):
         temp_offset = None
 
-        # Encode through rotors in forward direction (I -> II -> III -> Reflector)
         for i in range(2, -1, -1):
+
             if i == 1 and rotor_offset[2] != 0:
                 temp_offset = rotor_offset[i]
-                rotor_offset[i] = rotor_offset[i] - rotor_offset[i+1]
+                rotor_offset[i] = rotor_offset[i] - rotor_offset[i + 1]
+
             elif i == 0 and rotor_offset[1] != 0:
                 temp_offset = rotor_offset[i]
-                rotor_offset[i] = rotor_offset[i] - rotor_offset[i+1]
+                rotor_offset[i] = rotor_offset[i] - rotor_offset[i + 1]
 
             letter_idx = ord(letter) - ord('A')
             letter_idx = (letter_idx + rotor_offset[i]) % 26
-            letter = chr((ord(self.rotors[i][letter_idx])))
+            letter = chr(ord(self.rotors[i][letter_idx]))
 
             if temp_offset is not None:
                 rotor_offset[i] = temp_offset
                 temp_offset = None
 
-        # Reflect through reflector
-        letter_idx = ord(letter) - ord('A') - rotor_offset[0]
-        letter = self.reflector[letter_idx]
+        letter = chr(((ord(letter) - ord('A') - rotor_offset[0]) % 26) + ord('A'))
+        return letter
 
-        # Encode through rotors in reverse direction (Reflector -> III -> II -> I)
+    def encode_reverse(self, letter, rotor_offset):
+        temp_offset = None
+
         for i in range(3):
+
             if i == 1 and rotor_offset[0] != 0:
                 temp_offset = rotor_offset[i]
-                rotor_offset[i] = rotor_offset[i] - rotor_offset[i-1]
+                rotor_offset[i] = rotor_offset[i] - rotor_offset[i - 1]
+
             elif i == 2 and rotor_offset[1] != 0:
                 temp_offset = rotor_offset[i]
-                rotor_offset[i] = rotor_offset[i] - rotor_offset[i-1]
+                rotor_offset[i] = rotor_offset[i] - rotor_offset[i - 1]
 
             letter_idx = self.rotors[i].index(chr(((ord(letter) - ord('A') + rotor_offset[i]) % 26) + ord('A')))
             letter = chr(letter_idx + ord('A'))
@@ -76,11 +80,32 @@ class Enigma:
                 rotor_offset[i] = temp_offset
                 temp_offset = None
 
-        # Offset of last rotor in reverse direction
         letter = chr(((ord(letter) - ord('A') - rotor_offset[2]) % 26) + ord('A'))
+        return letter
+
+    def reflect(self, letter, rotor_offset):
+        letter_idx = ord(letter) - ord('A') - rotor_offset
+        return self.reflector[letter_idx]
+
+    def encode_letter(self, letter):
+        # Step rotors
+        self.step_rotors()
 
         # Apply plugboard
-        letter = self.plugboard.get(letter, letter)
+        letter = self.apply_plugboard(letter)
+
+        # Encode through rotors in forward direction (I -> II -> III -> Reflector)
+        rotor_offset = self.calculate_rotor_offset()
+        letter = self.encode_forward(letter, rotor_offset)
+
+        # Reflect through reflector
+        letter = self.reflect(letter, rotor_offset[0])
+
+        # Encode through rotors in reverse direction (Reflector -> III -> II -> I)
+        letter = self.encode_reverse(letter, rotor_offset)
+
+        # Apply plugboard
+        letter = self.apply_plugboard(letter)
 
         return letter
 
