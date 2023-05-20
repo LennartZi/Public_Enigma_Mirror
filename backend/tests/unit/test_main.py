@@ -26,37 +26,48 @@ def enigma_machine():
     yield enigma_machine
 
     # teardown code
-    enigma_machine.set_rotor_positions('A', 'B', 'C')
+    enigma_machine.set_rotor_positions('A', 'A', 'A')
 
 
 def test_step_one_rotor(enigma_machine):
     # Test one rotor stepping
-    enigma_machine.set_rotor_positions('A', 'B', 'R')
+    enigma_machine.set_rotor_positions('R', 'A', 'A')
     enigma_machine.step_rotors()
-    assert enigma_machine.rotor_positions == ['A', 'B', 'S']
+    assert enigma_machine.first_rotor.position == 'S' and \
+           enigma_machine.second_rotor.position == 'A' and \
+           enigma_machine.third_rotor.position == 'A'
 
     # second step
     enigma_machine.step_rotors()
-    assert enigma_machine.rotor_positions == ['A', 'B', 'T']
+    assert enigma_machine.first_rotor.position == 'T' and \
+           enigma_machine.second_rotor.position == 'A' and \
+           enigma_machine.third_rotor.position == 'A'
 
-    # stepping through the whole range up to 'B', the notch position
+    # stepping through the whole range up to 'Q', the notch position
     for i in range(23):
         enigma_machine.step_rotors()
-    assert enigma_machine.rotor_positions == ['A', 'B', 'Q']
+    assert enigma_machine.first_rotor.position == 'Q' and \
+           enigma_machine.second_rotor.position == 'A' and \
+           enigma_machine.third_rotor.position == 'A'
 
 
 def test_step_two_rotors(enigma_machine):
     # Test two rotors stepping
-    enigma_machine.set_rotor_positions('A', 'B', 'Q')
+    enigma_machine.set_rotor_positions('Q', 'A', 'A')
     enigma_machine.step_rotors()
-    assert enigma_machine.rotor_positions == ['A', 'C', 'R']
+    assert enigma_machine.first_rotor.position == "R" and\
+           enigma_machine.second_rotor.position == 'B' and\
+           enigma_machine.third_rotor.position == 'A'
 
 
 def test_step_three_rotors(enigma_machine):
     # Test three rotors stepping
-    enigma_machine.set_rotor_positions('A', 'E', 'Q')
+    enigma_machine.set_rotor_positions('Q', 'E', 'A')
     enigma_machine.step_rotors()
-    assert enigma_machine.rotor_positions == ['B', 'F', 'R']
+    # assert enigma_machine.rotor_positions == ['B', 'F', 'R']
+    assert enigma_machine.first_rotor.position == 'R' and \
+           enigma_machine.second_rotor.position == 'F' and \
+           enigma_machine.third_rotor.position == 'B'
 
 
 def test_encrypt_sentence(enigma_machine):

@@ -1,31 +1,48 @@
+from backend.backend.rotor import Rotor
+
+
 class Enigma:
     def __init__(self, rotor1, rotor2, rotor3, start_pos1, start_pos2, start_pos3, reflector, notch_rotor1,
                  notch_rotor2, notch_rotor3, plugboard=None):
-        self.rotors = [rotor3, rotor2, rotor1]
+        """self.rotors = [rotor3, rotor2, rotor1]
         self.rotor_positions = [start_pos3, start_pos2, start_pos1]
+        self.notches = [notch_rotor3, notch_rotor2, notch_rotor1]"""
+
+        self.first_rotor = Rotor(rotor1, start_pos1, notch_rotor1)
+        self.second_rotor = Rotor(rotor2, start_pos2, notch_rotor2)
+        self.third_rotor = Rotor(rotor3, start_pos3, notch_rotor3)
+
+        self.rotors = [self.first_rotor, self.second_rotor, self.third_rotor]
         self.reflector = reflector
         self.plugboard = plugboard or {}
-        self.notches = [notch_rotor3, notch_rotor2, notch_rotor1]
 
     def set_rotor_positions(self, pos1, pos2, pos3):
-        self.rotor_positions = [pos1, pos2, pos3]
+        self.first_rotor.set_position(pos1)
+        self.second_rotor.set_position(pos2)
+        self.third_rotor.set_position(pos3)
 
     def set_plugboard(self, plugboard):
         self.plugboard = plugboard
 
     def step_rotors(self):
         """
-        Rotates the first rotor as well as the other two if they are needed
+        Rotates the rotors by one position.
         """
-        # Checking if we need to rotate the third and or second rotor
-        if self.rotor_positions[1] == self.notches[1] and self.rotor_positions[2] == self.notches[2]:
-            self.rotor_positions[0] = next_letter(self.rotor_positions[0])
+        # Checking if we need to rotate the third rotor based on notches and current postions
+        '''if self.rotor_positions[1] == self.notches[1] and self.rotor_positions[2] == self.notches[2]:
+            self.rotor_positions[0] = next_letter(self.rotor_positions[0])'''
 
-        if self.rotor_positions[2] == self.notches[2]:
-            self.rotor_positions[1] = next_letter(self.rotor_positions[1])
+        # Checking if we need to rotate the second rotor based on notches and current postions
+        '''if self.rotor_positions[2] == self.notches[2]:
+            self.rotor_positions[1] = next_letter(self.rotor_positions[1])'''
+        if self.first_rotor.position == self.first_rotor.notch:
+            if self.second_rotor.position == self.second_rotor.notch:
+                self.third_rotor.step_rotor()
+
+            self.second_rotor.step_rotor()
 
         # rotates the first rotor by one step (A -> B -> C...).
-        self.rotor_positions[2] = next_letter(self.rotor_positions[2])
+        self.first_rotor.step_rotor()
 
     def apply_plugboard(self, letter):
         return self.plugboard.get(letter, letter)
@@ -57,8 +74,11 @@ class Enigma:
                 rotor_offset[i] = temp_offset
                 temp_offset = None
 
-        letter = chr(((ord(letter) - ord('A') - rotor_offset[0]) % 26) + ord('A'))
-        return letter
+        letter_index = ord(letter) - ord('A')
+        letter_index_adjusted = (letter_index - rotor_offset[0]) % 26
+        encoded_letter = chr(letter_index_adjusted + ord('A'))
+
+        return encoded_letter
 
     def encode_reverse(self, letter, rotor_offset):
         temp_offset = None
@@ -85,6 +105,7 @@ class Enigma:
 
     def reflect(self, letter, rotor_offset):
         letter_idx = ord(letter) - ord('A') - rotor_offset
+
         return self.reflector[letter_idx]
 
     def encode_letter(self, letter):
@@ -94,8 +115,9 @@ class Enigma:
         # Apply plugboard
         letter = self.apply_plugboard(letter)
 
-        # Encode through rotors in forward direction (I -> II -> III -> Reflector)
         rotor_offset = self.calculate_rotor_offset()
+
+        # Encode through rotors in forward direction (I -> II -> III -> Reflector)
         letter = self.encode_forward(letter, rotor_offset)
 
         # Reflect through reflector
