@@ -4,49 +4,74 @@ class Rotor:
         self.position = position
         self.notch = notch
         self.offset = 0
+        self.calculate_offset()
 
     def set_position(self, position):
         """
         Sets rotor position to any setting
         """
         if position in self.mapping:
-            position = get_alphabet_index(position)
-            self.position = get_letter(position)
+            position = index_from_letter(position)
+            self.position = letter_from_index(position)
         else:
             raise ValueError("position not included in mapping")
+        self.calculate_offset()
 
     def step_rotor(self):
         """
         steps the rotor by one
         """
         # gets the index for the current position
-        index = get_alphabet_index(self.position)
+        index = index_from_letter(self.position)
 
         # adds one step to the rotor and checks for a full rotation
         step = index + 1
         if step == 26:
             step = 0
 
-        letter = get_letter(step)
+        letter = letter_from_index(step)
 
         self.position = letter
+        self.calculate_offset()
+
+    def encrypt_character(self, position_letter):
+        """
+        :param position_letter: Position for which we want the encrypted letter, given as a capital character
+        :return: Letter after encryption by this rotor
+        """
+        offset_index = index_from_letter(position_letter)
+        # current_position = index_from_letter(self.position)
+
+        adjusted_index = offset_index # current_position
+
+        encrypted_letter = self.mapping[adjusted_index]
+
+        return encrypted_letter
+
+    def calculate_offset(self):
+        position_index = index_from_letter(self.position)
+
+        offset = position_index
+
+        self.offset = offset
 
 
-def get_alphabet_index(letter):
+def index_from_letter(letter):
     """
     Get the index of a letter in the alphabet, where A = 0, B = 1, etc.
 
     :param letter: A single uppercase letter
     :return: The index of the letter (0-25)
     """
-    # letter = letter.upper
-    alphabet_index = ord(letter) - ord('A')  # sets A - Z to 0-25
-    alphabet_index = alphabet_index % 26  # ensures that we don't overstep the alphabet
+    letter = letter.upper()
 
-    return alphabet_index
+    # Calculate the index of the letter in the alphabet
+    letter_index = ord(letter) - ord('A')
+
+    return letter_index
 
 
-def get_letter(index):
+def letter_from_index(index):
     """
     Get the letter for an index in the alphabet, where 0 = A, 1 = B, etc.
 

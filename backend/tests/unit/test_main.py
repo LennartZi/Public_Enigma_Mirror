@@ -14,7 +14,7 @@ def enigma_machine():
         rotor3=['B', 'D', 'F', 'H', 'J', 'L', 'C', 'P', 'R', 'T', 'X', 'V', 'Z', 'N', 'Y', 'E', 'I', 'W', 'G', 'A', 'K',
                 'M', 'U', 'S', 'Q', 'O'],
 
-        start_pos1='B', start_pos2='D', start_pos3='F',
+        start_pos1='A', start_pos2='A', start_pos3='A',
 
         reflector=['Y', 'R', 'U', 'H', 'Q', 'S', 'L', 'D', 'P', 'X', 'N', 'G', 'O', 'K', 'M', 'I', 'E', 'B', 'F', 'Z',
                    'C', 'W', 'V', 'J', 'A', 'T'],
@@ -33,41 +33,59 @@ def test_step_one_rotor(enigma_machine):
     # Test one rotor stepping
     enigma_machine.set_rotor_positions('R', 'A', 'A')
     enigma_machine.step_rotors()
-    assert enigma_machine.first_rotor.position == 'S' and \
-           enigma_machine.second_rotor.position == 'A' and \
-           enigma_machine.third_rotor.position == 'A'
+    assert (
+        enigma_machine.first_rotor.position,
+        enigma_machine.second_rotor.position,
+        enigma_machine.third_rotor.position,
+    ) == ('S', 'A', 'A'), "Rotor positions after stepping are incorrect."
 
     # second step
     enigma_machine.step_rotors()
-    assert enigma_machine.first_rotor.position == 'T' and \
-           enigma_machine.second_rotor.position == 'A' and \
-           enigma_machine.third_rotor.position == 'A'
+    assert (
+        enigma_machine.first_rotor.position,
+        enigma_machine.second_rotor.position,
+        enigma_machine.third_rotor.position,
+    ) == ('T', 'A', 'A'), "Rotor positions after stepping are incorrect."
 
     # stepping through the whole range up to 'Q', the notch position
     for i in range(23):
         enigma_machine.step_rotors()
-    assert enigma_machine.first_rotor.position == 'Q' and \
-           enigma_machine.second_rotor.position == 'A' and \
-           enigma_machine.third_rotor.position == 'A'
+    assert (
+        enigma_machine.first_rotor.position,
+        enigma_machine.second_rotor.position,
+        enigma_machine.third_rotor.position,
+    ) == ('Q', 'A', 'A'), "Rotor positions after stepping 23times are incorrect."
 
 
 def test_step_two_rotors(enigma_machine):
     # Test two rotors stepping
     enigma_machine.set_rotor_positions('Q', 'A', 'A')
     enigma_machine.step_rotors()
-    assert enigma_machine.first_rotor.position == "R" and\
-           enigma_machine.second_rotor.position == 'B' and\
-           enigma_machine.third_rotor.position == 'A'
+    assert (
+        enigma_machine.first_rotor.position,
+        enigma_machine.second_rotor.position,
+        enigma_machine.third_rotor.position,
+    ) == ('R', 'B', 'A'), "Rotor positions after stepping two rotors are incorrect."
 
 
 def test_step_three_rotors(enigma_machine):
     # Test three rotors stepping
     enigma_machine.set_rotor_positions('Q', 'E', 'A')
     enigma_machine.step_rotors()
-    # assert enigma_machine.rotor_positions == ['B', 'F', 'R']
-    assert enigma_machine.first_rotor.position == 'R' and \
-           enigma_machine.second_rotor.position == 'F' and \
-           enigma_machine.third_rotor.position == 'B'
+    assert (
+        enigma_machine.first_rotor.position,
+        enigma_machine.second_rotor.position,
+        enigma_machine.third_rotor.position,
+    ) == ('R', 'F', 'B'), "Rotor positions after stepping three rotors are incorrect."
+
+
+def test_encrypt_letter(enigma_machine):
+    enigma_machine.set_rotor_positions('A', 'A', 'A')
+
+    enigma_machine.step_rotors()
+    result = enigma_machine.encrypt_forward('T')
+
+    assert result == 'J'
 
 
 def test_encrypt_sentence(enigma_machine):
