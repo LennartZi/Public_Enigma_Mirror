@@ -80,12 +80,18 @@ describe('Test Every Letter', () => {
   })
 })
 
+//Encrypt - Decrypt Test
+let usr_input = "HELLO"
+let encr_output = ""
 // Normal User Interaction
 describe('User Interaction Encryption', () => {
   it('User Types the Word HELLO', () => {
     cy.visit(url)
-    let inp = "HELLO"
-    cy.testUserInput(inp)
+    cy.testUserInput(usr_input)
+
+    cy.get(".output").invoke('text').then((text) => {
+      encr_output = text
+    });
   })
 })
 
@@ -93,8 +99,14 @@ describe('User Interaction Encryption', () => {
 describe('User Interaction Decryption', () => {
   it('User Types the Word MOSGM (Encrypted Hello)', () => {
     cy.visit(url)
-    let inp = "MOSGM"
-    cy.testUserInput(inp)
+    //Da ein neuer Buchstabe immer links in die History und nicht rechts vom alten geschrieben wird,
+    //muss Encrypteter String reversed werden fuer den Input
+    encr_output = encr_output.split('').reverse().join("")
+    cy.testUserInput(encr_output)
+
+    cy.get(".output").invoke('text').then((text) => {
+    expect(text).to.equal(usr_input.split('').reverse().join(""))
+    });
   })
 })
 
