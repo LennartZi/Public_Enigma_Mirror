@@ -35,31 +35,34 @@ class Rotor:
         self.position = letter
         self.calculate_offset()  # updates self.offset after stepping the rotor
 
-    def encrypt_character(self, position_letter):
+    def encrypt_character(self, letter):
         """
-        :param position_letter: Position for which we want the encrypted letter, given as a capital character
+        Encrypts the letter, used when entering from the input side.
+        :param letter: Position for which we want the encrypted letter, given as a capital character
         :return: Letter after encryption by this rotor
         """
-        offset_index = index_from_letter(position_letter)
+        letter_index = index_from_letter(letter)
 
-        adjusted_index = offset_index
-
-        encrypted_letter = self.mapping[adjusted_index]
+        encrypted_letter = self.mapping[letter_index]
+        #  Gives us the letter that corresponds to the letter_index position in the rotor map.
+        #  This lets us know where we exit the rotor
 
         return encrypted_letter
 
-    # TODO: explain why we have two of these functions
+    # We need two functions because the way that we enter the rotor (from reflector side or from the input side) matters
+    # TODO: rewrite comments to clarify what is going on here
 
-    def encrypt_character_reverse(self, position_letter):
+    def encrypt_character_reverse(self, letter):
         """
-        :param position_letter: Position for which we want the encrypted letter, given as a capital character
+        Encrypts the letter, used when entering from the reflector side.
+        :param letter: Position for which we want the encrypted letter, given as a capital character
         :return: Letter after encryption by this rotor
         """
-        offset_index = index_from_letter(position_letter)
-        adjusted_index = offset_index
-        adjusted_letter = letter_from_index(adjusted_index)
-        encrypted_index = self.mapping.index(adjusted_letter)
+        encrypted_index = self.mapping.index(letter)
+        # this gives us the position on the rotor for our letter. This lets us know where we need to exit the rotor
+
         encrypted_letter = letter_from_index(encrypted_index)
+        # Changes our encrypted index back to a capital letter
         return encrypted_letter
 
     def calculate_offset(self):
