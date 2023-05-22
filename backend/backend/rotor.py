@@ -40,12 +40,27 @@ class Rotor:
         :return: Letter after encryption by this rotor
         """
         offset_index = index_from_letter(position_letter)
-        # current_position = index_from_letter(self.position)
 
-        adjusted_index = offset_index # current_position
+        adjusted_index = offset_index
 
         encrypted_letter = self.mapping[adjusted_index]
 
+        return encrypted_letter
+
+    def encrypt_character_reverse(self, position_letter):
+        """
+        :param position_letter: Position for which we want the encrypted letter, given as a capital character
+        :return: Letter after encryption by this rotor
+        """
+        offset_index = index_from_letter(position_letter)
+
+        adjusted_index = offset_index
+
+        adjusted_letter = letter_from_index(adjusted_index)
+
+        encrypted_index = self.mapping.index(adjusted_letter)
+
+        encrypted_letter = letter_from_index(encrypted_index)
         return encrypted_letter
 
     def calculate_offset(self):

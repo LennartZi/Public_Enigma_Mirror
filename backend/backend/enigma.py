@@ -39,116 +39,63 @@ class Enigma:
     def apply_plugboard(self, letter):
         return self.plugboard.get(letter, letter)
 
-    def encode_forward(self, letter, rotor_offset):
-        temp_offset = None
-
-        for i in range(2, -1, -1):
-
-            if i == 1 and rotor_offset[2] != 0:
-                temp_offset = rotor_offset[i]
-                rotor_offset[i] = rotor_offset[i] - rotor_offset[i + 1]
-
-            elif i == 0 and rotor_offset[1] != 0:
-                temp_offset = rotor_offset[i]
-                rotor_offset[i] = rotor_offset[i] - rotor_offset[i + 1]
-
-            letter_idx = ord(letter) - ord('A')
-            letter_idx = (letter_idx + rotor_offset[i]) % 26
-
-            letter = chr(ord(self.rotor_list[i][letter_idx]))
-
-            if temp_offset is not None:
-                rotor_offset[i] = temp_offset
-                temp_offset = None
-
-        letter_index = ord(letter) - ord('A')
-        letter_index_adjusted = (letter_index - rotor_offset[0]) % 26
-        encoded_letter = chr(letter_index_adjusted + ord('A'))
-
-        return encoded_letter
-
     def encrypt_forward(self, letter):
-        # get relative offsets for both rotors
-        relative_offset = 0
+        """
+        Encrypts a letter in the forward direction |reflector <- Third rotor <- Second rotor  <- First rotor <- input
+        :param letter: Any capital letter
+        :return:  The capital letter after encryption by three rotors, before reflection!
+        """
+        relative_offset = 0  # The relative offset between two rotors. Starts at 0 since the first rotor has none
 
         for rotor in self.rotor_list:
             letter_index = index_from_letter(letter)    # gets a number that represents our letter to do math
-
-            relative_offset = rotor.offset - relative_offset
-
+            relative_offset = rotor.offset - relative_offset    # removes the offset of the previous rotor
             letter_index = (letter_index + relative_offset) % 26  # adds the offset to the letter
-            # print(f"letter_index: {letter_index}")
-
             letter = letter_from_index(letter_index)
 
-            letter = rotor.encrypt_character(letter)
+            letter = rotor.encrypt_character(letter)  # encrypts the letter using the current rotor
 
-            relative_offset = rotor.offset
+            relative_offset = rotor.offset  # saves the current rotors offset for the next rotor relative offset
 
-
-        # add rotor offset to the letter
-
-        #
         return letter
 
     def encrypt_backward(self, letter):
-        pass
+        # Get relative offsets for both rotors
+        relative_offset = 0
+        for rotor in reversed(self.rotor_list):  # Reverse the rotor list
+            letter_index = index_from_letter(letter)  # gets a number that represents our letter to do math
 
-    def encode_reverse(self, letter, rotor_offset):
-        temp_offset = None
+            relative_offset = rotor.offset - relative_offset  # removes the offset of the previous rotor
 
-        for i in range(3):
+            letter_index = (letter_index + relative_offset) % 26  # adds the offset to the letter
 
-            if i == 1 and rotor_offset[0] != 0:
-                temp_offset = rotor_offset[i]
-                rotor_offset[i] = rotor_offset[i] - rotor_offset[i - 1]
+            letter = letter_from_index(letter_index)
+            letter = rotor.encrypt_character_reverse(letter)  # encrypts the letter using the current rotor
 
-            elif i == 2 and rotor_offset[1] != 0:
-                temp_offset = rotor_offset[i]
-                rotor_offset[i] = rotor_offset[i] - rotor_offset[i - 1]
+            relative_offset = rotor.offset  # saves the current rotors offset for the next rotor relative offset
 
-            letter_idx = self.rotor_list[i].index(chr(((ord(letter) - ord('A') + rotor_offset[i]) % 26) + ord('A')))
-            letter = chr(letter_idx + ord('A'))
-
-            if temp_offset is not None:
-                rotor_offset[i] = temp_offset
-                temp_offset = None
-
-        letter = chr(((ord(letter) - ord('A') - rotor_offset[2]) % 26) + ord('A'))
+        # remove the first rotors offset from letter. Since we don't have an entry rotor (ETW)
+        letter_index = index_from_letter(letter)
+        letter_index = (letter_index - self.first_rotor.offset) % 26
+        letter = letter_from_index(letter_index)
         return letter
 
-    def reflect(self, letter, rotor_offset):
-        letter_idx = ord(letter) - ord('A') - rotor_offset
+    def reflect(self, letter):
+        letter_index = index_from_letter(letter)
+        offset = self.third_rotor.offset
 
-        return self.reflector[letter_idx]
+        reflect_position = letter_index - offset
 
-    def encode_letter(self, letter):
-        # Step rotors
-        self.step_rotors()
-
-        # Apply plugboard
-        letter = self.apply_plugboard(letter)
-
-        # ###rotor_offset = self.calculate_rotor_offset()
-
-        # Encode through rotors in forward direction (I -> II -> III -> Reflector)
-        # ###letter = self.encode_forward(letter, rotor_offset)
-
-        # Reflect through reflector
-        # ###letter = self.reflect(letter, rotor_offset[0])
-
-        # Encode through rotors in reverse direction (Reflector -> III -> II -> I)
-        # ###letter = self.encode_reverse(letter, rotor_offset)
-
-        # Apply plugboard
-        letter = self.apply_plugboard(letter)
-
-        return letter
+        return self.reflector[reflect_position]
 
     def encrypt_letter(self, letter):
         self.step_rotors()
 
-        letter = self.encrypt_forward()
+        letter = self.encrypt_forward(letter)
+
+        letter = self.reflect(letter)
+
+        letter = self.encrypt_backward(letter)
 
         return letter
 

@@ -79,7 +79,7 @@ def test_step_three_rotors(enigma_machine):
     ) == ('R', 'F', 'B'), "Rotor positions after stepping three rotors are incorrect."
 
 
-def test_encrypt_letter(enigma_machine):
+def test_encrypt_letter_forward(enigma_machine):
     enigma_machine.set_rotor_positions('A', 'A', 'A')
 
     enigma_machine.step_rotors()
@@ -88,21 +88,37 @@ def test_encrypt_letter(enigma_machine):
     assert result == 'J'
 
 
+def test_reflector(enigma_machine):
+    enigma_machine.set_rotor_positions('B', 'A', 'A')
+
+    result = enigma_machine.reflect('J')
+
+    assert result == 'X'
+
+
+def test_encrypt_letter_backward(enigma_machine):
+    enigma_machine.set_rotor_positions('B', 'A', 'A')
+
+    result = enigma_machine.encrypt_backward('X')
+
+    assert result == 'Z'
+
+
 def test_encrypt_sentence(enigma_machine):
     # Tests the encryption of a sentence
     enigma_machine.set_rotor_positions('A', 'A', 'A')
 
     # Sentence currently without spaces and all uppercase!
     sentence = "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS"
-    encrypted_word = ""
+    encrypted_sentence = ""
 
     # Sentence is split into letters and encrypted one by one
     for letter in sentence:
-        encrypted_letter = enigma_machine.encode_letter(letter)
-        encrypted_word += encrypted_letter
+        encrypted_letter = enigma_machine.encrypt_letter(letter)
+        encrypted_sentence += encrypted_letter
 
     # expected result from https://people.physik.hu-berlin.de/~palloks/js/enigma/enigma-u_v20.html
-    assert encrypted_word == "ZPJJSVSPGBWNXCQXOPCCFYXRPWVYUAXQRZBKKMJZNOFHLCCPGICCVZZ"
+    assert encrypted_sentence == "ZPJJSVSPGBWNXCQXOPCCFYXRPWVYUAXQRZBKKMJZNOFHLCCPGICCVZZ"
 
 
 def test_decrypt_sentence(enigma_machine):
@@ -111,13 +127,11 @@ def test_decrypt_sentence(enigma_machine):
 
     # Sentence currently without spaces and all uppercase!
     sentence = "ZPJJSVSPGBWNXCQXOPCCFYXRPWVYUAXQRZBKKMJZNOFHLCCPGICCVZZ"
-    decrypted_word = ""
+    decrypted_sentence = ""
 
     # Sentence is split into letters and encrypted one by one
     for letter in sentence:
-        encrypted_letter = enigma_machine.encode_letter(letter)
-        decrypted_word += encrypted_letter
+        encrypted_letter = enigma_machine.encrypt_letter(letter)
+        decrypted_sentence += encrypted_letter
 
-    assert decrypted_word == "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS"
-
-
+    assert decrypted_sentence == "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS"
