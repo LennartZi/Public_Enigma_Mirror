@@ -9,17 +9,31 @@ class Enigma:
         self.second_rotor = Rotor(rotor2, start_pos2, notch_rotor2)
         self.third_rotor = Rotor(rotor3, start_pos3, notch_rotor3)
 
+        # Used to iterate through all rotors later on. We can use this to deal with the 2 rotor variant
         self.rotor_list = [self.first_rotor, self.second_rotor, self.third_rotor]
 
         self.reflector = reflector
         self.plugboard = plugboard or {}
 
     def set_rotor_positions(self, pos1, pos2, pos3):
+        """
+        Sets all rotors to any chosen position
+        This is a legacy function that lets us not change any of the frontend stuff.
+        :param pos1: position for rotor 1 given as a capital letter
+        :param pos2: position for rotor 2 given as a capital letter
+        :param pos3: position for rotor 3 given as a capital letter
+        """
         self.first_rotor.set_position(pos1)
         self.second_rotor.set_position(pos2)
         self.third_rotor.set_position(pos3)
 
     def set_plugboard(self, plugboard):
+        # TODO: add functionality and test
+        """
+        currently not implemented or tested
+        :param plugboard:
+        :return:
+        """
         self.plugboard = plugboard
 
     def step_rotors(self):
@@ -37,6 +51,12 @@ class Enigma:
         self.first_rotor.step_rotor()
 
     def apply_plugboard(self, letter):
+        # TODO: add functionality and test
+        """
+        currently not implemented or tested
+        :param letter:
+        :return:
+        """
         return self.plugboard.get(letter, letter)
 
     def encrypt_forward(self, letter):
@@ -60,6 +80,11 @@ class Enigma:
         return letter
 
     def encrypt_backward(self, letter):
+        """
+        Encrypts a letter in the backward direction |reflector -> Third rotor -> Second rotor  -> First rotor -> output
+        :param letter: Any capital letter
+        :return:  The capital letter after encryption by three rotors, before reflection!
+        """
         # Get relative offsets for both rotors
         relative_offset = 0
         for rotor in reversed(self.rotor_list):  # Reverse the rotor list
@@ -81,6 +106,11 @@ class Enigma:
         return letter
 
     def reflect(self, letter):
+        """
+        Reflects the letter using the reflector
+        :param letter: Capital letter to reflect
+        :return: Capital letter after reflection
+        """
         letter_index = index_from_letter(letter)
         offset = self.third_rotor.offset
 
@@ -89,15 +119,37 @@ class Enigma:
         return self.reflector[reflect_position]
 
     def encrypt_letter(self, letter):
+        """
+        Encrypts a letter and returns the encrypted one
+        :param letter: Letter that needs to be de/encrypted
+        :return: The encrypted letter
+        """
         self.step_rotors()
 
+        # TODO: add plugboard here
+
+        # reflector <- Third rotor <- Second rotor  <- First rotor <- input
         letter = self.encrypt_forward(letter)
 
         letter = self.reflect(letter)
 
+        # reflector -> Third rotor -> Second rotor  -> First rotor -> output
         letter = self.encrypt_backward(letter)
 
+        # TODO: add plugboard here
+
         return letter
+
+    def encode_letter(self, letter):
+        # TODO: remove and change calls in api to encrypt_letter
+        """
+        Encrypts any given letter
+        Only used to call encrypt_letter. This is a legacy function and should be removed
+        :param letter: letter we want to encrypt
+        :return: encrypted letter
+        """
+
+        return self.encrypt_letter(letter)
 
 
 def next_letter(letter):

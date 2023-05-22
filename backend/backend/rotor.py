@@ -9,12 +9,13 @@ class Rotor:
     def set_position(self, position):
         """
         Sets rotor position to any setting
+        :param position: position to set the rotor to. Given as capital letter
         """
         if position in self.mapping:
             position = index_from_letter(position)
             self.position = letter_from_index(position)
         else:
-            raise ValueError("position not included in mapping")
+            raise ValueError("position not included in mapping")  # This is kinda bad :)
         self.calculate_offset()
 
     def step_rotor(self):
@@ -32,7 +33,7 @@ class Rotor:
         letter = letter_from_index(step)
 
         self.position = letter
-        self.calculate_offset()
+        self.calculate_offset()  # updates self.offset after stepping the rotor
 
     def encrypt_character(self, position_letter):
         """
@@ -47,25 +48,26 @@ class Rotor:
 
         return encrypted_letter
 
+    # TODO: explain why we have two of these functions
+
     def encrypt_character_reverse(self, position_letter):
         """
         :param position_letter: Position for which we want the encrypted letter, given as a capital character
         :return: Letter after encryption by this rotor
         """
         offset_index = index_from_letter(position_letter)
-
         adjusted_index = offset_index
-
         adjusted_letter = letter_from_index(adjusted_index)
-
         encrypted_index = self.mapping.index(adjusted_letter)
-
         encrypted_letter = letter_from_index(encrypted_index)
         return encrypted_letter
 
     def calculate_offset(self):
-        position_index = index_from_letter(self.position)
+        """
+        Calculates the offset (distance from starting position "A") and sets it as offset
+        """
 
+        position_index = index_from_letter(self.position)
         offset = position_index
 
         self.offset = offset
