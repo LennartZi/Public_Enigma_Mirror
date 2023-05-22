@@ -71,15 +71,6 @@ describe('Test Keyboard Input', () => {
   })
 })
 
-// Normal User Interaction
-describe('User Interaction', () => {
-  it('User Types the Word HELLO', () => {
-    cy.visit(url)
-    let inp = "HELLO"
-    cy.testUserInput(inp)
-  })
-})
-
 // Same as User Input but with every Letter
 describe('Test Every Letter', () => {
   it('Click Every Letter for Function Test', () => {
@@ -88,3 +79,22 @@ describe('Test Every Letter', () => {
     cy.testUserInput(inp)
   })
 })
+
+// Normal User Interaction
+describe('User Interaction Encryption', () => {
+  it('User Types the Word HELLO', () => {
+    cy.visit(url)
+    let inp = "HELLO"
+    cy.testUserInput(inp)
+  })
+})
+
+// Decryption
+describe('User Interaction Decryption', () => {
+  it('User Types the Word MOSGM (Encrypted Hello)', () => {
+    cy.visit(url)
+    let inp = "MOSGM"
+    cy.testUserInput(inp)
+  })
+})
+
