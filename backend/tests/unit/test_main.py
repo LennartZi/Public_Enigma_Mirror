@@ -80,36 +80,42 @@ def test_step_three_rotors(enigma_machine):
 
 
 def test_encrypt_letter_forward(enigma_machine):
-    enigma_machine.set_rotor_positions('A', 'A', 'A')
+    enigma_machine.set_rotor_positions('Q', 'E', 'A')
+    enigma_machine.step_rotors()  # Stepping the rotor. The function would usually only be called after a step
 
-    enigma_machine.step_rotors()
     result = enigma_machine.encrypt_forward('T')
 
-    assert result == 'J'
+    assert result == 'L'
 
 
 def test_reflector(enigma_machine):
-    enigma_machine.set_rotor_positions('B', 'A', 'A')
+    enigma_machine.set_rotor_positions('Q', 'E', 'A')
 
-    result = enigma_machine.reflect('J')
+    result = enigma_machine.reflect('K')
 
-    assert result == 'X'
+    assert result == 'N'
 
 
 def test_encrypt_letter_backward(enigma_machine):
-    enigma_machine.set_rotor_positions('B', 'A', 'A')
+    enigma_machine.set_rotor_positions('Q', 'E', 'A')
+    enigma_machine.step_rotors()    # Stepping the rotor. The function would usually only be called after a step
 
-    result = enigma_machine.encrypt_backward('X')
+    result = enigma_machine.encrypt_backward('N')
 
-    assert result == 'Z'
+    assert result == 'V'
 
 
 def test_encrypt_sentence(enigma_machine):
     # Tests the encryption of a sentence
-    enigma_machine.set_rotor_positions('A', 'A', 'A')
+    enigma_machine.set_rotor_positions('Q', 'E', 'A')
 
     # Sentence currently without spaces and all uppercase!
-    sentence = "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS"
+    sentence = "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS" \
+               "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS" \
+               "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS" \
+               "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS" \
+               "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS" \
+               "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS"
     encrypted_sentence = ""
 
     # Sentence is split into letters and encrypted one by one
@@ -118,15 +124,25 @@ def test_encrypt_sentence(enigma_machine):
         encrypted_sentence += encrypted_letter
 
     # expected result from https://people.physik.hu-berlin.de/~palloks/js/enigma/enigma-u_v20.html
-    assert encrypted_sentence == "ZPJJSVSPGBWNXCQXOPCCFYXRPWVYUAXQRZBKKMJZNOFHLCCPGICCVZZ"
+    assert encrypted_sentence == "VXCJNEYKDLWBKXSLAKXXDFJQSEGCATFIQTBKLDKURCJVVZTISTABSAJ" \
+                                 "SQNUOGJCCIOTLQUHGOXCXPUIGLVYOJSVUPWMPIKJEDHDJYUHAIFFXFJ" \
+                                 "NIOAPMHHXUHREBSICOUKLULXNWGJOMFKWLQAVJHIKSJRGEVNTLEESFO" \
+                                 "PLZDOVQRBNFEEAICKKYTIWIVXJUIALSVLPWZFBTDEUSQHPGWFGQOGOX" \
+                                 "YCGPVTTXZKUUKFNWDIDRPIWSEBHKPSBGQHBNDDSWEBKDJNZXVVCXEBI" \
+                                 "YEHWQARXONGNUVIAOWNRKOYPQVQGRZKAYVCNRQDWXBQKWONKYHSOEEO"
 
 
 def test_decrypt_sentence(enigma_machine):
     # Tests the decryption of a sentence
-    enigma_machine.set_rotor_positions('A', 'A', 'A')
+    enigma_machine.set_rotor_positions('Q', 'E', 'A')
 
     # Sentence currently without spaces and all uppercase!
-    sentence = "ZPJJSVSPGBWNXCQXOPCCFYXRPWVYUAXQRZBKKMJZNOFHLCCPGICCVZZ"
+    sentence = "VXCJNEYKDLWBKXSLAKXXDFJQSEGCATFIQTBKLDKURCJVVZTISTABSAJ" \
+               "SQNUOGJCCIOTLQUHGOXCXPUIGLVYOJSVUPWMPIKJEDHDJYUHAIFFXFJ" \
+               "NIOAPMHHXUHREBSICOUKLULXNWGJOMFKWLQAVJHIKSJRGEVNTLEESFO" \
+               "PLZDOVQRBNFEEAICKKYTIWIVXJUIALSVLPWZFBTDEUSQHPGWFGQOGOX" \
+               "YCGPVTTXZKUUKFNWDIDRPIWSEBHKPSBGQHBNDDSWEBKDJNZXVVCXEBI" \
+               "YEHWQARXONGNUVIAOWNRKOYPQVQGRZKAYVCNRQDWXBQKWONKYHSOEEO"
     decrypted_sentence = ""
 
     # Sentence is split into letters and encrypted one by one
@@ -134,4 +150,9 @@ def test_decrypt_sentence(enigma_machine):
         encrypted_letter = enigma_machine.encrypt_letter(letter)
         decrypted_sentence += encrypted_letter
 
-    assert decrypted_sentence == "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS"
+    assert decrypted_sentence == "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS" \
+                                 "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS" \
+                                 "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS" \
+                                 "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS" \
+                                 "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS" \
+                                 "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS"
