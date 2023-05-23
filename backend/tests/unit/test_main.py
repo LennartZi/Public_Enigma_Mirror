@@ -29,6 +29,34 @@ def enigma_machine():
     enigma_machine.set_rotor_positions('A', 'A', 'A')
 
 
+@pytest.fixture()
+def two_rotor_enigma():
+    # TODO: Change rotors and notches to fit, write more test than just the one
+    two_rotor_enigma = Enigma(
+        rotor1=['E', 'K', 'M', 'F', 'L', 'G', 'D', 'Q', 'V', 'Z', 'N', 'T', 'O', 'W', 'Y', 'H', 'X', 'U', 'S', 'P',
+                'A',
+                'I', 'B', 'R', 'C', 'J'],
+
+        rotor2=['A', 'J', 'D', 'K', 'S', 'I', 'R', 'U', 'X', 'B', 'L', 'H', 'W', 'T', 'M', 'C', 'Q', 'G', 'Z', 'N',
+                'P',
+                'Y', 'F', 'V', 'O', 'E'],
+
+        start_pos1='A', start_pos2='A',
+
+        reflector=['Y', 'R', 'U', 'H', 'Q', 'S', 'L', 'D', 'P', 'X', 'N', 'G', 'O', 'K', 'M', 'I', 'E', 'B', 'F',
+                   'Z',
+                   'C', 'W', 'V', 'J', 'A', 'T'],
+
+        notch_rotor1='Q', notch_rotor2='E')
+
+    two_rotor_enigma.set_rotor_positions('A', 'A')
+
+    yield two_rotor_enigma
+
+    # teardown code
+    two_rotor_enigma.set_rotor_positions('A', 'A')
+
+
 def test_step_one_rotor(enigma_machine):
     # Test one rotor stepping
     enigma_machine.set_rotor_positions('R', 'A', 'A')
@@ -156,3 +184,13 @@ def test_decrypt_sentence(enigma_machine):
                                  "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS" \
                                  "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS" \
                                  "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS"
+
+
+def test_two_rotor_step(two_rotor_enigma):
+    # Test stepping both rotors
+    two_rotor_enigma.set_rotor_positions('Q', 'A')
+    two_rotor_enigma.step_rotors()
+    assert (
+               two_rotor_enigma.first_rotor.position,
+               two_rotor_enigma.second_rotor.position
+           ) == ('R', 'B'), "Rotor positions after stepping two rotors are incorrect."
