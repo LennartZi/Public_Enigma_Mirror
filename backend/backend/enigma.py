@@ -2,30 +2,21 @@ from backend.backend.rotor import Rotor, index_from_letter, letter_from_index
 
 
 class Enigma:
-    def __init__(self, rotor1, rotor2, rotor3, start_pos1, start_pos2, start_pos3, reflector, notch_rotor1,
-                 notch_rotor2, notch_rotor3, plugboard=None):
+    def __init__(self, rotor1, rotor2, start_pos1, start_pos2, reflector, notch_rotor1, notch_rotor2,
+                 plugboard=None, rotor3=None, start_pos3=None,  notch_rotor3=None):
 
         self.first_rotor = Rotor(rotor1, start_pos1, notch_rotor1)
         self.second_rotor = Rotor(rotor2, start_pos2, notch_rotor2)
-        self.third_rotor = Rotor(rotor3, start_pos3, notch_rotor3)
 
         # Used to iterate through all rotors later on. We can use this to deal with the 2 rotor variant
-        self.rotor_list = [self.first_rotor, self.second_rotor, self.third_rotor]
+        self.rotor_list = [self.first_rotor, self.second_rotor]
+
+        if rotor3 is not None:
+            self.third_rotor = Rotor(rotor3, start_pos3, notch_rotor3)
+            self.rotor_list.append(self.third_rotor)
 
         self.reflector = reflector
         self.plugboard = plugboard or {}
-
-    def set_rotor_positions(self, pos1, pos2, pos3):
-        """
-        Sets all rotors to any chosen position
-        This is a legacy function that lets us not change any of the frontend stuff.
-        :param pos1: position for rotor 1 given as a capital letter
-        :param pos2: position for rotor 2 given as a capital letter
-        :param pos3: position for rotor 3 given as a capital letter
-        """
-        self.first_rotor.set_position(pos1)
-        self.second_rotor.set_position(pos2)
-        self.third_rotor.set_position(pos3)
 
     def set_plugboard(self, plugboard):
         # TODO: add functionality and test
@@ -36,21 +27,6 @@ class Enigma:
         """
         self.plugboard = plugboard
 
-    def step_rotors(self):
-        """
-        Rotates the rotors by one position.
-        """
-        # Rotors are = |Third|Second|First|. The first one always steps.
-
-        # Checking if we need to rotate the second and third rotor based on notches and current postions
-        if self.first_rotor.position == self.first_rotor.notch:
-            if self.second_rotor.position == self.second_rotor.notch:
-
-                self.third_rotor.step_rotor()
-            self.second_rotor.step_rotor()
-        self.first_rotor.step_rotor()
-        self.get_rotor_positions()
-
     def apply_plugboard(self, letter):
         # TODO: add functionality and test
         """
@@ -59,6 +35,34 @@ class Enigma:
         :return:
         """
         return self.plugboard.get(letter, letter)
+
+    def set_rotor_positions(self, pos1, pos2, pos3=None):
+        """
+        Sets all rotors to any chosen position
+        This is a legacy function that lets us not change any of the frontend stuff.
+        :param pos1: position for rotor 1 given as a capital letter
+        :param pos2: position for rotor 2 given as a capital letter
+        :param pos3: position for rotor 3 given as a capital letter
+        """
+        positions = [pos1, pos2, pos3]  # this is hacky and should probably be changed
+        i = 0
+        for rotor in self.rotor_list:
+            rotor.position = positions[i]
+            i += 1
+        # TODO: Add handling for when pos3 is not supplied but we have 3 rotors
+
+    def step_rotors(self):
+        """
+        Rotates the rotors by one position.
+        """
+        # Rotors are = |Third|Second|First|. The first one always steps.
+        for rotor in self.rotor_list:
+            position = rotor.position  # this saves the position of the rotor before stepping
+
+            rotor.step_rotor()
+
+            if position != rotor.notch:  # If we weren't on the notch we don't move the next rotor
+                break
 
     def encrypt_forward(self, letter):
         """
