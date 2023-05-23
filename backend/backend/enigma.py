@@ -49,6 +49,7 @@ class Enigma:
                 self.third_rotor.step_rotor()
             self.second_rotor.step_rotor()
         self.first_rotor.step_rotor()
+        self.get_rotor_positions()
 
     def apply_plugboard(self, letter):
         # TODO: add functionality and test
@@ -63,7 +64,7 @@ class Enigma:
         """
         Encrypts a letter in the forward direction |reflector <- Third rotor <- Second rotor  <- First rotor <- input
         :param letter: Any capital letter
-        :return:  The capital letter after encryption by three rotors, before reflection!
+        :return:  The capital letter after encryption by three rotors, ***before*** reflection!
         """
         relative_offset = 0  # The relative offset between two rotors. Starts at 0 since the first rotor has none
 
@@ -83,7 +84,7 @@ class Enigma:
         """
         Encrypts a letter in the backward direction |reflector -> Third rotor -> Second rotor  -> First rotor -> output
         :param letter: Any capital letter
-        :return:  The capital letter after encryption by three rotors, before reflection!
+        :return:  The capital letter after encryption by three rotors, ***after*** reflection!
         """
         # Get relative offsets for both rotors
         relative_offset = 0
@@ -127,7 +128,6 @@ class Enigma:
         self.step_rotors()
 
         # TODO: add plugboard here
-
         # reflector <- Third rotor <- Second rotor  <- First rotor <- input
         letter = self.encrypt_forward(letter)
 
@@ -137,7 +137,6 @@ class Enigma:
         letter = self.encrypt_backward(letter)
 
         # TODO: add plugboard here
-
         return letter
 
     def encode_letter(self, letter):
@@ -150,6 +149,17 @@ class Enigma:
         """
 
         return self.encrypt_letter(letter)
+
+    def get_rotor_positions(self):
+        """
+        Returns position of all rotors as a list
+        :return: [first_rotor, second_rotor, third_rotor]
+        """
+        rotor_positions = []
+        for rotor in self.rotor_list:  # reverse list if you'd like them returned as [3,2,1]
+            rotor_positions.append(rotor.position)
+
+        return rotor_positions
 
 
 def next_letter(letter):

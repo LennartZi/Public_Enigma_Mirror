@@ -103,6 +103,8 @@ def encrypt_letter():
         data = request.get_json()
         letter = data.get('letter')
         letter = enigma_b.encode_letter(letter)
+
+        # TODO: change to get_rotor_position. Check that the order is consistent with the previous implementation
         positions = enigma_b.rotor_positions
 
         response = jsonify(letter)
