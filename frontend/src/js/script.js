@@ -170,3 +170,33 @@ async function VariantsDropdown() {
   }
 }
 
+function updateRotorOptions() {
+  const enigmaModel = document.getElementById('variantSelect');
+  const rotorSelection = document.getElementById('rotorSelection');
+  const rotorCount = enigmaModel.value === 'Enigma 1' ? 5 : enigmaModel.value === 'Enigma M3' ? 8 : 3;
+
+  // Löschen Sie die vorherigen Rotoren und füllen Sie die Liste mit den neuen Rotoren
+  rotorSelection.innerHTML = '';
+  for (let i = 1; i <= rotorCount; i++) {
+    const li = document.createElement("li");
+    li.textContent = "Rotor " + i;
+    li.setAttribute("data-value", "rotor" + i);
+
+    li.addEventListener("click", function(event) {
+      const selectedItems = rotorSelection.querySelectorAll("li.selected");
+
+      // Entfernen Sie die Auswahl, wenn das Element bereits ausgewählt ist
+      if (event.target.classList.contains("selected")) {
+          event.target.classList.remove("selected");
+          return;
+        }
+
+        // Stellen Sie sicher, dass mindestens 3 und höchstens 3 Rotoren ausgewählt sind
+        if (selectedItems.length < 3) {
+          event.target.classList.add("selected");
+        }
+      });
+    rotorSelection.appendChild(li);
+  }
+}
+

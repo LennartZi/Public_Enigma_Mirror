@@ -10,9 +10,15 @@
   <div id="container3">
     <div class="variantSelect">
       <div><h2>Enigma-Model:</h2></div>
-      <div><select id="variantSelect">
+      <div><select id="variantSelect" onchange="updateRotorOptions()">
         <option disabled selected value> -- select a variant -- </option>
       </select></div>
+    </div>
+    <div id="selectRotor" class="variantSelect">
+      <label for="rotorSelection">Rotor-Auswahl:</label>
+      <div>
+        <ol id="rotorSelection" class="rotor-selection"></ol>
+      </div>
     </div>
   </div>
   <div id="container2">
