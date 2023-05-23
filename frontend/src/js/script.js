@@ -145,7 +145,6 @@ function addClickListener(key) {
 }
 
 
-
 // Funktion zum Aktualisieren der Eingabehistorie
 function updateInputHistory(clickedKey) {
   inputHistory.textContent = (clickedKey.toUpperCase() + inputHistory.textContent).substring(0, maxHistoryLength);
@@ -154,5 +153,20 @@ function updateInputHistory(clickedKey) {
 // Funktion zum Aktualisieren der Ausgabehistorie
 function updateOutputHistory(output) {
   outputHistory.textContent = (output.toUpperCase() + outputHistory.textContent).substring(0, maxHistoryLength);
+}
+
+
+async function VariantsDropdown() {
+  try {
+    const variants = await getVariants();
+    for (let variant of variants) {
+      const option = document.createElement('option');
+      option.value = variant;
+      option.text = variant;
+      variantSelect.appendChild(option);
+    }
+  } catch (error) {
+    console.error('Error while populating variant dropdown:', error);
+  }
 }
 
