@@ -11,6 +11,7 @@ class Enigma:
         # Used to iterate through all rotors later on. We can use this to deal with the 2 rotor variant
         self.rotor_list = [self.first_rotor, self.second_rotor]
 
+        # If we are handed a third rotor for construction use it and add the third rotor to the list
         if rotor3 is not None:
             self.third_rotor = Rotor(rotor3, start_pos3, notch_rotor3)
             self.rotor_list.append(self.third_rotor)
@@ -80,7 +81,7 @@ class Enigma:
 
             letter = rotor.encrypt_character(letter)  # encrypts the letter using the current rotor
 
-            relative_offset = rotor.offset  # saves the current rotors offset for the next rotor relative offset
+            relative_offset = rotor.offset  # saves the current rotors offset for the next rotors relative offset
 
         return letter
 
@@ -117,7 +118,7 @@ class Enigma:
         :return: Capital letter after reflection
         """
         letter_index = index_from_letter(letter)
-        offset = self.third_rotor.offset
+        offset = self.rotor_list[-1].offset  # this is always the last rotor
 
         reflect_position = letter_index - offset
 
@@ -157,7 +158,7 @@ class Enigma:
     def get_rotor_positions(self):
         """
         Returns position of all rotors as a list
-        :return: [first_rotor, second_rotor, third_rotor]
+        :return: [first rotor, second rotor, third rotor]
         """
         rotor_positions = []
         for rotor in self.rotor_list:  # reverse list if you'd like them returned as [3,2,1]
