@@ -91,11 +91,12 @@ document.addEventListener('keydown', async (event) => {
   const isValidKey = rows.some(row => row.includes(key.toLowerCase()));
 
   if (!event.repeat && isValidKey) {
+    updateInputHistory(key);
     findAndHighlightKey(keyboard_input, key , true);
     const response = await putKey({letter: key})
     console.log(response);
-    // Senden ans Backend
-    outputHistory.textContent = (response + outputHistory.textContent).substring(0, maxHistoryLength);
+    // Output History aktualisieren
+    updateOutputHistory(response);
   }
 });
 
@@ -128,18 +129,30 @@ function findAndHighlightKey(keyboardDiv, key, highlight) {
 function addClickListener(key) {
   key.addEventListener('click', async () => {
     const keyText = key.textContent;
-
+    updateInputHistory(keyText);
     findAndHighlightKey(keyboard_input, keyText, true);
     const response = await putKey({ letter: keyText });
     console.log(response);
 
-    // Senden ans Backend
-    outputHistory.textContent = (response + outputHistory.textContent).substring(0, maxHistoryLength);
+    // Update der Ausgabehistorie
+    updateOutputHistory(response);
 
     // Entfernen der Hervorhebung nach einer kurzen Verzögerung
     setTimeout(() => {
       findAndHighlightKey(keyboard_input, keyText, false);
     }, 2000);
   });
+}
+
+
+
+// Funktion zum Aktualisieren der Eingabehistorie
+function updateInputHistory(clickedKey) {
+  inputHistory.textContent = (clickedKey.toUpperCase() + inputHistory.textContent).substring(0, maxHistoryLength);
+}
+
+// Funktion zum Aktualisieren der Ausgabehistorie
+function updateOutputHistory(output) {
+  outputHistory.textContent = (output.toUpperCase() + outputHistory.textContent).substring(0, maxHistoryLength);
 }
 
