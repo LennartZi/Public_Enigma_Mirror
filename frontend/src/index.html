@@ -5,20 +5,30 @@
   <title>Virtuelle Tastatur</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
+<body onload="VariantsDropdown()">
 <div class="main-container">
-  <div id="container2" class="container">
-    <div id="outputContainer">
-      <h1>Output</h1>
-      <div id="outputHistory" class="output"></div>
+  <div id="container3">
+    <div class="variantSelect">
+      <div><h2>Enigma-Model:</h2></div>
+      <div><select id="variantSelect" onchange="updateRotorOptions()">
+        <option disabled selected value> -- select a variant -- </option>
+      </select></div>
+    </div>
+    <div id="selectRotor" class="variantSelect">
+      <label for="rotorSelection">Rotor-Auswahl:</label>
+      <div>
+        <ol id="rotorSelection" class="rotor-selection"></ol>
+      </div>
     </div>
   </div>
-  <div id="container1" class="container">
-    <div id="inputContainer">
-      <div id="keyboard_input" class="keyboard"></div>
-      <h1>Input</h1>
-      <div id="inputHistory" class="output"></div>
-    </div>
+  <div id="container2">
+    <h1>Output</h1>
+    <div id="outputHistory" class="input_output_text"></div>
+  </div>
+  <div id="container1">
+    <div id="keyboard_input" class="keyboard"></div>
+    <h1>Input</h1>
+    <div id="inputHistory" class="input_output_text"></div>
   </div>
 </div>
   <script src="js/script.js"></script>
