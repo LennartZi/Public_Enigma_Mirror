@@ -8,6 +8,7 @@ import yaml
 def set_cookie(response, key: str, value):
     response.set_cookie(key, str(value), max_age=3600*24*365, path="/", samesite="Lax")
 
+
 @app.route("/config")
 def config():
     with open("/etc/enigma.yaml", "r") as stream:
@@ -70,6 +71,15 @@ def rotor_position(rotornr):
         response.headers['Set-Cookie'] = f'position={{{rotornr}: {position}}}'
         return response
 
+
+# Endpoint to retrieve the input history and regular history
+@app.route("/history", methods=['GET'])
+def get_history():
+    input_history = request.cookies.get("input_history") or ""
+    history = request.cookies.get("history") or ""
+    return jsonify({"input_history": input_history, "history": history})
+
+
 single_request = Lock()
 # Endpoint for encrypting a letter
 @app.route('/encrypt', methods=['PUT'])
@@ -102,12 +112,20 @@ def encrypt_letter():
 
         data = request.get_json()
         letter = data.get('letter')
+        input_letter = letter
         letter = enigma_b.encode_letter(letter)
         positions = enigma_b.rotor_positions
 
         response = jsonify(letter)
         set_cookie(response, "positions", json.dumps(positions))
 
+        # Saves input-history in cookie
+        input_history = request.cookies.get("input_history") or str()
+        input_history += input_letter
+        input_history = input_history[-140:]
+        set_cookie(response, "input_history", input_history)
+
+        # Saves history in cookie
         history = request.cookies.get("history") or str()
         history += letter
         history = history[-140:]
