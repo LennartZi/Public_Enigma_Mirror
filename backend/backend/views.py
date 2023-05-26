@@ -21,8 +21,13 @@ def config():
 # Endpoint for getting the available variants
 @app.route('/variants', methods=['GET'])
 def get_variants():
-    variants = ['A', 'B', 'C']
-    return jsonify(variants)
+    with open("/etc/enigma.yaml", "r") as stream:
+        try:
+            data = yaml.safe_load(stream)
+            variants = list(data['variants'].keys())
+            return jsonify(variants)
+        except yaml.YAMLError as exc:
+            return 'Error loading variants', 500
 
 
 # Endpoint for setting the current variant
