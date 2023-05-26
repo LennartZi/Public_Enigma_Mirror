@@ -79,15 +79,38 @@ def get_rotors():
 
 
 # Endpoint for setting the current rotor for a given rotor number
-@app.route('/rotor/<int:rotornr>', methods=['PUT'])
+@app.route('/rotor/<int:rotornr>', methods=['GET', 'PUT'])
 def set_rotor(rotornr):
     variant_cookie = request.cookies.get('variant')
     if not variant_cookie:
         return 'Variant cookie not set', 400
-    rotor = request.headers.get('rotor')
-    response = app.make_response('')
-    response.headers['Set-Cookie'] = f'rotors={{{rotornr}: {rotor}}}'
-    return response
+
+    rotors_cookie = request.cookies.get('rotors')
+    rotors = json.loads(rotors_cookie) if rotors_cookie else [None, None, None]
+
+    if request.method == 'GET':
+        rotor = rotors[rotornr]
+        response_data = {'rotor': rotor} if rotor is not None else {'message': 'No rotor selected at this position'}
+        return jsonify(response_data)
+    elif request.method == 'PUT':
+        rotor = request.headers.get('rotor')
+
+        with open("/etc/enigma.yaml", "r") as file:
+            data = yaml.load(file, Loader=yaml.SafeLoader)
+
+        variant = data['variants'].get(variant_cookie)
+        if not variant:
+            return 'Variant not found in YAML', 400
+
+        valid_rotors = variant['rotors'].keys()
+        if rotor not in valid_rotors:
+            return 'Invalid rotor for the selected variant', 400
+
+        rotors[rotornr] = rotor
+
+        response = app.make_response('')
+        set_cookie(response, "rotors", json.dumps(rotors))
+        return response
 
 
 # Endpoint for getting/setting the starting position for a given rotor number
