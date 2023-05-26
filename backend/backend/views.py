@@ -41,7 +41,7 @@ def handle_variant():
             return "Variant cookie not set", 400
     elif request.method == "PUT":
         variant = request.headers.get("variant")
-        response = app.make_response("")
+        response = app.make_response("Variant " + variant + " set!")
         set_cookie(response, "variant", variant)
         return response
 
@@ -108,7 +108,7 @@ def set_rotor(rotornr):
 
         rotors[rotornr] = rotor
 
-        response = app.make_response('')
+        response = app.make_response("Rotor " + rotor + " set on position " + str(rotornr))
         set_cookie(response, "rotors", json.dumps(rotors))
         return response
 
@@ -127,7 +127,9 @@ def rotor_position(rotornr):
         positions = json.loads(positions)
         position = request.headers.get("position")
         positions[rotornr] = position
-        response = app.make_response('')
+        rotor = request.cookies.get("rotors")
+        rotor = rotor[rotornr]
+        response = app.make_response("Rotor position of rotor " + rotor + " set to " + position)
         set_cookie(response, "positions", json.dumps(positions))
         return response
 
