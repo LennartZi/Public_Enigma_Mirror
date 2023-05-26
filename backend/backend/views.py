@@ -31,12 +31,19 @@ def get_variants():
 
 
 # Endpoint for setting the current variant
-@app.route('/variant', methods=['PUT'])
-def set_variant():
-    variant = request.headers.get('variant')
-    response = app.make_response('')
-    response.headers['Set-Cookie'] = f'variant={variant}'
-    return response
+@app.route("/variant", methods=["GET", "PUT"])
+def handle_variant():
+    if request.method == "GET":
+        variant_cookie = request.cookies.get("variant")
+        if variant_cookie:
+            return jsonify(variant_cookie)
+        else:
+            return "Variant cookie not set", 400
+    elif request.method == "PUT":
+        variant = request.headers.get("variant")
+        response = app.make_response("")
+        set_cookie(response, "variant", variant)
+        return response
 
 
 # Endpoint for getting the available rotors
@@ -77,7 +84,7 @@ def rotor_position(rotornr):
     elif request.method == 'PUT':
         positions = request.cookies.get("positions") or '["A", "A", "A"]'
         positions = json.loads(positions)
-        position = request.headers.get('position')
+        position = request.headers.get("position")
         positions[rotornr] = position
         response = app.make_response('')
         set_cookie(response, "positions", json.dumps(positions))
