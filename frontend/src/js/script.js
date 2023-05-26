@@ -1,3 +1,5 @@
+const variantSelect = document.getElementById('variantSelect');
+const inputHistory = document.getElementById('inputHistory');
 const outputHistory = document.getElementById('outputHistory');
 const keyboard_input = document.getElementById('keyboard_input');
 const maxHistoryLength = 140;
@@ -53,9 +55,15 @@ function putKey(data) {
 function getVariants() {
   return getFromBackend('/variants');
 }
+function getVariant() {
+  return getFromBackend('/variant');
+}
 
 function putVariant(data) {
   return putToBackend('/variant', data);
+}
+function getRotors() {
+  return getFromBackend('/rotors');
 }
 
 // Erstellen der Tasten
@@ -94,7 +102,6 @@ document.addEventListener('keydown', async (event) => {
     updateInputHistory(key);
     findAndHighlightKey(keyboard_input, key , true);
     const response = await putKey({letter: key})
-    console.log(response);
     // Output History aktualisieren
     updateOutputHistory(response);
   }
@@ -132,7 +139,6 @@ function addClickListener(key) {
     updateInputHistory(keyText);
     findAndHighlightKey(keyboard_input, keyText, true);
     const response = await putKey({ letter: keyText });
-    console.log(response);
 
     // Update der Ausgabehistorie
     updateOutputHistory(response);
@@ -140,7 +146,7 @@ function addClickListener(key) {
     // Entfernen der Hervorhebung nach einer kurzen Verzögerung
     setTimeout(() => {
       findAndHighlightKey(keyboard_input, keyText, false);
-    }, 2000);
+    }, 1000);
   });
 }
 
@@ -153,6 +159,14 @@ function updateInputHistory(clickedKey) {
 // Funktion zum Aktualisieren der Ausgabehistorie
 function updateOutputHistory(output) {
   outputHistory.textContent = (output.toUpperCase() + outputHistory.textContent).substring(0, maxHistoryLength);
+}
+
+
+function loadHistory() {
+  getHistory().then(history => {
+    outputHistory.textContent = history.history.split('').reverse().join('').toUpperCase();
+    inputHistory.textContent = history.input_history.split('').reverse().join('').toUpperCase();
+  });
 }
 
 
@@ -200,3 +214,17 @@ function updateRotorOptions() {
   }
 }
 
+
+window.addEventListener('load', async(event) => {
+  await VariantsDropdown();
+  await getVariant().then(variant => {document.getElementById('variantSelect').value = variant});
+  updateRotorOptions();
+  loadHistory();
+});
+
+document.getElementById('variantSelect').addEventListener('change', async(event) => {
+  const enigmaModel = document.getElementById('variantSelect');
+  await putVariant({variant: enigmaModel.value});
+  updateRotorOptions();
+
+});
