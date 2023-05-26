@@ -52,11 +52,29 @@ def get_rotors():
     variant_cookie = request.cookies.get('variant')
     if not variant_cookie:
         return 'Variant cookie not set', 400
-    rotors = [
-        {'name': 'I', 'entry': True, 'reflector': False},
-        {'name': 'II', 'entry': True, 'reflector': False},
-        {'name': 'III', 'entry': True, 'reflector': False},
-    ]
+
+    with open("/etc/enigma.yaml", "r") as file:
+        data = yaml.load(file, Loader=yaml.SafeLoader)
+
+    variant = data['variants'].get(variant_cookie)
+    if not variant:
+        return 'Variant not found in YAML', 400
+
+    rotors = []
+    rotor_info = variant['rotors']
+    available_rotors = rotor_info.keys()
+    for rotor_name, rotor_data in rotor_info.items():
+        if rotor_name == 'installable':
+            continue
+        rotor = {
+            'name': rotor_name,
+            'entry': False,
+            'reflector': False,
+            'substitution': rotor_data['substitution'],
+            'turnover': rotor_data['turnover']
+        }
+        rotors.append(rotor)
+
     return jsonify(rotors)
 
 
