@@ -40,8 +40,8 @@ def handle_variant():
         else:
             return "Variant cookie not set", 400
     elif request.method == "PUT":
-        variant = request.headers.get("variant")
-        response = app.make_response("Variant " + variant + " set!")
+        variant = request.get_json()["variant"]
+        response = app.make_response(jsonify("Variant " + variant + " set!"))
         set_cookie(response, "variant", variant)
         return response
 
@@ -93,7 +93,7 @@ def set_rotor(rotornr):
         response_data = {'rotor': rotor} if rotor is not None else {'message': 'No rotor selected at this position'}
         return jsonify(response_data)
     elif request.method == 'PUT':
-        rotor = request.headers.get('rotor')
+        rotor = request.get_json()['rotor']
 
         with open("/etc/enigma.yaml", "r") as file:
             data = yaml.load(file, Loader=yaml.SafeLoader)
@@ -108,7 +108,7 @@ def set_rotor(rotornr):
 
         rotors[rotornr] = rotor
 
-        response = app.make_response("Rotor " + rotor + " set on position " + str(rotornr))
+        response = app.make_response(jsonify("Rotor " + str(rotor) + " set on position " + str(rotornr)))
         set_cookie(response, "rotors", json.dumps(rotors))
         return response
 
@@ -125,11 +125,12 @@ def rotor_position(rotornr):
     elif request.method == 'PUT':
         positions = request.cookies.get("positions") or '["A", "A", "A"]'
         positions = json.loads(positions)
-        position = request.headers.get("position")
+        position = request.get_json()["position"]
         positions[rotornr] = position
-        rotor = request.cookies.get("rotors")
-        rotor = rotor[rotornr]
-        response = app.make_response("Rotor position of rotor " + rotor + " set to " + position)
+        rotors = request.cookies.get("rotors")
+        rotors = json.loads(rotors)
+        rotor = rotors[rotornr]
+        response = app.make_response(jsonify("Rotor position of rotor " + str(rotor) + " set to " + str(position)))
         set_cookie(response, "positions", json.dumps(positions))
         return response
 
