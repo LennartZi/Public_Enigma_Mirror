@@ -8,6 +8,7 @@ import yaml
 def set_cookie(response, key: str, value):
     response.set_cookie(key, str(value), max_age=3600*24*365, path="/", samesite="Lax")
 
+
 @app.route("/config")
 def config():
     with open("/etc/enigma.yaml", "r") as stream:
@@ -63,12 +64,28 @@ def set_rotor(rotornr):
 @app.route('/rotor/<int:rotornr>/position', methods=['GET', 'PUT'])
 def rotor_position(rotornr):
     if request.method == 'GET':
-        return jsonify(1)
+        positions = request.cookies.get("positions") or '["A", "A", "A"]'
+        positions = json.loads(positions)
+        position = positions[rotornr]
+        string = "Rotor " + str(rotornr) + " position"
+        return jsonify({string: position})
     elif request.method == 'PUT':
+        positions = request.cookies.get("positions") or '["A", "A", "A"]'
+        positions = json.loads(positions)
         position = request.headers.get('position')
+        positions[rotornr] = position
         response = app.make_response('')
-        response.headers['Set-Cookie'] = f'position={{{rotornr}: {position}}}'
+        set_cookie(response, "positions", json.dumps(positions))
         return response
+
+
+# Endpoint to retrieve the input history and regular history
+@app.route("/history", methods=['GET'])
+def get_history():
+    input_history = request.cookies.get("input_history") or ""
+    history = request.cookies.get("history") or ""
+    return jsonify({"input_history": input_history, "history": history})
+
 
 single_request = Lock()
 # Endpoint for encrypting a letter
@@ -102,13 +119,20 @@ def encrypt_letter():
 
         data = request.get_json()
         letter = data.get('letter')
+        input_letter = letter
         letter = enigma_b.encrypt_letter(letter)
-
         positions = enigma_b.get_rotor_positions()
 
         response = jsonify(letter)
         set_cookie(response, "positions", json.dumps(positions))
 
+        # Saves input-history in cookie
+        input_history = request.cookies.get("input_history") or str()
+        input_history += input_letter
+        input_history = input_history[-140:]
+        set_cookie(response, "input_history", input_history)
+
+        # Saves history in cookie
         history = request.cookies.get("history") or str()
         history += letter
         history = history[-140:]

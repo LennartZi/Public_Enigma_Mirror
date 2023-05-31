@@ -1,7 +1,7 @@
 const outputHistory = document.getElementById('outputHistory');
 const keyboard_input = document.getElementById('keyboard_input');
 const maxHistoryLength = 140;
-const backendUrl = 'http://localhost:8000/api';
+const backendUrl = location.origin + '/api';
 
 const rows = [
   'qwertyuiop',
@@ -91,11 +91,12 @@ document.addEventListener('keydown', async (event) => {
   const isValidKey = rows.some(row => row.includes(key.toLowerCase()));
 
   if (!event.repeat && isValidKey) {
+    updateInputHistory(key);
     findAndHighlightKey(keyboard_input, key , true);
     const response = await putKey({letter: key})
     console.log(response);
-    // Senden ans Backend
-    outputHistory.textContent = (response + outputHistory.textContent).substring(0, maxHistoryLength);
+    // Output History aktualisieren
+    updateOutputHistory(response);
   }
 });
 
@@ -128,18 +129,74 @@ function findAndHighlightKey(keyboardDiv, key, highlight) {
 function addClickListener(key) {
   key.addEventListener('click', async () => {
     const keyText = key.textContent;
-
+    updateInputHistory(keyText);
     findAndHighlightKey(keyboard_input, keyText, true);
     const response = await putKey({ letter: keyText });
     console.log(response);
 
-    // Senden ans Backend
-    outputHistory.textContent = (response + outputHistory.textContent).substring(0, maxHistoryLength);
+    // Update der Ausgabehistorie
+    updateOutputHistory(response);
 
     // Entfernen der Hervorhebung nach einer kurzen Verzögerung
     setTimeout(() => {
       findAndHighlightKey(keyboard_input, keyText, false);
     }, 2000);
   });
+}
+
+
+// Funktion zum Aktualisieren der Eingabehistorie
+function updateInputHistory(clickedKey) {
+  inputHistory.textContent = (clickedKey.toUpperCase() + inputHistory.textContent).substring(0, maxHistoryLength);
+}
+
+// Funktion zum Aktualisieren der Ausgabehistorie
+function updateOutputHistory(output) {
+  outputHistory.textContent = (output.toUpperCase() + outputHistory.textContent).substring(0, maxHistoryLength);
+}
+
+
+async function VariantsDropdown() {
+  try {
+    const variants = await getVariants();
+    for (let variant of variants) {
+      const option = document.createElement('option');
+      option.value = variant;
+      option.text = variant;
+      variantSelect.appendChild(option);
+    }
+  } catch (error) {
+    console.error('Error while populating variant dropdown:', error);
+  }
+}
+
+function updateRotorOptions() {
+  const enigmaModel = document.getElementById('variantSelect');
+  const rotorSelection = document.getElementById('rotorSelection');
+  const rotorCount = enigmaModel.value === 'Enigma 1' ? 5 : enigmaModel.value === 'Enigma M3' ? 8 : 3;
+
+  // Löschen Sie die vorherigen Rotoren und füllen Sie die Liste mit den neuen Rotoren
+  rotorSelection.innerHTML = '';
+  for (let i = 1; i <= rotorCount; i++) {
+    const li = document.createElement("li");
+    li.textContent = "Rotor " + i;
+    li.setAttribute("data-value", "rotor" + i);
+
+    li.addEventListener("click", function(event) {
+      const selectedItems = rotorSelection.querySelectorAll("li.selected");
+
+      // Entfernen Sie die Auswahl, wenn das Element bereits ausgewählt ist
+      if (event.target.classList.contains("selected")) {
+          event.target.classList.remove("selected");
+          return;
+        }
+
+        // Stellen Sie sicher, dass mindestens 3 und höchstens 3 Rotoren ausgewählt sind
+        if (selectedItems.length < 3) {
+          event.target.classList.add("selected");
+        }
+      });
+    rotorSelection.appendChild(li);
+  }
 }
 
