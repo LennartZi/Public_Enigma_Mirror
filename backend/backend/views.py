@@ -97,15 +97,14 @@ def encrypt_letter():
         second_position = positions[1]
         third_position = positions[2]
 
-        enigma_b = Enigma(rotor_I, rotor_II, rotor_III, first_position, second_position, third_position, ukw_b, "Q", "E",
-                          "V")
+        enigma_b = Enigma(rotor_I, rotor_II, rotor_III, first_position, second_position, third_position, ukw_b,
+                          "Q", "E", "V")
 
         data = request.get_json()
         letter = data.get('letter')
-        letter = enigma_b.encode_letter(letter)
+        letter = enigma_b.encrypt_letter(letter)
 
-        # TODO: change to get_rotor_position. Check that the order is consistent with the previous implementation
-        positions = enigma_b.rotor_positions
+        positions = enigma_b.get_rotor_positions()
 
         response = jsonify(letter)
         set_cookie(response, "positions", json.dumps(positions))

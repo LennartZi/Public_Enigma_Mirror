@@ -186,6 +186,12 @@ def test_decrypt_sentence(enigma_machine):
                                  "THISISATESTOFTHEENIGMAENCRYPTIONANDDECRYPTIONALGORITHMS"
 
 
+def test_get_rotor_position(enigma_machine):
+    enigma_machine.set_rotor_positions('A', 'B', 'C')
+
+    assert enigma_machine.get_rotor_positions() == ['A', 'B', 'C']
+
+
 def test_two_rotor_step(two_rotor_enigma):
     # Test stepping both rotors
     two_rotor_enigma.set_rotor_positions('Q', 'A')

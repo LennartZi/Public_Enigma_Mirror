@@ -20,7 +20,6 @@ class Enigma:
         self.plugboard = plugboard or {}
 
     def set_plugboard(self, plugboard):
-        # TODO: add functionality and test
         """
         currently not implemented or tested
         :param plugboard:
@@ -29,7 +28,6 @@ class Enigma:
         self.plugboard = plugboard
 
     def apply_plugboard(self, letter):
-        # TODO: add functionality and test
         """
         currently not implemented or tested
         :param letter:
@@ -132,7 +130,8 @@ class Enigma:
         """
         self.step_rotors()
 
-        # TODO: add plugboard here
+        # Plugboard goes here
+
         # reflector <- Third rotor <- Second rotor  <- First rotor <- input
         letter = self.encrypt_forward(letter)
 
@@ -141,19 +140,9 @@ class Enigma:
         # reflector -> Third rotor -> Second rotor  -> First rotor -> output
         letter = self.encrypt_backward(letter)
 
-        # TODO: add plugboard here
+        # Plugboard goes here
+
         return letter
-
-    def encode_letter(self, letter):
-        # TODO: remove and change calls in api to encrypt_letter
-        """
-        Encrypts any given letter
-        Only used to call encrypt_letter. This is a legacy function and should be removed
-        :param letter: letter we want to encrypt
-        :return: encrypted letter
-        """
-
-        return self.encrypt_letter(letter)
 
     def get_rotor_positions(self):
         """
