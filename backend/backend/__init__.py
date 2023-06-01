@@ -11,4 +11,4 @@ def create_app(test_config=None):
     with app.app_context():
         from . import views
 
-    return app 
+    return app
