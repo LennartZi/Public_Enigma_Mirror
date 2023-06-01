@@ -149,19 +149,9 @@ single_request = Lock()
 # Endpoint for encrypting a letter
 @app.route('/encrypt', methods=['PUT'])
 def encrypt_letter():
-    # Cookie / Anfrage verarbeitung
 
     ukw_b = ['Y', 'R', 'U', 'H', 'Q', 'S', 'L', 'D', 'P', 'X', 'N', 'G', 'O', 'K', 'M', 'I', 'E', 'B',
              'F', 'Z', 'C', 'W', 'V', 'J', 'A', 'T']
-
-    rotor_I = ['E', 'K', 'M', 'F', 'L', 'G', 'D', 'Q', 'V', 'Z', 'N', 'T', 'O', 'W', 'Y', 'H', 'X', 'U', 'S', 'P', 'A',
-               'I', 'B', 'R', 'C', 'J']
-
-    rotor_II = ['A', 'J', 'D', 'K', 'S', 'I', 'R', 'U', 'X', 'B', 'L', 'H', 'W', 'T', 'M', 'C', 'Q', 'G', 'Z', 'N', 'P',
-                'Y', 'F', 'V', 'O', 'E']
-
-    rotor_III = ['B', 'D', 'F', 'H', 'J', 'L', 'C', 'P', 'R', 'T', 'X', 'V', 'Z', 'N', 'Y', 'E', 'I', 'W', 'G', 'A',
-                 'K', 'M', 'U', 'S', 'Q', 'O']
 
     if single_request.locked():
         return str(), 423
@@ -186,11 +176,6 @@ def encrypt_letter():
                     rotor_mapping.append((rotor_config[rotor]['substitution']))
             except yaml.YAMLError as exc:
                 print(exc)
-
-        # TODO: Notch für rotor laden aus YAML für entsprechende Variante
-
-        # notches = fetch_notches(variant, rotors)
-        # notch_rotor1 = notches[1] ....
 
         enigma = Enigma(rotor1=rotor_mapping[0], rotor2=rotor_mapping[1], rotor3=rotor_mapping[2],
                         start_pos1=positions[0], start_pos2=positions[1], start_pos3=positions[2],
