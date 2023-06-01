@@ -1,0 +1,6 @@
+.idea
+*.pyc
+
+/backend/__pycache__/
+/backend/tests/__pycache__/
+/backend/tests/unit/__pycache__/
