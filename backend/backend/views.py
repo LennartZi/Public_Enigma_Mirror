@@ -83,14 +83,14 @@ def get_rotors():
 def set_rotor(rotornr):
     variant_cookie = request.cookies.get('variant')
     if not variant_cookie:
-        return 'Variant cookie not set', 400
+        return jsonify('Variant cookie not set', 400)
 
     rotors_cookie = request.cookies.get('rotors')
     rotors = json.loads(rotors_cookie) if rotors_cookie else [None, None, None]
 
     if request.method == 'GET':
         rotor = rotors[rotornr]
-        response_data = {'rotor': rotor} if rotor is not None else {'message': 'No rotor selected at this position'}
+        response_data = {'rotor': rotor} if rotor is not None else ('Variant cookie not set', 400)
         return jsonify(response_data)
     elif request.method == 'PUT':
         rotor = request.get_json()['rotor']
