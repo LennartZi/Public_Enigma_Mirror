@@ -324,7 +324,7 @@ function isVariantSelected() {
   console.log(selectedRotors.length)
 
   // Wenn kein Variante ausgewählt ist oder keine Rotoren ausgewählt sind, gebe true zurück
-  if (variantSelect.value === '' || selectedRotors.length < 2) {
+  if (variantSelect.value === '' || selectedRotors.length < 3 || variantSelect.value === 'B' && selectedRotors.length < 2) {
     return true;
   }
 }
