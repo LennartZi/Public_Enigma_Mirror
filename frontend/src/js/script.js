@@ -1,3 +1,5 @@
+const variantSelect = document.getElementById('variantSelect');
+const inputHistory = document.getElementById('inputHistory');
 const outputHistory = document.getElementById('outputHistory');
 const keyboard_input = document.getElementById('keyboard_input');
 const maxHistoryLength = 140;
@@ -53,9 +55,23 @@ function putKey(data) {
 function getVariants() {
   return getFromBackend('/variants');
 }
+function getVariant() {
+  return getFromBackend('/variant');
+}
 
 function putVariant(data) {
   return putToBackend('/variant', data);
+}
+function getRotors() {
+  return getFromBackend('/rotors');
+}
+
+function getRotor(position) {
+    return getFromBackend(`/rotor/${position}`);
+}
+
+function putRotors(position, data) {
+    return putToBackend(`/rotor/${position}`, data);
 }
 
 // Erstellen der Tasten
@@ -94,7 +110,6 @@ document.addEventListener('keydown', async (event) => {
     updateInputHistory(key);
     findAndHighlightKey(keyboard_input, key , true);
     const response = await putKey({letter: key})
-    console.log(response);
     // Output History aktualisieren
     updateOutputHistory(response);
   }
@@ -132,7 +147,6 @@ function addClickListener(key) {
     updateInputHistory(keyText);
     findAndHighlightKey(keyboard_input, keyText, true);
     const response = await putKey({ letter: keyText });
-    console.log(response);
 
     // Update der Ausgabehistorie
     updateOutputHistory(response);
@@ -140,7 +154,7 @@ function addClickListener(key) {
     // Entfernen der Hervorhebung nach einer kurzen Verzögerung
     setTimeout(() => {
       findAndHighlightKey(keyboard_input, keyText, false);
-    }, 2000);
+    }, 1000);
   });
 }
 
@@ -153,6 +167,14 @@ function updateInputHistory(clickedKey) {
 // Funktion zum Aktualisieren der Ausgabehistorie
 function updateOutputHistory(output) {
   outputHistory.textContent = (output.toUpperCase() + outputHistory.textContent).substring(0, maxHistoryLength);
+}
+
+
+function loadHistory() {
+  getHistory().then(history => {
+    outputHistory.textContent = history.history.split('').reverse().join('').toUpperCase();
+    inputHistory.textContent = history.input_history.split('').reverse().join('').toUpperCase();
+  });
 }
 
 
@@ -170,33 +192,118 @@ async function VariantsDropdown() {
   }
 }
 
-function updateRotorOptions() {
-  const enigmaModel = document.getElementById('variantSelect');
-  const rotorSelection = document.getElementById('rotorSelection');
-  const rotorCount = enigmaModel.value === 'Enigma 1' ? 5 : enigmaModel.value === 'Enigma M3' ? 8 : 3;
+async function updateRotorOptions() {
+  try {
+    const rotors = await getRotors();
+    const rotorCount = rotors.length;
 
-  // Löschen Sie die vorherigen Rotoren und füllen Sie die Liste mit den neuen Rotoren
-  rotorSelection.innerHTML = '';
-  for (let i = 1; i <= rotorCount; i++) {
-    const li = document.createElement("li");
-    li.textContent = "Rotor " + i;
-    li.setAttribute("data-value", "rotor" + i);
+    const rotorSelection = document.getElementById('rotorSelection');
+    rotorSelection.innerHTML = '';
 
-    li.addEventListener("click", function(event) {
-      const selectedItems = rotorSelection.querySelectorAll("li.selected");
+    for (let i = 0; i < rotorCount; i++) {
+      const li = document.createElement("li");
+      li.textContent = rotors[i].name;
+      li.setAttribute("data-value", "rotor" + (i + 1));
 
-      // Entfernen Sie die Auswahl, wenn das Element bereits ausgewählt ist
-      if (event.target.classList.contains("selected")) {
+      li.addEventListener("click", async function(event) {
+        const selectedItems = rotorSelection.querySelectorAll("li.selected");
+        const selectedRotorList = document.getElementById('selectedRotor');
+
+        if (event.target.classList.contains("selected")) {
           event.target.classList.remove("selected");
+
+          for (let item of selectedRotorList.children) {
+            if (item.textContent === event.target.textContent) {
+              item.textContent = 'X';
+              break;
+            }
+          }
           return;
         }
 
-        // Stellen Sie sicher, dass mindestens 3 und höchstens 3 Rotoren ausgewählt sind
         if (selectedItems.length < 3) {
           event.target.classList.add("selected");
+
+          // Find the index of the first 'X' item
+          let rotorPosition;
+          for (let i = 0; i < selectedRotorList.children.length; i++) {
+            if (selectedRotorList.children[i].textContent === 'X') {
+              selectedRotorList.children[i].textContent = event.target.textContent;
+              rotorPosition = i;
+              break;
+            }
+          }
+
+          try {
+            const rotorName = event.target.textContent;
+            await putRotors(rotorPosition, { rotor: rotorName });
+          } catch (error) {
+            console.error('Error while sending the selected rotor to the backend:', error);
+          }
         }
       });
-    rotorSelection.appendChild(li);
+      rotorSelection.appendChild(li);
+    }
+  } catch (error) {
+    console.error('Error while updating rotor options:', error);
   }
 }
 
+async function updateSelectedRotorsFromCookies() {
+  try {
+    const selectedRotorList = document.getElementById('selectedRotor');
+    const rotorSelection = document.getElementById('rotorSelection');
+
+    for (let i = 0; i < 3; i++) {
+      const rotorData = await getRotor(i);
+      //HIer weiter machen bekomme undefined zurück weiß nicht warum muss mal gucken warum getRotor(i) undefined zurück gibt
+      if (rotorData !== 400) {
+        selectedRotorList.children[i].textContent = rotorData.rotor;
+
+        // Suche den entsprechenden Rotor in der rotorSelection und füge die 'selected' Klasse hinzu
+        for (let li of rotorSelection.children) {
+          if (li.textContent === rotorData.rotor) {
+            li.classList.add("selected");
+            break;
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Fehler beim Abrufen der Rotoren aus den Cookies:', error);
+  }
+}
+
+
+window.addEventListener('load', async(event) => {
+  await VariantsDropdown();
+  const variant = await getVariant();
+  if (variant !== undefined) {
+    document.getElementById('variantSelect').value = variant;
+  }
+  await updateRotorOptions();
+  loadHistory();
+});
+
+document.getElementById('variantSelect').addEventListener('change', async(event) => {
+  const enigmaModel = document.getElementById('variantSelect');
+  await putVariant({variant: enigmaModel.value});
+  await updateRotorOptions();
+});
+
+
+variantSelect.addEventListener('change', function() {
+  const selectedRotorList = document.getElementById('selectedRotor');
+  const rotorSelection = document.getElementById('rotorSelection');
+
+  // Set the content of all li elements in the selectedRotorList to 'X'
+  for (let item of selectedRotorList.children) {
+    item.textContent = 'X';
+  }
+
+  // Deselect all selected items in the rotorSelection list
+  const selectedItems = rotorSelection.querySelectorAll("li.selected");
+  for (let item of selectedItems) {
+    item.classList.remove('selected');
+  }
+});
