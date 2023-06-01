@@ -1,4 +1,4 @@
-from backend.backend.enigma import Enigma
+from backend.enigma import Enigma
 import pytest
 
 
