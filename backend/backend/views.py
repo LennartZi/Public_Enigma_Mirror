@@ -114,8 +114,10 @@ def encrypt_letter():
         second_position = positions[1]
         third_position = positions[2]
 
-        enigma_b = Enigma(rotor_I, rotor_II, rotor_III, first_position, second_position, third_position, ukw_b,
-                          "Q", "E", "V")
+        enigma_b = Enigma(rotor1=rotor_I, rotor2=rotor_II, rotor3=rotor_III,
+                          start_pos1=first_position, start_pos2=second_position, start_pos3=third_position,
+                          reflector=ukw_b,
+                          notch_rotor1="Q", notch_rotor2="E", notch_rotor3="V")
 
         data = request.get_json()
         letter = data.get('letter')
