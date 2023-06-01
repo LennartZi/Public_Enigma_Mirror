@@ -249,31 +249,6 @@ async function updateRotorOptions() {
   }
 }
 
-async function updateSelectedRotorsFromCookies() {
-  try {
-    const selectedRotorList = document.getElementById('selectedRotor');
-    const rotorSelection = document.getElementById('rotorSelection');
-
-    for (let i = 0; i < 3; i++) {
-      const rotorData = await getRotor(i);
-      //HIer weiter machen bekomme undefined zurück weiß nicht warum muss mal gucken warum getRotor(i) undefined zurück gibt
-      if (rotorData !== 400) {
-        selectedRotorList.children[i].textContent = rotorData.rotor;
-
-        // Suche den entsprechenden Rotor in der rotorSelection und füge die 'selected' Klasse hinzu
-        for (let li of rotorSelection.children) {
-          if (li.textContent === rotorData.rotor) {
-            li.classList.add("selected");
-            break;
-          }
-        }
-      }
-    }
-  } catch (error) {
-    console.error('Fehler beim Abrufen der Rotoren aus den Cookies:', error);
-  }
-}
-
 
 window.addEventListener('load', async(event) => {
   await VariantsDropdown();
@@ -282,6 +257,7 @@ window.addEventListener('load', async(event) => {
     document.getElementById('variantSelect').value = variant;
   }
   await updateRotorOptions();
+  await updateRotors();
   loadHistory();
 });
 
@@ -289,6 +265,7 @@ document.getElementById('variantSelect').addEventListener('change', async(event)
   const enigmaModel = document.getElementById('variantSelect');
   await putVariant({variant: enigmaModel.value});
   await updateRotorOptions();
+  document.cookie = 'rotors=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 });
 
 
@@ -307,3 +284,32 @@ variantSelect.addEventListener('change', function() {
     item.classList.remove('selected');
   }
 });
+
+
+
+async function updateRotors() {
+    const selectedRotorList = document.getElementById('selectedRotor');
+    const rotorSelection = document.getElementById('rotorSelection');
+
+    for (let i = 0; i < 3; i++) {
+        try {
+            const response = await getRotor(i);
+            if (response && response.rotor) {
+                selectedRotorList.children[i].textContent = response.rotor;
+
+                // Finden und Auswählen des entsprechenden Rotors in der rotorSelection
+                for (let rotorOption of rotorSelection.children) {
+                    if (rotorOption.textContent === response.rotor) {
+                        rotorOption.classList.add('selected');
+                        break;
+                    }
+                }
+            }
+        } catch (error) {
+            // Ignoriere Fehler mit dem Statuscode 400 und lasse den textContent unverändert
+            if (error.status !== 400) {
+                console.error(`Fehler beim Abrufen des Rotors an der Position ${i}:`, error);
+            }
+        }
+    }
+}
