@@ -147,6 +147,8 @@ single_request = Lock()
 # Endpoint for encrypting a letter
 @app.route('/encrypt', methods=['PUT'])
 def encrypt_letter():
+    # Cookie / Anfrage verarbeitung
+
     ukw_b = ['Y', 'R', 'U', 'H', 'Q', 'S', 'L', 'D', 'P', 'X', 'N', 'G', 'O', 'K', 'M', 'I', 'E', 'B',
              'F', 'Z', 'C', 'W', 'V', 'J', 'A', 'T']
 
@@ -163,23 +165,47 @@ def encrypt_letter():
         return str(), 423
 
     with single_request:
+        # Reading the cookie values
+        variant = request.cookies.get("variant")
         positions = request.cookies.get("positions") or '["A", "A", "A"]'
+        rotors = request.cookies.get("rotors")
 
         positions = json.loads(positions)
         first_position = positions[0]
         second_position = positions[1]
         third_position = positions[2]
 
-        enigma_b = Enigma(rotor1=rotor_I, rotor2=rotor_II, rotor3=rotor_III,
+        rotors = json.loads(rotors)
+        first_rotor = rotors[0]
+        second_rotor = rotors[1]
+        third_rotor = rotors[2]
+
+        rotor_mapping = []
+        notches = []
+        with open("/etc/enigma.yaml", "r") as stream:
+            try:
+                rotor_config = yaml.safe_load(stream)['variants'][variant]['rotors']
+                for rotor in rotors:
+                    notches.append(rotor_config[rotor]['turnover'])
+                    rotor_mapping.append((rotor_config[rotor]['substitution']))
+            except yaml.YAMLError as exc:
+                print(exc)
+
+        # TODO: Notch für rotor laden aus YAML für entsprechende Variante
+
+        # notches = fetch_notches(variant, rotors)
+        # notch_rotor1 = notches[1] ....
+
+        enigma = Enigma(rotor1=rotor_mapping[0], rotor2=rotor_mapping[1], rotor3=rotor_mapping[2],
                           start_pos1=first_position, start_pos2=second_position, start_pos3=third_position,
                           reflector=ukw_b,
-                          notch_rotor1="Q", notch_rotor2="E", notch_rotor3="V")
+                          notch_rotor1=notches[0], notch_rotor2=notches[1], notch_rotor3=notches[2])
 
         data = request.get_json()
         letter = data.get('letter')
         input_letter = letter
-        letter = enigma_b.encrypt_letter(letter)
-        positions = enigma_b.get_rotor_positions()
+        letter = enigma.encrypt_letter(letter)
+        positions = enigma.get_rotor_positions()
 
         response = jsonify(letter)
         set_cookie(response, "positions", json.dumps(positions))
