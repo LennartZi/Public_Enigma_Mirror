@@ -1,4 +1,4 @@
-from backend.backend.rotor import Rotor, index_from_letter, letter_from_index
+from .rotor import Rotor, index_from_letter, letter_from_index
 
 
 class Enigma:
