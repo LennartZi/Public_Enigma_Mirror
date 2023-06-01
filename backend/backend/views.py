@@ -6,7 +6,7 @@ import yaml
 
 
 def set_cookie(response, key: str, value):
-    response.set_cookie(key, str(value), max_age=3600*24*365, path="/", samesite="Lax")
+    response.set_cookie(key, str(value), max_age=3600 * 24 * 365, path="/", samesite="Lax")
 
 
 @app.route("/config")
@@ -144,6 +144,8 @@ def get_history():
 
 
 single_request = Lock()
+
+
 # Endpoint for encrypting a letter
 @app.route('/encrypt', methods=['PUT'])
 def encrypt_letter():
@@ -166,22 +168,16 @@ def encrypt_letter():
 
     with single_request:
         # Reading the cookie values
-        variant = request.cookies.get("variant")
+        variant = request.cookies.get("variant") or 'I'
         positions = request.cookies.get("positions") or '["A", "A", "A"]'
-        rotors = request.cookies.get("rotors")
+        rotors = request.cookies.get("rotors") or '["I","II","III"]'
 
         positions = json.loads(positions)
-        first_position = positions[0]
-        second_position = positions[1]
-        third_position = positions[2]
-
         rotors = json.loads(rotors)
-        first_rotor = rotors[0]
-        second_rotor = rotors[1]
-        third_rotor = rotors[2]
 
         rotor_mapping = []
         notches = []
+
         with open("/etc/enigma.yaml", "r") as stream:
             try:
                 rotor_config = yaml.safe_load(stream)['variants'][variant]['rotors']
@@ -197,9 +193,9 @@ def encrypt_letter():
         # notch_rotor1 = notches[1] ....
 
         enigma = Enigma(rotor1=rotor_mapping[0], rotor2=rotor_mapping[1], rotor3=rotor_mapping[2],
-                          start_pos1=first_position, start_pos2=second_position, start_pos3=third_position,
-                          reflector=ukw_b,
-                          notch_rotor1=notches[0], notch_rotor2=notches[1], notch_rotor3=notches[2])
+                        start_pos1=positions[0], start_pos2=positions[1], start_pos3=positions[2],
+                        reflector=ukw_b,
+                        notch_rotor1=notches[0], notch_rotor2=notches[1], notch_rotor3=notches[2])
 
         data = request.get_json()
         letter = data.get('letter')
