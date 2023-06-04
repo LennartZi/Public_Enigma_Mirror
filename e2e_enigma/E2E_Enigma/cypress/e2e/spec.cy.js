@@ -39,9 +39,7 @@ describe('Test Keyboard Input', () => {
     cy.setupTest(url, model_selector, model)
     cy.get('body').type('{q}');
     cy.wait(65)
-    cy.get(output_history).invoke('text').then((text) => {
-      expect(text).to.have.length(1)
-  });
+    cy.checkHistory(input_history, output_history, 'Q')
   })
 })
 
