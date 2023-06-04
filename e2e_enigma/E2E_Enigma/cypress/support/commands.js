@@ -1,25 +1,41 @@
-// ***********************************************
-// This example commands.js shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-//
-//
-// -- This is a parent command --
-// Cypress.Commands.add('login', (email, password) => { ... })
-//
-//
-// -- This is a child command --
-// Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This will overwrite an existing command --
-// Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+Cypress.Commands.add('testUserInput', (input_history, output_history, keys, inp) => {
+    for (let i = 0; i < inp.length; i++) {
+      cy.get(keys).contains(inp[i]).click()
+      cy.get(keys).contains(inp[i]).should('have.class', 'highlight')
+      cy.wait(65)
+    }
+  
+    for (let i = 0; i < inp.length; i++) {
+      cy.get(keys).contains(inp[i]).not('have.class', 'highlight')
+    }
+    
+})
+  
+Cypress.Commands.add('checkHistory', (input_history, output_history, inp) => {
+    //Output Test
+    cy.get(output_history).invoke('text').then((text) => {
+        expect(text).to.have.length(inp.length)
+      });
+    //Input History Test
+    cy.get(input_history).invoke('text').then((text) => {
+        expect(text).to.equal(inp.split('').reverse().join(""))
+      });  
+
+})
+
+Cypress.Commands.add('setModel', (element, inp) => {
+    cy.get(element).select(inp)
+})
+
+Cypress.Commands.add('setRotors', () => {
+    //cy.get("#rotor1").click()
+    cy.get('ol#rotorSelection li:first').click()
+    cy.get('ol#rotorSelection li:last').click()
+    cy.get('ol#rotorSelection li:first').next().click()
+})
+
+Cypress.Commands.add('setupTest', (url, model_selector,model) => {
+    cy.visit(url)
+    cy.setModel(model_selector, model)
+    cy.setRotors()
+})
