@@ -38,7 +38,7 @@ describe('Test Keyboard Input', () => {
   it('Single User Interation', () => {
     cy.setupTest(url, model_selector, model)
     cy.get('body').type('{q}');
-    cy.wait(150)
+    cy.wait(65)
     cy.checkHistory(input_history, output_history, 'Q')
   })
 })
