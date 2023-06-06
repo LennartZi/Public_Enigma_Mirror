@@ -158,6 +158,22 @@ def get_history():
     return jsonify({"input_history": input_history, "history": history})
 
 
+# Endpoint for setting and retrieving the plugboard
+@app.route("/plugboard", methods=["GET", "PUT"])
+def handle_plugboard():
+    if request.method == "GET":
+        plugboard_cookie = request.cookies.get("plugboard")
+        if plugboard_cookie:
+            return jsonify(plugboard_cookie)
+        else:
+            return "Plugboard cookie not set", 400
+    elif request.method == "PUT":
+        plugboard = request.get_json()["plugboard"]
+        response = app.make_response(jsonify("Plugboard updated"))
+        set_cookie(response, "plugboard", plugboard)
+        return response
+
+
 single_request = Lock()
 
 
@@ -176,7 +192,7 @@ def encrypt_letter():
         variant = request.cookies.get("variant") or 'I'
         positions = request.cookies.get("positions") or '["A", "A", "A"]'
         rotors = request.cookies.get("rotors") or '["I","II","III"]'
-
+        plugboard = request.cookie.get("plugboard") or {}
         positions = json.loads(positions)
         rotors = json.loads(rotors)
 
@@ -195,7 +211,8 @@ def encrypt_letter():
         enigma = Enigma(rotor1=rotor_mapping[0], rotor2=rotor_mapping[1], rotor3=rotor_mapping[2],
                         start_pos1=positions[0], start_pos2=positions[1], start_pos3=positions[2],
                         reflector=ukw_b,
-                        notch_rotor1=notches[0], notch_rotor2=notches[1], notch_rotor3=notches[2])
+                        notch_rotor1=notches[0], notch_rotor2=notches[1], notch_rotor3=notches[2],
+                        plugboard=plugboard)
 
         data = request.get_json()
         letter = data.get('letter')
