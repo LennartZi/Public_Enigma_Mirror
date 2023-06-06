@@ -101,6 +101,7 @@ createKeys(keyboard_input);
 
 // Event-Listener zum Abfangen von Tastenanschlägen
 document.addEventListener('keydown', async (event) => {
+  if (isVariantSelected()) return;
   const key = event.key;
 
   // Prüfe, ob der gedrückte Buchstabe in den `rows` enthalten ist
@@ -116,6 +117,7 @@ document.addEventListener('keydown', async (event) => {
 });
 
 document.addEventListener('keyup', async (event) => {
+  if (isVariantSelected()) return;
   const key = event.key;
 
   findAndHighlightKey(keyboard_input, key , false);
@@ -143,6 +145,8 @@ function findAndHighlightKey(keyboardDiv, key, highlight) {
 // Funktion zum Hinzufügen des Mausklick-Event-Listeners
 function addClickListener(key) {
   key.addEventListener('click', async () => {
+    console.log(isVariantSelected())
+    if (isVariantSelected()) return;
     const keyText = key.textContent;
     updateInputHistory(keyText);
     findAndHighlightKey(keyboard_input, keyText, true);
@@ -312,4 +316,15 @@ async function updateRotors() {
             }
         }
     }
+}
+
+function isVariantSelected() {
+  const rotorSelection = document.getElementById('rotorSelection');
+  const selectedRotors = rotorSelection.querySelectorAll("li.selected");
+  console.log(selectedRotors.length)
+
+  // Wenn kein Variante ausgewählt ist oder keine Rotoren ausgewählt sind, gebe true zurück
+  if (variantSelect.value === '' || selectedRotors.length < 3 || variantSelect.value === 'B' && selectedRotors.length < 2) {
+    return true;
+  }
 }
