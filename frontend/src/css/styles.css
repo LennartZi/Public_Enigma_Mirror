@@ -85,6 +85,9 @@
   background-color: yellow;
 }
 
+.highlight-red {
+  background-color: red;
+}
 
 h1 {
   margin: 0;
@@ -126,4 +129,20 @@ h2 {
 
 #selectRotorPosition {
   padding: 20px;
+}
+
+.key_output {
+  font-size: 40px;
+  font-weight: bolder;
+  font-family: monospace;
+  display: flex;
+  width: 60px;
+  height: 60px;
+  align-items: center;
+  justify-content: center;
+  border: 8px solid black;
+  border-radius: 50px;
+  user-select: none;
+  cursor: default;
+  margin: 5px;
 }
