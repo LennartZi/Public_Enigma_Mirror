@@ -363,7 +363,6 @@ function isVariantSelected() {
   }
 }
 
-/*
 function createPlug(keyboardDiv, keysConfig) {
   for (let rowIndex = 0; rowIndex < keysConfig.length; rowIndex++) {
     const row = document.createElement('div');
@@ -382,5 +381,3 @@ function createPlug(keyboardDiv, keysConfig) {
 }
 
 createPlug(keyboard_plug, plug_row);
-
-*/
