@@ -7,6 +7,8 @@ const keyboard_plug = document.getElementById('keyboard_plug');
 
 const maxHistoryLength = 140;
 const backendUrl = location.origin + '/api';
+const connections = {};
+let selectedKeys = [];
 
 const rows = [
   'qwertyuiop',
@@ -373,7 +375,8 @@ function createPlug(keyboardDiv, keysConfig) {
       const key = document.createElement('div');
       key.classList.add('key_plug');
       key.textContent = keys[i].toUpperCase();
-      // key.addEventListener('click', () => {});
+      key.addEventListener('click', () => {
+          handlePlugClick(key);});
       row.appendChild(key);
     }
     keyboardDiv.appendChild(row);
@@ -381,3 +384,81 @@ function createPlug(keyboardDiv, keysConfig) {
 }
 
 createPlug(keyboard_plug, plug_row);
+
+
+function handlePlugClick(key) {
+  // Wenn die Taste bereits verbunden ist, trenne sie
+  if (connections[key.textContent]) {
+    disconnectKeys(key);
+    return;
+  }
+
+  // Wenn die maximale Anzahl von Verbindungen erreicht ist, kehre frühzeitig zurück
+  if (Object.keys(connections).length >= 10) {
+    return;
+  }
+
+  // Wechsle die 'selected'-Klasse für die geklickte Taste und aktualisiere das ausgewählte Tastenarray
+  toggleSelectedClass(key);
+  updateSelectedKeys(key);
+
+  // Verbinde die Tasten, wenn zwei Tasten ausgewählt sind
+  if (selectedKeys.length === 2) {
+    const [key1, key2] = selectedKeys;
+    const color = getRandomColor();
+    key1.style.backgroundColor = color;
+    key2.style.backgroundColor = color;
+    connectKeys(key1, key2, color);
+  }
+}
+
+
+function disconnectKeys(key) {
+  const connectedKey = connections[key.textContent].key;
+  delete connections[key.textContent];
+  delete connections[connectedKey.textContent];
+  key.style.backgroundColor = "";
+  connectedKey.style.backgroundColor = "";
+  toggleSelectedClass(key);
+  toggleSelectedClass(connectedKey);
+  //putPairs(Object.fromEntries(Object.entries(connections).map(([k, v]) => [k, v.key.textContent]))).then(r => console.log(r));
+}
+
+function connectKeys(key1, key2, color) {
+  connections[key1.textContent] = { key: key2, color };
+  connections[key2.textContent] = { key: key1, color };
+  selectedKeys = [];
+  // 1. Konvertiere die 'connections'-Objekt-Entries in ein Array von Arrays
+  const connectionEntries = Object.entries(connections);
+  console.log(connectionEntries);
+  // 2. Erstelle ein neues Array, indem du die '.textContent'-Eigenschaft der Schlüssel und der verbundenen Schlüssel extrahierst
+  const connectionTextContentPairs = connectionEntries.map(([k, v]) => [k, v.key.textContent]);
+  console.log(connectionTextContentPairs);
+  // 3. Erstelle ein neues Objekt aus dem Array von Schlüssel-Wert-Paaren
+  const connectionObject = Object.fromEntries(connectionTextContentPairs);
+  console.log(connectionObject);
+  // 4. Sende das Objekt an das Backend mithilfe der 'putPairs'-Funktion (die noch implementiert werden muss)
+  //putPairs(connectionObject).then(r => console.log(r));
+}
+
+function toggleSelectedClass(key) {
+  key.classList.toggle('selected');
+}
+
+function updateSelectedKeys(key) {
+  if (selectedKeys.includes(key)) {
+    selectedKeys = selectedKeys.filter(k => k !== key);
+  } else {
+    selectedKeys.push(key);
+  }
+}
+
+
+function getRandomColor() {
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}

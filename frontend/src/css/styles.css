@@ -184,3 +184,7 @@ h2 {
   margin: 5px;
   border-radius: 50%;
 }
+
+.selected {
+  background-color: darkgray;
+}
