@@ -1,5 +1,5 @@
 from .rotor import Rotor, index_from_letter, letter_from_index
-
+import ast
 
 class Enigma:
     def __init__(self, rotor1, rotor2, start_pos1, start_pos2, reflector, notch_rotor1, notch_rotor2,
@@ -26,6 +26,7 @@ class Enigma:
         represents a connection between two letters, indicating that they will be swapped during the encryption process.
         The resulting dictionary should include both forward and backward connections, ensuring bidirectional swapping.
         """
+        plugboard = ast.literal_eval(plugboard)
         self.plugboard = {}
 
         for pair in plugboard.items():

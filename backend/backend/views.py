@@ -3,6 +3,7 @@ from flask import current_app as app
 from threading import Lock
 from .enigma import Enigma
 import yaml
+import ast
 
 
 def set_cookie(response, key: str, value):
@@ -164,7 +165,8 @@ def handle_plugboard():
     if request.method == "GET":
         plugboard_cookie = request.cookies.get("plugboard")
         if plugboard_cookie:
-            return jsonify(plugboard_cookie)
+            plugboard_dict = ast.literal_eval(plugboard_cookie)
+            return jsonify(plugboard_dict)
         else:
             return "Plugboard cookie not set", 400
     elif request.method == "PUT":
@@ -192,7 +194,7 @@ def encrypt_letter():
         variant = request.cookies.get("variant") or 'I'
         positions = request.cookies.get("positions") or '["A", "A", "A"]'
         rotors = request.cookies.get("rotors") or '["I","II","III"]'
-        plugboard = request.cookie.get("plugboard") or {}
+        plugboard = request.cookies.get("plugboard") or {}
         positions = json.loads(positions)
         rotors = json.loads(rotors)
 
@@ -211,15 +213,17 @@ def encrypt_letter():
         enigma = Enigma(rotor1=rotor_mapping[0], rotor2=rotor_mapping[1], rotor3=rotor_mapping[2],
                         start_pos1=positions[0], start_pos2=positions[1], start_pos3=positions[2],
                         reflector=ukw_b,
-                        notch_rotor1=notches[0], notch_rotor2=notches[1], notch_rotor3=notches[2],
-                        plugboard=plugboard)
+                        notch_rotor1=notches[0], notch_rotor2=notches[1], notch_rotor3=notches[2])
 
+        # Set the plugboard (Will be saved as dictionary) -> Important step to use apply_plugboard
+        enigma.set_plugboard(plugboard)
+
+        # Encryption process: Getting the letter -> Encrypting -> Saving the new positions
         data = request.get_json()
         letter = data.get('letter')
         input_letter = letter
         letter = enigma.encrypt_letter(letter)
         positions = enigma.get_rotor_positions()
-
         response = jsonify(letter)
         set_cookie(response, "positions", json.dumps(positions))
 
