@@ -85,6 +85,15 @@ function putRotors(position, data) {
     return putToBackend(`/rotor/${position}`, data);
 }
 
+function putPlug(data) {
+    return putToBackend(`/plugboard`, data);
+}
+
+function getPlug() {
+    return getFromBackend(`/plugboard`);
+}
+
+
 // Erstellen der Tasten
 function createKeys(keyboardDiv) {
   for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
@@ -179,7 +188,6 @@ function findAndHighlightKey(keyboardDiv, key, highlight) {
 // Funktion zum Hinzufügen des Mausklick-Event-Listeners
 function addClickListener(key) {
   key.addEventListener('click', async () => {
-    console.log(isVariantSelected())
     if (isVariantSelected()) return;
     const keyText = key.textContent;
     updateInputHistory(keyText);
@@ -298,6 +306,7 @@ window.addEventListener('load', async(event) => {
   }
   await updateRotorOptions();
   await updateRotors();
+  loadPlug();
   loadHistory();
 });
 
@@ -357,7 +366,7 @@ async function updateRotors() {
 function isVariantSelected() {
   const rotorSelection = document.getElementById('rotorSelection');
   const selectedRotors = rotorSelection.querySelectorAll("li.selected");
-  console.log(selectedRotors.length)
+
 
   // Wenn kein Variante ausgewählt ist oder keine Rotoren ausgewählt sind, gebe true zurück
   if (variantSelect.value === '' || selectedRotors.length < 3 || variantSelect.value === 'B' && selectedRotors.length < 2) {
@@ -408,10 +417,39 @@ function handlePlugClick(key) {
     const color = getRandomColor();
     key1.style.backgroundColor = color;
     key2.style.backgroundColor = color;
-    connectKeys(key1, key2, color);
+    connectKeys(key1, key2);
   }
 }
 
+function loadPlug() {
+  getPlug().then(response => {
+    if (response) {
+      const uniqueEntries = [];
+      for (const [key, value] of Object.entries(response)) {
+        // Überprüfen, ob das Paar bereits im Array vorhanden ist, aber in umgekehrter Reihenfolge
+        if (!uniqueEntries.find(([k, v]) => k === value && v === key)) {
+          uniqueEntries.push([key, value]);
+        }
+      }
+
+      for (const [key, value] of uniqueEntries) {
+        const color = getRandomColor();
+
+        const keyElements = Array.from(document.querySelectorAll('.key_plug'));
+        const keyElement = keyElements.find(element => element.textContent === key);
+        const valueElement = keyElements.find(element => element.textContent === value);
+
+        if (keyElement && valueElement) {
+          toggleSelectedClass(keyElement);
+          toggleSelectedClass(valueElement);
+          keyElement.style.backgroundColor = color;
+          valueElement.style.backgroundColor = color;
+          connectKeys(keyElement, valueElement);
+        }
+      }
+    }
+  });
+}
 
 function disconnectKeys(key) {
   const connectedKey = connections[key.textContent].key;
@@ -421,28 +459,34 @@ function disconnectKeys(key) {
   connectedKey.style.backgroundColor = "";
   toggleSelectedClass(key);
   toggleSelectedClass(connectedKey);
-  //putPairs(Object.fromEntries(Object.entries(connections).map(([k, v]) => [k, v.key.textContent]))).then(r => console.log(r));
+
+  // Update the connections object format after disconnecting keys
+  const connectionEntries = Object.entries(connections);
+  const connectionTextContentPairs = connectionEntries.map(([k, v]) => [k, v.key.textContent]);
+  const connectionObject = Object.fromEntries(connectionTextContentPairs);
+
+  // Wrap the connectionObject in a "plugboard" object
+  const finalObject = { plugboard: connectionObject };
+
+  putPlug(finalObject).then(r => console.log(r));
 }
 
-function connectKeys(key1, key2, color) {
-  connections[key1.textContent] = { key: key2, color };
-  connections[key2.textContent] = { key: key1, color };
+function connectKeys(key1, key2) {
+  connections[key1.textContent] = { key: key2};
+  connections[key2.textContent] = { key: key1};
   selectedKeys = [];
-  // 1. Konvertiere die 'connections'-Objekt-Entries in ein Array von Arrays
+
   const connectionEntries = Object.entries(connections);
-  console.log(connectionEntries);
-  // 2. Erstelle ein neues Array, indem du die '.textContent'-Eigenschaft der Schlüssel und der verbundenen Schlüssel extrahierst
   const connectionTextContentPairs = connectionEntries.map(([k, v]) => [k, v.key.textContent]);
-  console.log(connectionTextContentPairs);
-  // 3. Erstelle ein neues Objekt aus dem Array von Schlüssel-Wert-Paaren
   const connectionObject = Object.fromEntries(connectionTextContentPairs);
-  console.log(connectionObject);
-  // 4. Sende das Objekt an das Backend mithilfe der 'putPairs'-Funktion (die noch implementiert werden muss)
-  //putPairs(connectionObject).then(r => console.log(r));
+  const finalObject = { plugboard: connectionObject };
+  putPlug(finalObject).then(r => console.log(r));
 }
 
 function toggleSelectedClass(key) {
+  console.log(`Toggling selected class for key: ${key.textContent}`);
   key.classList.toggle('selected');
+  console.log(`Key classes after toggle: ${key.classList}`);
 }
 
 function updateSelectedKeys(key) {
@@ -453,12 +497,24 @@ function updateSelectedKeys(key) {
   }
 }
 
+const availableColors = [
+  '#FF0000', // Rot
+  '#00FF00', // Grün
+  '#0000FF', // Blau
+  '#FFFF00', // Gelb
+  '#FF00FF', // Magenta
+];
 
 function getRandomColor() {
-  const letters = '0123456789ABCDEF';
-  let color = '#';
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
+  if (availableColors.length === 0) {
+    throw new Error('Es sind keine Farben mehr verfügbar.');
   }
+
+  const randomIndex = Math.floor(Math.random() * availableColors.length);
+  const color = availableColors[randomIndex];
+
+  // Entfernen Sie die verwendete Farbe aus dem Array, um Duplikate zu verhindern
+  availableColors.splice(randomIndex, 1);
+
   return color;
 }
