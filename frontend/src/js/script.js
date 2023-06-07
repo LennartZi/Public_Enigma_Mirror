@@ -3,6 +3,8 @@ const inputHistory = document.getElementById('inputHistory');
 const outputHistory = document.getElementById('outputHistory');
 const keyboard_input = document.getElementById('keyboard_input');
 const keyboard_output = document.getElementById('keyboard_output');
+const keyboard_plug = document.getElementById('keyboard_plug');
+
 const maxHistoryLength = 140;
 const backendUrl = location.origin + '/api';
 
@@ -106,6 +108,26 @@ function createKeys(keyboardDiv) {
 createKeys(keyboard_input);
 
 
+function createOutput(keyboardDiv) {
+  for (let rowIndex = 0; rowIndex < plug_row.length; rowIndex++) {
+    const row = document.createElement('div');
+    row.classList.add('row');
+    const keys = plug_row[rowIndex];
+
+    for (let i = 0; i < keys.length; i++) {
+      const key = document.createElement('div');
+      key.classList.add('key_output');
+      key.textContent = keys[i].toUpperCase();
+      row.appendChild(key);
+    }
+    keyboardDiv.appendChild(row);
+  }
+  //addKeyListeners(keyboardDiv);
+}
+
+createOutput(keyboard_output);
+
+
 // Event-Listener zum Abfangen von Tastenanschlägen
 document.addEventListener('keydown', async (event) => {
   if (isVariantSelected()) return;
@@ -118,8 +140,8 @@ document.addEventListener('keydown', async (event) => {
     updateInputHistory(key);
     findAndHighlightKey(keyboard_input, key , true);
     const response = await putKey({letter: key})
-    // Output History aktualisieren
     findAndHighlightKey(keyboard_output, response, true);
+    // Output History aktualisieren
     updateOutputHistory(response);
   }
 });
@@ -132,6 +154,7 @@ document.addEventListener('keyup', async (event) => {
   findAndHighlightKey(keyboard_output, outputHistory.textContent[0], false);
 
 });
+
 
 
 // Hilfsfunktion, um die Tasten zu finden und hervorzuheben
@@ -172,7 +195,6 @@ function addClickListener(key) {
     }, 1000);
   });
 }
-
 
 
 // Funktion zum Aktualisieren der Eingabehistorie
@@ -341,21 +363,22 @@ function isVariantSelected() {
   }
 }
 
-function createOutput(keyboardDiv) {
-  for (let rowIndex = 0; rowIndex < plug_row.length; rowIndex++) {
+
+function createPlug(keyboardDiv, keysConfig) {
+  for (let rowIndex = 0; rowIndex < keysConfig.length; rowIndex++) {
     const row = document.createElement('div');
     row.classList.add('row');
-    const keys = plug_row[rowIndex];
+    const keys = keysConfig[rowIndex];
 
     for (let i = 0; i < keys.length; i++) {
       const key = document.createElement('div');
-      key.classList.add('key_output');
+      key.classList.add('key_plug');
       key.textContent = keys[i].toUpperCase();
+      // key.addEventListener('click', () => {});
       row.appendChild(key);
     }
     keyboardDiv.appendChild(row);
   }
-  //addKeyListeners(keyboardDiv);
 }
 
-createOutput(keyboard_output);
+createPlug(keyboard_plug, plug_row);
