@@ -194,7 +194,7 @@ def encrypt_letter():
         variant = request.cookies.get("variant") or 'I'
         positions = request.cookies.get("positions") or '["A", "A", "A"]'
         rotors = request.cookies.get("rotors") or '["I","II","III"]'
-        plugboard = request.cookies.get("plugboard") or {}
+        plugboard = request.cookies.get("plugboard") or "{}"
         positions = json.loads(positions)
         rotors = json.loads(rotors)
 
