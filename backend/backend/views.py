@@ -224,8 +224,7 @@ single_request = Lock()
 @app.route('/encrypt', methods=['PUT'])
 def encrypt_letter():
 
-    ukw_b = ['Y', 'R', 'U', 'H', 'Q', 'S', 'L', 'D', 'P', 'X', 'N', 'G', 'O', 'K', 'M', 'I', 'E', 'B',
-             'F', 'Z', 'C', 'W', 'V', 'J', 'A', 'T']
+    ukw_b = 'YRUHQSLDPXNGOKMIEBFZCWVJAT'
 
     if single_request.locked():
         return str(), 423
@@ -235,9 +234,11 @@ def encrypt_letter():
         variant = request.cookies.get("variant") or 'I'
         positions = request.cookies.get("positions") or '["A", "A", "A"]'
         rotors = request.cookies.get("rotors") or '["I","II","III"]'
+        ukw = request.cookies.get("reflector") or ukw_b  # ukw_b can be deleted later
 
         positions = json.loads(positions)
         rotors = json.loads(rotors)
+        ukw = json.loads(ukw)
 
         rotor_mapping = []
         notches = []
@@ -245,6 +246,7 @@ def encrypt_letter():
         with open("/etc/enigma.yaml", "r") as stream:
             try:
                 rotor_config = yaml.safe_load(stream)['variants'][variant]['rotors']
+                ukw = yaml.safe_load(stream)['variants'][variant]['reflectors'][ukw]
                 for rotor in rotors:
                     notches.append(rotor_config[rotor]['turnover'])
                     rotor_mapping.append((rotor_config[rotor]['substitution']))
@@ -253,7 +255,7 @@ def encrypt_letter():
 
         enigma = Enigma(rotor1=rotor_mapping[0], rotor2=rotor_mapping[1], rotor3=rotor_mapping[2],
                         start_pos1=positions[0], start_pos2=positions[1], start_pos3=positions[2],
-                        reflector=ukw_b,
+                        reflector=ukw,
                         notch_rotor1=notches[0], notch_rotor2=notches[1], notch_rotor3=notches[2])
 
         data = request.get_json()
