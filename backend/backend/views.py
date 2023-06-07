@@ -150,6 +150,65 @@ def rotor_position(rotornr):
         return response
 
 
+# Endpoint to get the available reflector of a specific variant
+@app.route('/reflectors', methods=['GET'])
+def get_reflectors():
+    variant_cookie = request.cookies.get('variant')
+    if not variant_cookie:
+        return 'Variant cookie not set', 400
+
+    with open("/etc/enigma.yaml", "r") as file:
+        data = yaml.load(file, Loader=yaml.SafeLoader)
+
+    variant = data['variants'].get(variant_cookie)
+    if not variant:
+        return 'Variant not found in YAML', 400
+
+    reflectors = []
+    reflector_info = variant['reflectors']
+    available_reflectors = reflector_info.keys()
+    for reflector_name, reflector_data in reflector_info.items():
+        reflector = {
+            'name': reflector_name,
+            'wiring': reflector_data
+        }
+        reflectors.append(reflector)
+
+    return jsonify(reflectors)
+
+
+# Endpoint to set and get the current reflector
+@app.route('/reflector', methods=['GET', 'PUT'])
+def set_reflector():
+    variant_cookie = request.cookies.get('variant')
+    if not variant_cookie:
+        return jsonify('Variant cookie not set', 400)
+
+    reflector_cookie = request.cookies.get('reflector')
+
+    if request.method == 'GET':
+        reflector = reflector_cookie
+        response_data = {'reflector': reflector} if reflector is not None else ('Variant cookie not set', 400)
+        return jsonify(response_data)
+    elif request.method == 'PUT':
+        reflector = request.get_json()['reflector']
+
+        with open("/etc/enigma.yaml", "r") as file:
+            data = yaml.load(file, Loader=yaml.SafeLoader)
+
+        variant = data['variants'].get(variant_cookie)
+        if not variant:
+            return 'Variant not found in YAML', 400
+
+        valid_reflectors = variant['reflectors'].keys()
+        if reflector not in valid_reflectors:
+            return 'Invalid reflector for the selected variant', 400
+
+        response = app.make_response(jsonify("Reflector " + str(reflector) + " set"))
+        set_cookie(response, "reflector", reflector)
+        return response
+
+
 # Endpoint to retrieve the input history and regular history
 @app.route("/history", methods=['GET'])
 def get_history():
