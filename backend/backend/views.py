@@ -238,18 +238,18 @@ def encrypt_letter():
 
         positions = json.loads(positions)
         rotors = json.loads(rotors)
-        ukw = json.loads(ukw)
 
         rotor_mapping = []
         notches = []
 
         with open("/etc/enigma.yaml", "r") as stream:
             try:
-                rotor_config = yaml.safe_load(stream)['variants'][variant]['rotors']
-                ukw = yaml.safe_load(stream)['variants'][variant]['reflectors'][ukw]
+                data = yaml.safe_load(stream)
+                rotor_config = data['variants'][variant]['rotors']
+                ukw = data['variants'][variant]['reflectors'][ukw]
                 for rotor in rotors:
                     notches.append(rotor_config[rotor]['turnover'])
-                    rotor_mapping.append((rotor_config[rotor]['substitution']))
+                    rotor_mapping.append(rotor_config[rotor]['substitution'])
             except yaml.YAMLError as exc:
                 print(exc)
 
