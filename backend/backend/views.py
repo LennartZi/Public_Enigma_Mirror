@@ -176,6 +176,20 @@ def handle_plugboard():
         return response
 
 
+# Endpoint for resetting the Enigma
+@app.route('/reset', methods=["GET"])
+def reset_enigma():
+    response = app.make_response(jsonify("Enigma reset"))
+    response.set_cookie("variant", "", expires=0)
+    response.set_cookie("plugboard", "", expires=0)
+    response.set_cookie("rotors", "", expires=0)
+    response.set_cookie("positions", "", expires=0)
+    response.set_cookie("input_history", "", expires=0)
+    response.set_cookie("history", "", expires=0)
+    response.set_cookie("reflector", "", expires=0)
+    return response
+
+
 single_request = Lock()
 
 
