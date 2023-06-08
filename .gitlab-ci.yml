@@ -120,6 +120,8 @@ e2e-test:
 
 container_scanning:
   stage: e2e
+  variables:
+    CS_IMAGE: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG}
 
 remove-container:
   stage: cleanup
