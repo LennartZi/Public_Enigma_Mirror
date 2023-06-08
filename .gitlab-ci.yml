@@ -6,9 +6,6 @@ stages:
   - cleanup
   - release
 
-include:
-  - template: Security/Container-Scanning.gitlab-ci.yml
-
 unit-test-backend:
   stage: test
   image: python:3.11-alpine
@@ -118,10 +115,31 @@ e2e-test:
       junit: e2e-test-results.xml
     expire_in: 1 day
 
+include:
+  - template: Security/Container-Scanning.gitlab-ci.yml
+
 container_scanning:
   stage: e2e
+  dependencies: []
+  when: manual
+
+container_scanning_backend:
+  extends: container_scanning
+  when: on_success
   variables:
     CS_IMAGE: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG}
+
+container_scanning_frontend:
+  extends: container_scanning
+  when: on_success
+  variables:
+    CS_IMAGE: ${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG}
+
+container_scanning_reverse-proxy:
+  extends: container_scanning
+  when: on_success
+  variables:
+    CS_IMAGE: ${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG}
 
 remove-container:
   stage: cleanup
