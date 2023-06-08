@@ -1,5 +1,5 @@
 from .rotor import Rotor, index_from_letter, letter_from_index
-
+import ast
 
 class Enigma:
     def __init__(self, rotor1, rotor2, start_pos1, start_pos2, reflector, notch_rotor1, notch_rotor2,
@@ -21,17 +21,26 @@ class Enigma:
 
     def set_plugboard(self, plugboard):
         """
-        currently not implemented or tested
-        :param plugboard:
-        :return:
+        currently not tested
+        :param plugboard: A dictionary containing letter pairs for configuring the plugboard. Each key-value pair
+        represents a connection between two letters, indicating that they will be swapped during the encryption process.
+        The resulting dictionary should include both forward and backward connections, ensuring bidirectional swapping.
         """
-        self.plugboard = plugboard
+        plugboard = ast.literal_eval(plugboard)
+        self.plugboard = {}
+
+        for pair in plugboard.items():
+            letter_a, letter_b = pair
+            self.plugboard[letter_a] = letter_b
+            self.plugboard[letter_b] = letter_a
 
     def apply_plugboard(self, letter):
         """
-        currently not implemented or tested
-        :param letter:
-        :return:
+        Apply the plugboard swapping to the given letter.
+
+        :param letter: The input letter to be swapped.
+        :return: The swapped letter if it exists in the plugboard dictionary,
+                 otherwise return the original letter.
         """
         return self.plugboard.get(letter, letter)
 
@@ -131,6 +140,7 @@ class Enigma:
         self.step_rotors()
 
         # Plugboard goes here
+        self.apply_plugboard(letter)
 
         # reflector <- Third rotor <- Second rotor  <- First rotor <- input
         letter = self.encrypt_forward(letter)
@@ -141,6 +151,7 @@ class Enigma:
         letter = self.encrypt_backward(letter)
 
         # Plugboard goes here
+        self.apply_plugboard(letter)
 
         return letter
 

@@ -3,6 +3,7 @@ from flask import current_app as app
 from threading import Lock
 from .enigma import Enigma
 import yaml
+import ast
 
 
 def set_cookie(response, key: str, value):
@@ -217,6 +218,23 @@ def get_history():
     return jsonify({"input_history": input_history, "history": history})
 
 
+# Endpoint for setting and retrieving the plugboard
+@app.route("/plugboard", methods=["GET", "PUT"])
+def handle_plugboard():
+    if request.method == "GET":
+        plugboard_cookie = request.cookies.get("plugboard")
+        if plugboard_cookie:
+            plugboard_dict = ast.literal_eval(plugboard_cookie)
+            return jsonify(plugboard_dict)
+        else:
+            return "Plugboard cookie not set", 400
+    elif request.method == "PUT":
+        plugboard = request.get_json()["plugboard"]
+        response = app.make_response(jsonify("Plugboard updated"))
+        set_cookie(response, "plugboard", plugboard)
+        return response
+
+
 single_request = Lock()
 
 
@@ -236,6 +254,7 @@ def encrypt_letter():
         rotors = request.cookies.get("rotors") or '["I","II","III"]'
         ukw = request.cookies.get("reflector") or "UKW-B"  # ukw_b can be deleted later
 
+        plugboard = request.cookies.get("plugboard") or "{}"
         positions = json.loads(positions)
         rotors = json.loads(rotors)
 
@@ -258,12 +277,15 @@ def encrypt_letter():
                         reflector=ukw,
                         notch_rotor1=notches[0], notch_rotor2=notches[1], notch_rotor3=notches[2])
 
+        # Set the plugboard (Will be saved as dictionary) -> Important step to use apply_plugboard
+        enigma.set_plugboard(plugboard)
+
+        # Encryption process: Getting the letter -> Encrypting -> Saving the new positions
         data = request.get_json()
         letter = data.get('letter')
         input_letter = letter
         letter = enigma.encrypt_letter(letter)
         positions = enigma.get_rotor_positions()
-
         response = jsonify(letter)
         set_cookie(response, "positions", json.dumps(positions))
 
