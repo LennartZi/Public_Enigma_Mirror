@@ -234,7 +234,7 @@ def encrypt_letter():
         variant = request.cookies.get("variant") or 'I'
         positions = request.cookies.get("positions") or '["A", "A", "A"]'
         rotors = request.cookies.get("rotors") or '["I","II","III"]'
-        ukw = request.cookies.get("reflector") or ukw_b  # ukw_b can be deleted later
+        ukw = request.cookies.get("reflector") or "UKW-B"  # ukw_b can be deleted later
 
         positions = json.loads(positions)
         rotors = json.loads(rotors)
