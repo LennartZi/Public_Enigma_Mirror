@@ -149,7 +149,7 @@ container_scanning_reverse-proxy:
   before_script:
     - apk add --no-cache jq
   script:
-  - jq -e "( .vulnerabilities | length ) = 0" ./gl-container-scanning-report.json
+  - jq -e "( .vulnerabilities | length ) == 0" ./gl-container-scanning-report.json
   allow_failure: true
 
 container_scanning_results_backend:
