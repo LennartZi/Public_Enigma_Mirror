@@ -3,6 +3,8 @@ stages:
   - build
   - package
   - e2e
+  - scan
+  - scan_results
   - cleanup
   - release
 
@@ -26,7 +28,7 @@ unit-test-backend:
 
 build-backend:
   stage: build
-  dependencies: []
+  needs: []
   image: python:3.11-alpine
   script:
     - pip install pipenv
@@ -40,7 +42,7 @@ build-backend:
 
 containerize-frontend:
   stage: package
-  dependencies: []
+  needs: []
   image: quay.io/podman/stable
   before_script:
     - podman login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
@@ -52,8 +54,9 @@ containerize-frontend:
 
 containerize-backend:
   stage: package
-  dependencies:
-    - build-backend
+  needs:
+    - job: build-backend
+      artifacts: true
   image: quay.io/podman/stable
   before_script:
     - podman login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
@@ -65,7 +68,7 @@ containerize-backend:
 
 containerize-reverse-proxy:
   stage: package
-  dependencies: []
+  needs: []
   image: quay.io/podman/stable
   before_script:
     - podman login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
@@ -77,7 +80,10 @@ containerize-reverse-proxy:
 
 e2e-test:
   stage: e2e
-  dependencies: []
+  needs:
+    - containerize-backend
+    - containerize-frontend
+    - containerize-reverse-proxy
   image: docker:24-dind
   before_script:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
@@ -114,6 +120,64 @@ e2e-test:
     reports:
       junit: e2e-test-results.xml
     expire_in: 1 day
+
+include:
+  - template: Security/Container-Scanning.gitlab-ci.yml
+
+container_scanning:
+  stage: scan
+  when: manual
+
+container_scanning_backend:
+  extends: container_scanning
+  needs:
+    - containerize-backend
+  when: on_success
+  variables:
+    CS_IMAGE: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG}
+
+container_scanning_frontend:
+  extends: container_scanning
+  needs:
+    - containerize-frontend
+  when: on_success
+  variables:
+    CS_IMAGE: ${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG}
+
+container_scanning_reverse-proxy:
+  extends: container_scanning
+  needs:
+    - containerize-reverse-proxy
+  when: on_success
+  variables:
+    CS_IMAGE: ${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG}
+
+.container_scanning_results:
+  stage: scan_results
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache jq
+  script:
+  - jq -e "( .vulnerabilities | length ) == 0" ./gl-container-scanning-report.json
+  allow_failure: true
+
+container_scanning_results_backend:
+  extends: .container_scanning_results
+  needs:
+    - job: container_scanning_backend
+      artifacts: true
+
+container_scanning_results_frontend:
+  extends: .container_scanning_results
+  needs:
+    - job: container_scanning_frontend
+      artifacts: true
+
+container_scanning_results_reverse-proxy:
+  extends: .container_scanning_results
+  needs:
+    - job: container_scanning_reverse-proxy
+      artifacts: true
 
 remove-container:
   stage: cleanup
