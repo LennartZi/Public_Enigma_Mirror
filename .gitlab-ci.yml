@@ -28,6 +28,7 @@ unit-test-backend:
 
 build-backend:
   stage: build
+  needs: []
   dependencies: []
   image: python:3.11-alpine
   script:
@@ -42,6 +43,7 @@ build-backend:
 
 containerize-frontend:
   stage: package
+  needs: []
   dependencies: []
   image: quay.io/podman/stable
   before_script:
@@ -54,6 +56,8 @@ containerize-frontend:
 
 containerize-backend:
   stage: package
+  needs:
+    - build-backend
   dependencies:
     - build-backend
   image: quay.io/podman/stable
@@ -67,6 +71,7 @@ containerize-backend:
 
 containerize-reverse-proxy:
   stage: package
+  needs: []
   dependencies: []
   image: quay.io/podman/stable
   before_script:
@@ -79,6 +84,10 @@ containerize-reverse-proxy:
 
 e2e-test:
   stage: e2e
+  needs:
+    - containerize-backend
+    - containerize-frontend
+    - containerize-reverse-proxy
   dependencies: []
   image: docker:24-dind
   before_script:
@@ -127,18 +136,24 @@ container_scanning:
 
 container_scanning_backend:
   extends: container_scanning
+  needs:
+    - containerize-backend
   when: on_success
   variables:
     CS_IMAGE: ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG}
 
 container_scanning_frontend:
   extends: container_scanning
+  needs:
+    - containerize-frontend
   when: on_success
   variables:
     CS_IMAGE: ${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG}
 
 container_scanning_reverse-proxy:
   extends: container_scanning
+  needs:
+    - containerize-reverse-proxy
   when: on_success
   variables:
     CS_IMAGE: ${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG}
@@ -154,16 +169,22 @@ container_scanning_reverse-proxy:
 
 container_scanning_results_backend:
   extends: .container_scanning_results
+  needs:
+    - container_scanning_backend
   dependencies:
     - container_scanning_backend
 
 container_scanning_results_frontend:
   extends: .container_scanning_results
+  needs:
+    - container_scanning_frontend
   dependencies:
     - container_scanning_frontend
 
 container_scanning_results_reverse-proxy:
   extends: .container_scanning_results
+  needs:
+    - container_scanning_reverse-proxy
   dependencies:
     - container_scanning_reverse-proxy
 
