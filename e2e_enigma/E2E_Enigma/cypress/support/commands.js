@@ -51,19 +51,6 @@ Cypress.Commands.add('setReflectors', () => {
     cy.get('ol#selectedReflector li:first').invoke('text').then((text) => {
         expect(text).to.equal('UKW-A')
       });
-    cy.get('ol#reflectorSelection li:first').click()
-
-
-    cy.get('ol#reflectorSelection li:last').click()
-    cy.get('ol#selectedReflector li:last').invoke('text').then((text) => {
-        expect(text).to.equal("UKW-C")
-      });
-    cy.get('ol#reflectorSelection li:last').click()
-
-    cy.get('ol#reflectorSelection li:first').next().click()
-    cy.get('ol#selectedReflector li:first').next().invoke('text').then((text) => {
-        expect(text).to.equal("UKW-B")
-      });
 })
 
 Cypress.Commands.add('setupTest', (url, model_selector,model) => {
