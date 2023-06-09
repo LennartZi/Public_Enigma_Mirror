@@ -48,7 +48,7 @@ Cypress.Commands.add('setRotors', () => {
 
 Cypress.Commands.add('setReflectors', () => {
     cy.get('ol#reflectorSelection li:first').click()
-    cy.get('ol#selectedReflector li:first').invoke('text').then((text) => {
+    cy.get('ol#selectedUKW li:first').invoke('text').then((text) => {
         expect(text).to.equal('UKW-A')
       });
 })
