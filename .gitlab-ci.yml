@@ -29,7 +29,6 @@ unit-test-backend:
 build-backend:
   stage: build
   needs: []
-  dependencies: []
   image: python:3.11-alpine
   script:
     - pip install pipenv
@@ -44,7 +43,6 @@ build-backend:
 containerize-frontend:
   stage: package
   needs: []
-  dependencies: []
   image: quay.io/podman/stable
   before_script:
     - podman login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
@@ -57,9 +55,8 @@ containerize-frontend:
 containerize-backend:
   stage: package
   needs:
-    - build-backend
-  dependencies:
-    - build-backend
+    - job: build-backend
+      artifacts: true
   image: quay.io/podman/stable
   before_script:
     - podman login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
@@ -72,7 +69,6 @@ containerize-backend:
 containerize-reverse-proxy:
   stage: package
   needs: []
-  dependencies: []
   image: quay.io/podman/stable
   before_script:
     - podman login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
@@ -88,7 +84,6 @@ e2e-test:
     - containerize-backend
     - containerize-frontend
     - containerize-reverse-proxy
-  dependencies: []
   image: docker:24-dind
   before_script:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
@@ -131,7 +126,6 @@ include:
 
 container_scanning:
   stage: scan
-  dependencies: []
   when: manual
 
 container_scanning_backend:
@@ -170,23 +164,20 @@ container_scanning_reverse-proxy:
 container_scanning_results_backend:
   extends: .container_scanning_results
   needs:
-    - container_scanning_backend
-  dependencies:
-    - container_scanning_backend
+    - job: container_scanning_backend
+      artifacts: true
 
 container_scanning_results_frontend:
   extends: .container_scanning_results
   needs:
-    - container_scanning_frontend
-  dependencies:
-    - container_scanning_frontend
+    - job: container_scanning_frontend
+      artifacts: true
 
 container_scanning_results_reverse-proxy:
   extends: .container_scanning_results
   needs:
-    - container_scanning_reverse-proxy
-  dependencies:
-    - container_scanning_reverse-proxy
+    - job: container_scanning_reverse-proxy
+      artifacts: true
 
 remove-container:
   stage: cleanup
