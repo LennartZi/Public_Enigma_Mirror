@@ -2,6 +2,7 @@ const variantSelect = document.getElementById('variantSelect');
 const inputHistory = document.getElementById('inputHistory');
 const outputHistory = document.getElementById('outputHistory');
 const keyboard_input = document.getElementById('keyboard_input');
+const keyboard_output = document.getElementById('keyboard_output');
 const maxHistoryLength = 140;
 const backendUrl = location.origin + '/api';
 
@@ -9,6 +10,12 @@ const rows = [
   'qwertyuiop',
   'asdfghjkl',
   'zxcvbnm'
+];
+
+const plug_row = [
+  'qwertyuio',
+  'asdfghjk',
+  'pzxcvbnml'
 ];
 
 // Senden und Empfangen von Daten vom Backend
@@ -112,6 +119,7 @@ document.addEventListener('keydown', async (event) => {
     findAndHighlightKey(keyboard_input, key , true);
     const response = await putKey({letter: key})
     // Output History aktualisieren
+    findAndHighlightKey(keyboard_output, response, true);
     updateOutputHistory(response);
   }
 });
@@ -121,15 +129,16 @@ document.addEventListener('keyup', async (event) => {
   const key = event.key;
 
   findAndHighlightKey(keyboard_input, key , false);
+  findAndHighlightKey(keyboard_output, outputHistory.textContent[0], false);
 
 });
 
 
-
 // Hilfsfunktion, um die Tasten zu finden und hervorzuheben
 function findAndHighlightKey(keyboardDiv, key, highlight) {
-  const keys = keyboardDiv.getElementsByClassName('key_input');
-  const highlightClass = 'highlight';
+  const isKeyInput = keyboardDiv === keyboard_input;
+  const keys = keyboardDiv.getElementsByClassName(isKeyInput ? 'key_input' : 'key_output');
+  const highlightClass = keyboardDiv === keyboard_input ? 'highlight' : 'highlight-red';
   for (let k of keys) {
     if (k.textContent.toLowerCase() === key.toLowerCase()) {
       if (highlight) {
@@ -151,6 +160,7 @@ function addClickListener(key) {
     updateInputHistory(keyText);
     findAndHighlightKey(keyboard_input, keyText, true);
     const response = await putKey({ letter: keyText });
+    findAndHighlightKey(keyboard_output, response, true);
 
     // Update der Ausgabehistorie
     updateOutputHistory(response);
@@ -158,9 +168,11 @@ function addClickListener(key) {
     // Entfernen der Hervorhebung nach einer kurzen Verzögerung
     setTimeout(() => {
       findAndHighlightKey(keyboard_input, keyText, false);
+      findAndHighlightKey(keyboard_output, response, false);
     }, 1000);
   });
 }
+
 
 
 // Funktion zum Aktualisieren der Eingabehistorie
@@ -328,3 +340,22 @@ function isVariantSelected() {
     return true;
   }
 }
+
+function createOutput(keyboardDiv) {
+  for (let rowIndex = 0; rowIndex < plug_row.length; rowIndex++) {
+    const row = document.createElement('div');
+    row.classList.add('row');
+    const keys = plug_row[rowIndex];
+
+    for (let i = 0; i < keys.length; i++) {
+      const key = document.createElement('div');
+      key.classList.add('key_output');
+      key.textContent = keys[i].toUpperCase();
+      row.appendChild(key);
+    }
+    keyboardDiv.appendChild(row);
+  }
+  //addKeyListeners(keyboardDiv);
+}
+
+createOutput(keyboard_output);
