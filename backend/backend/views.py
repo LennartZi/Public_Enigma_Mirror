@@ -151,6 +151,65 @@ def rotor_position(rotornr):
         return response
 
 
+# Endpoint to get the available reflector of a specific variant
+@app.route('/reflectors', methods=['GET'])
+def get_reflectors():
+    variant_cookie = request.cookies.get('variant')
+    if not variant_cookie:
+        return 'Variant cookie not set', 400
+
+    with open("/etc/enigma.yaml", "r") as file:
+        data = yaml.load(file, Loader=yaml.SafeLoader)
+
+    variant = data['variants'].get(variant_cookie)
+    if not variant:
+        return 'Variant not found in YAML', 400
+
+    reflectors = []
+    reflector_info = variant['reflectors']
+    available_reflectors = reflector_info.keys()
+    for reflector_name, reflector_data in reflector_info.items():
+        reflector = {
+            'name': reflector_name,
+            'wiring': reflector_data
+        }
+        reflectors.append(reflector)
+
+    return jsonify(reflectors)
+
+
+# Endpoint to set and get the current reflector
+@app.route('/reflector', methods=['GET', 'PUT'])
+def set_reflector():
+    variant_cookie = request.cookies.get('variant')
+    if not variant_cookie:
+        return jsonify('Variant cookie not set', 400)
+
+    reflector_cookie = request.cookies.get('reflector')
+
+    if request.method == 'GET':
+        reflector = reflector_cookie
+        response_data = {'reflector': reflector} if reflector is not None else ('Variant cookie not set', 400)
+        return jsonify(response_data)
+    elif request.method == 'PUT':
+        reflector = request.get_json()['reflector']
+
+        with open("/etc/enigma.yaml", "r") as file:
+            data = yaml.load(file, Loader=yaml.SafeLoader)
+
+        variant = data['variants'].get(variant_cookie)
+        if not variant:
+            return 'Variant not found in YAML', 400
+
+        valid_reflectors = variant['reflectors'].keys()
+        if reflector not in valid_reflectors:
+            return 'Invalid reflector for the selected variant', 400
+
+        response = app.make_response(jsonify("Reflector " + str(reflector) + " set"))
+        set_cookie(response, "reflector", reflector)
+        return response
+
+
 # Endpoint to retrieve the input history and regular history
 @app.route("/history", methods=['GET'])
 def get_history():
@@ -193,8 +252,7 @@ single_request = Lock()
 @app.route('/encrypt', methods=['PUT'])
 def encrypt_letter():
 
-    ukw_b = ['Y', 'R', 'U', 'H', 'Q', 'S', 'L', 'D', 'P', 'X', 'N', 'G', 'O', 'K', 'M', 'I', 'E', 'B',
-             'F', 'Z', 'C', 'W', 'V', 'J', 'A', 'T']
+    ukw_b = 'YRUHQSLDPXNGOKMIEBFZCWVJAT'
 
     if single_request.locked():
         return str(), 423
@@ -204,6 +262,8 @@ def encrypt_letter():
         variant = request.cookies.get("variant") or 'I'
         positions = request.cookies.get("positions") or '["A", "A", "A"]'
         rotors = request.cookies.get("rotors") or '["I","II","III"]'
+        ukw = request.cookies.get("reflector") or "UKW-B"  # ukw_b can be deleted later
+
         plugboard = request.cookies.get("plugboard") or "{}"
         positions = json.loads(positions)
         rotors = json.loads(rotors)
@@ -213,16 +273,18 @@ def encrypt_letter():
 
         with open("/etc/enigma.yaml", "r") as stream:
             try:
-                rotor_config = yaml.safe_load(stream)['variants'][variant]['rotors']
+                data = yaml.safe_load(stream)
+                rotor_config = data['variants'][variant]['rotors']
+                ukw = data['variants'][variant]['reflectors'][ukw]
                 for rotor in rotors:
                     notches.append(rotor_config[rotor]['turnover'])
-                    rotor_mapping.append((rotor_config[rotor]['substitution']))
+                    rotor_mapping.append(rotor_config[rotor]['substitution'])
             except yaml.YAMLError as exc:
                 print(exc)
 
         enigma = Enigma(rotor1=rotor_mapping[0], rotor2=rotor_mapping[1], rotor3=rotor_mapping[2],
                         start_pos1=positions[0], start_pos2=positions[1], start_pos3=positions[2],
-                        reflector=ukw_b,
+                        reflector=ukw,
                         notch_rotor1=notches[0], notch_rotor2=notches[1], notch_rotor3=notches[2])
 
         # Set the plugboard (Will be saved as dictionary) -> Important step to use apply_plugboard
