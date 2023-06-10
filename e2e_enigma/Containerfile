@@ -1,4 +1,4 @@
-FROM cypress/browsers:node16.16.0-chrome107-ff107-edge
+FROM docker.io/cypress/browsers:node16.16.0-chrome107-ff107-edge
 
 COPY E2E_Enigma /workdir
 WORKDIR /workdir
