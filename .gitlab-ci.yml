@@ -77,7 +77,7 @@ containerize-reverse-proxy:
 containerize-e2e-tests:
   extends: .containerize
   script:
-    - podman build e2e_enigma -t e2e-tests:${CI_COMMIT_REF_SLUG}
+    - podman build e2e_enigma -t ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
     - podman push ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
   after_script:
     - podman rmi ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
