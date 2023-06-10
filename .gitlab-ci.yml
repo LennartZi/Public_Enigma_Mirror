@@ -1,3 +1,6 @@
+variables:
+  DOCKER_DRIVER: overlay2
+
 stages:
   - test
   - build
@@ -25,6 +28,12 @@ unit-test-backend:
       coverage_report:
         coverage_format: cobertura
         path: backend/coverage.xml
+  only:
+    changes:
+      - "backend/*"
+      - "backend/backend/*"
+      - "backend/tests/*"
+      - "backend/tests/**/*"
 
 build-backend:
   stage: build
@@ -40,12 +49,15 @@ build-backend:
       - backend/dist
     expire_in: 1 hour
 
-containerize-frontend:
+.containerize:
   stage: package
   needs: []
   image: quay.io/podman/stable
   before_script:
     - podman login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+
+containerize-frontend:
+  extends: .containerize
   script:
     - podman build frontend -t ${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG}
     - podman push ${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG}
@@ -53,13 +65,10 @@ containerize-frontend:
     - podman rmi ${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG}
 
 containerize-backend:
-  stage: package
+  extends: .containerize
   needs:
     - job: build-backend
       artifacts: true
-  image: quay.io/podman/stable
-  before_script:
-    - podman login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
   script:
     - podman build backend -t ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG} --build-arg context=ci
     - podman push ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG}
@@ -67,16 +76,20 @@ containerize-backend:
     - podman rmi ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG}
 
 containerize-reverse-proxy:
-  stage: package
-  needs: []
-  image: quay.io/podman/stable
-  before_script:
-    - podman login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+  extends: .containerize
   script:
     - podman build reverse-proxy -t ${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG}
     - podman push ${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG}
   after_script:
     - podman rmi ${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG}
+
+containerize-e2e-tests:
+  extends: .containerize
+  script:
+    - podman build e2e_enigma -t ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
+    - podman push ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
+  after_script:
+    - podman rmi ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
 
 e2e-test:
   stage: e2e
@@ -84,6 +97,7 @@ e2e-test:
     - containerize-backend
     - containerize-frontend
     - containerize-reverse-proxy
+    - containerize-e2e-tests
   image: docker:24-dind
   before_script:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
@@ -102,8 +116,7 @@ e2e-test:
     - docker compose -f compose.e2e.yml up --detach
     - cat enigma.yaml | docker compose -f compose.e2e.yml exec -i backend tee /etc/enigma.yaml
     - export MAIN_SERVICE=$(docker compose -f compose.e2e.yml port reverse-proxy 80)
-    - docker build e2e_enigma -t e2e-tests:${CI_COMMIT_REF_SLUG} -f e2e_enigma/Containerfile
-    - docker run --env CYPRESS_MAIN_SERVICE=$MAIN_SERVICE --network=host --name e2e-tests-${CI_COMMIT_REF_SLUG} e2e-tests:${CI_COMMIT_REF_SLUG}
+    - docker run --env CYPRESS_MAIN_SERVICE=$MAIN_SERVICE --network=host --name e2e-tests-${CI_COMMIT_REF_SLUG} ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
   after_script:
     - docker-compose -f compose.e2e.yml down --rmi all || true
     - docker cp e2e-tests-${CI_COMMIT_REF_SLUG}:/workdir/test-results.xml e2e-test-results.xml || true
@@ -179,7 +192,7 @@ container_scanning_results_reverse-proxy:
     - job: container_scanning_reverse-proxy
       artifacts: true
 
-remove-container:
+.delete-container:
   stage: cleanup
   dependencies: []
   image: 
@@ -187,6 +200,9 @@ remove-container:
     entrypoint: [""]
   before_script:
     - /bin/skopeo login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+
+remove-app-containers:
+  extends: .delete-container
   script:
     - /bin/skopeo delete docker://${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG}
     - /bin/skopeo delete docker://${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG}
@@ -194,6 +210,13 @@ remove-container:
   except:
     variables:
       - $CI_COMMIT_TAG
+
+remove-e2e-tests-container:
+  extends: .delete-container
+  needs:
+    - e2e-test
+  script:
+    - /bin/skopeo delete docker://${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
 
 release:
   stage: release
