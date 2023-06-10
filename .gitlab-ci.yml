@@ -28,6 +28,12 @@ unit-test-backend:
       coverage_report:
         coverage_format: cobertura
         path: backend/coverage.xml
+  only:
+    changes:
+      - "backend/*"
+      - "backend/backend/*"
+      - "backend/tests/*"
+      - "backend/tests/**/*"
 
 build-backend:
   stage: build
