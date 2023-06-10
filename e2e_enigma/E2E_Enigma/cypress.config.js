@@ -1,6 +1,7 @@
 const { defineConfig } = require("cypress");
 
 module.exports = defineConfig({
+  viewportHeight: 860,
   env: {
     MAIN_SERVICE: 'localhost:8000',
   },
