@@ -56,6 +56,8 @@ Cypress.Commands.add('setReflectors', () => {
 Cypress.Commands.add('setupTest', (url, model_selector,model) => {
     cy.visit(url)
     cy.setModel(model_selector, model)
+    cy.wait(65)
     cy.setRotors()
     cy.setReflectors()
+    cy.wait(65)
 })

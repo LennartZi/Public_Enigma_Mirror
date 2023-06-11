@@ -1,6 +1,7 @@
 const { defineConfig } = require("cypress");
 
 module.exports = defineConfig({
+  viewportHeight: 860,
   env: {
     MAIN_SERVICE: 'localhost:8000',
   },
@@ -8,5 +9,9 @@ module.exports = defineConfig({
     setupNodeEvents(on, config) {
       // implement node event listeners here
     },
+  },
+  "retries": {
+    "runMode": 2,
+    "openMode": 0,
   },
 });
