@@ -109,7 +109,7 @@ h2 {
   flex-direction: row;
   align-self: center;
   list-style-type: none;
-  max-height: 100px; /* Optional: Begrenzt die Höhe der Liste */
+  width: 250px;
   overflow-y: auto; /* Optional: Fügt eine Scrollbar hinzu, wenn die Höhe überschritten wird */
 }
 .rotor-selection li {
@@ -142,4 +142,20 @@ h2 {
   align-items: center;
   justify-content: center;
   flex-direction: column;
+}
+
+.name {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  width: 200px;
+}
+
+.selected-rotor {
+  display: flex;
+  flex-direction: row;
+  align-self: center;
+  list-style-type: none;
+  width: 250px;
+  overflow-y: auto; /* Optional: Fügt eine Scrollbar hinzu, wenn die Höhe überschritten wird */
 }

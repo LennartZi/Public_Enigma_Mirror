@@ -132,13 +132,13 @@ def set_rotor(rotornr):
 @app.route('/rotor/<int:rotornr>/position', methods=['GET', 'PUT'])
 def rotor_position(rotornr):
     if request.method == 'GET':
-        positions = request.cookies.get("positions") or '["A", "A", "A"]'
+        positions = request.cookies.get("positions")
         positions = json.loads(positions)
         position = positions[rotornr]
         string = "Rotor " + str(rotornr) + " position"
         return jsonify({string: position})
     elif request.method == 'PUT':
-        positions = request.cookies.get("positions") or '["A", "A", "A"]'
+        positions = request.cookies.get("positions")
         positions = json.loads(positions)
         position = request.get_json()["position"]
         positions[rotornr] = position
