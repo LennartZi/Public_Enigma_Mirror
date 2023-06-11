@@ -101,7 +101,6 @@ containerize-e2e-tests:
   image: docker:24-dind
   before_script:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
-    - docker pull {CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
     - |
       echo -e "version: '2'
       services:
