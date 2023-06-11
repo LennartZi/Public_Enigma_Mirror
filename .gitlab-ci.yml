@@ -101,6 +101,7 @@ containerize-e2e-tests:
   image: docker:24-dind
   before_script:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+    - docker pull {CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
     - |
       echo -e "version: '2'
       services:
@@ -135,6 +136,16 @@ e2e-tests-firefox:
   script:
     - cat enigma.yaml | docker compose -f compose.e2e.yml exec -i backend tee /etc/enigma.yaml
     - docker run --env CYPRESS_MAIN_SERVICE=$MAIN_SERVICE --env browser=firefox --network=host --name e2e-tests-${CI_COMMIT_REF_SLUG} ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
+
+e2e-tests-chromium:
+  extends: .e2e-tests
+  script:
+    - cat enigma.yaml | docker compose -f compose.e2e.yml exec -i backend tee /etc/enigma.yaml
+    - docker run --env CYPRESS_MAIN_SERVICE=$MAIN_SERVICE --env browser=chromium --network=host --name e2e-tests-${CI_COMMIT_REF_SLUG} ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: manual
 
 include:
   - template: Security/Container-Scanning.gitlab-ci.yml
