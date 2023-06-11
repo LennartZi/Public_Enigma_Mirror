@@ -5,4 +5,4 @@ WORKDIR /workdir
 
 RUN npm ci
 
-ENTRYPOINT ["npx", "cypress", "run", "--headless", "--reporter", "junit"]
+ENTRYPOINT ["docker-entrypoint.sh", "npx", "cypress", "run", "--headless", "--reporter", "junit"]
