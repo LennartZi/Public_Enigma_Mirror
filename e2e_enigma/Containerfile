@@ -5,4 +5,4 @@ WORKDIR /workdir
 
 RUN npm ci
 
-CMD ["npx", "cypress", "run", "--browser", "firefox", "--headless", "--reporter", "junit"]
+ENTRYPOINT ["npx", "cypress", "run", "--headless", "--reporter", "junit"]
