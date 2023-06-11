@@ -134,7 +134,7 @@ e2e-tests-firefox:
   extends: .e2e-tests
   script:
     - cat enigma.yaml | docker compose -f compose.e2e.yml exec -i backend tee /etc/enigma.yaml
-    - docker run --env CYPRESS_MAIN_SERVICE=$MAIN_SERVICE --network=host --name e2e-tests-${CI_COMMIT_REF_SLUG} ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG} --browser firefox
+    - docker run --env CYPRESS_MAIN_SERVICE=$MAIN_SERVICE --env browser=firefox --network=host --name e2e-tests-${CI_COMMIT_REF_SLUG} ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
 
 include:
   - template: Security/Container-Scanning.gitlab-ci.yml
