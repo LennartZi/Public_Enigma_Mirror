@@ -208,12 +208,18 @@ async function VariantsDropdown() {
   }
 }
 
+
+
+
 async function updateRotorOptions() {
   try {
     const rotors = await getRotors();
     const rotorCount = rotors.length;
 
     const rotorSelection = document.getElementById('rotorSelection');
+    const selectedRotorList = document.getElementById('selectedRotor');
+    const rotorSubstitutionSelects = document.querySelectorAll('.rotor-substitutions');
+
     rotorSelection.innerHTML = '';
 
     for (let i = 0; i < rotorCount; i++) {
@@ -223,14 +229,17 @@ async function updateRotorOptions() {
 
       li.addEventListener("click", async function(event) {
         const selectedItems = rotorSelection.querySelectorAll("li.selected");
-        const selectedRotorList = document.getElementById('selectedRotor');
 
         if (event.target.classList.contains("selected")) {
           event.target.classList.remove("selected");
 
           for (let item of selectedRotorList.children) {
-            if (item.textContent === event.target.textContent) {
-              item.textContent = 'X';
+            if (item.querySelector('span').textContent === event.target.textContent) {
+              item.querySelector('span').textContent = 'X';
+
+              // Clear the dropdown menu when the rotor is deselected
+              const dropdown = rotorSubstitutionSelects[i]; // Adjusted
+              dropdown.innerHTML = '';
               break;
             }
           }
@@ -242,10 +251,31 @@ async function updateRotorOptions() {
 
           // Find the index of the first 'X' item
           let rotorPosition;
-          for (let i = 0; i < selectedRotorList.children.length; i++) {
-            if (selectedRotorList.children[i].textContent === 'X') {
-              selectedRotorList.children[i].textContent = event.target.textContent;
+          for (let i = 0; i < selectedRotorList.children.length; i+=2) {
+            if (selectedRotorList.children[i].querySelector('span').textContent === 'X') {
+              selectedRotorList.children[i].querySelector('span').textContent = event.target.textContent;
               rotorPosition = i;
+
+              // Fill the dropdown menu with the substitution of the selected rotor
+              const dropdown = rotorSubstitutionSelects[i/2]; // Adjusted
+
+              dropdown.innerHTML = ''; // Clear the dropdown menu
+
+              const selectedRotorName = event.target.textContent;
+              const selectedRotor = rotors.find(rotor => rotor.name === selectedRotorName);
+
+              if (!selectedRotor) {
+                console.error('Rotor not found:', selectedRotorName);
+                return;
+              }
+
+              // Use `selectedRotor.substitution` instead of `rotors[i].substitution`
+              selectedRotor.substitution.split('').forEach(letter => {
+                const option = document.createElement('option');
+                option.value = letter;
+                option.text = letter;
+                dropdown.appendChild(option);
+              });
               break;
             }
           }
@@ -264,7 +294,6 @@ async function updateRotorOptions() {
     console.error('Error while updating rotor options:', error);
   }
 }
-
 
 window.addEventListener('load', async(event) => {
   await VariantsDropdown();
@@ -295,7 +324,7 @@ variantSelect.addEventListener('change', function() {
 
   // Set the content of all li elements in the selectedRotorList to 'X'
   for (let item of selectedRotorList.children) {
-    item.textContent = 'X';
+    item.querySelector('span').textContent = 'X';
   }
 
   // Deselect all selected items in the rotorSelection list
@@ -310,12 +339,28 @@ variantSelect.addEventListener('change', function() {
 async function updateRotors() {
     const selectedRotorList = document.getElementById('selectedRotor');
     const rotorSelection = document.getElementById('rotorSelection');
+    const rotorSubstitutionSelects = document.querySelectorAll('.rotor-substitutions'); // New
+    const rotors = await getRotors(); // Fetch all rotors once and reuse this data
 
     for (let i = 0; i < 3; i++) {
         try {
             const response = await getRotor(i);
+
             if (response && response.rotor) {
-                selectedRotorList.children[i].textContent = response.rotor;
+                selectedRotorList.children[i].querySelector('span').textContent = response.rotor;
+
+                // Populate dropdown with substitution
+                const dropdown = rotorSubstitutionSelects[i]; // Adjusted
+                const rotorData = rotors.find(rotor => rotor.name === response.rotor);
+                if (rotorData && rotorData.substitution) {
+                  dropdown.innerHTML = '';
+                  for (let char of rotorData.substitution) {
+                    const option = document.createElement('option');
+                    option.value = char;
+                    option.text = char;
+                    dropdown.appendChild(option);
+                  }
+                }
 
                 // Finden und Auswählen des entsprechenden Rotors in der rotorSelection
                 for (let rotorOption of rotorSelection.children) {
@@ -333,7 +378,6 @@ async function updateRotors() {
         }
     }
 }
-
 function isVariantSelected() {
   const rotorSelection = document.getElementById('rotorSelection');
   const selectedRotors = rotorSelection.querySelectorAll("li.selected");

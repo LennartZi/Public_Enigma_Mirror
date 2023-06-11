@@ -107,8 +107,8 @@ h2 {
 .rotor-selection {
   display: flex;
   flex-direction: row;
+  align-self: center;
   list-style-type: none;
-  margin: 0;
   max-height: 100px; /* Optional: Begrenzt die Höhe der Liste */
   overflow-y: auto; /* Optional: Fügt eine Scrollbar hinzu, wenn die Höhe überschritten wird */
 }
@@ -126,4 +126,20 @@ h2 {
 
 #selectRotorPosition {
   padding: 20px;
+}
+
+.rotor-substitutions {
+  display: flex;
+  flex-direction: row;
+  list-style-type: none;
+  margin: 5px;
+  max-height: 100px; /* Optional: Begrenzt die Höhe der Liste */
+  overflow-y: auto; /* Optional: Fügt eine Scrollbar hinzu, wenn die Höhe überschritten wird */
+}
+
+.rotor-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
 }
