@@ -47,10 +47,9 @@ describe('Test Keyboard Input', () => {
 describe('Test Every Letter', () => {
   it('Click Every Letter for Function Test', () => {
     cy.setupTest(url, model_selector, model)
-    cy.wait(65)
+
     let inp = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     cy.testUserInput(input_history, output_history, keys, inp)
-    cy.wait(65)
     cy.checkHistory(input_history, output_history, inp)
   })
 })
@@ -61,9 +60,8 @@ describe('Full User Interaction', () => {
     cy.setupTest(url, model_selector, model)
 
     cy.testUserInput(input_history,output_history, keys, usr_input)
-    cy.wait(65)
     cy.checkHistory(input_history, output_history, usr_input)
-    cy.wait(65)
+
     cy.get(output_history).invoke('text').then((text) => {
       encr_output = text
     });
@@ -79,7 +77,7 @@ describe('User Interaction Decryption', () => {
     //muss Encrypteter String reversed werden fuer den Input
     encr_output = encr_output.split('').reverse().join("")
     cy.testUserInput(input_history,output_history, keys, encr_output)
-    cy.wait(65)
+
     cy.get(output_history).invoke('text').then((text) => {
     expect(text).to.equal(usr_input.split('').reverse().join(""))
     });
