@@ -85,6 +85,17 @@ function putRotors(position, data) {
     return putToBackend(`/rotor/${position}`, data);
 }
 
+function getReflectors() {
+    return getFromBackend(`/reflectors`);
+}
+
+function putReflectors(data) {
+    return putToBackend(`/reflector`, data);
+}
+
+function getReflector() {
+    return getFromBackend(`/reflector`);
+}
 function putPlug(data) {
     return putToBackend(`/plugboard`, data);
 }
@@ -92,7 +103,6 @@ function putPlug(data) {
 function getPlug() {
     return getFromBackend(`/plugboard`);
 }
-
 
 // Erstellen der Tasten
 function createKeys(keyboardDiv) {
@@ -306,6 +316,8 @@ window.addEventListener('load', async(event) => {
   }
   await updateRotorOptions();
   await updateRotors();
+  await updateReflectorOptions();
+  await updateReflectors();
   loadPlug();
   loadHistory();
 });
@@ -314,7 +326,9 @@ document.getElementById('variantSelect').addEventListener('change', async(event)
   const enigmaModel = document.getElementById('variantSelect');
   await putVariant({variant: enigmaModel.value});
   await updateRotorOptions();
+  await updateReflectorOptions();
   document.cookie = 'rotors=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  document.cookie = 'reflector=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 });
 
 
@@ -371,6 +385,66 @@ function isVariantSelected() {
   // Wenn kein Variante ausgewählt ist oder keine Rotoren ausgewählt sind, gebe true zurück
   if (variantSelect.value === '' || selectedRotors.length < 3 || variantSelect.value === 'B' && selectedRotors.length < 2) {
     return true;
+  }
+}
+
+async function updateReflectorOptions() {
+  try {
+    const reflectors = await getReflectors();
+    const reflectorCount = reflectors.length;
+
+    const reflectorSelection = document.getElementById('reflectorSelection');
+    reflectorSelection.innerHTML = '';
+
+    for (let i = 0; i < reflectorCount; i++) {
+      const li = document.createElement("li");
+      li.textContent = reflectors[i].name;
+      li.setAttribute("data-value", "reflector" + (i + 1));
+
+      li.addEventListener("click", async function(event) {
+        const selectedItems = reflectorSelection.querySelectorAll("li.selected");
+
+        if (event.target.classList.contains("selected")) {
+          event.target.classList.remove("selected");
+          return;
+        }
+
+        if (selectedItems.length < 1) { // Adjust this condition based on your requirements
+          event.target.classList.add("selected");
+          try {
+            const reflectorName = event.target.textContent;
+            await putReflectors({ reflector: reflectorName });
+          } catch (error) {
+            console.error('Error while sending the selected reflector to the backend:', error);
+          }
+        }
+      });
+      reflectorSelection.appendChild(li);
+    }
+  } catch (error) {
+    console.error('Error while updating reflector options:', error);
+  }
+}
+
+async function updateReflectors() {
+  const reflectorSelection = document.getElementById('reflectorSelection');
+
+  try {
+    const response = await getReflector();
+    if (response && response.reflector) {
+      // Finden und Auswählen des entsprechenden Reflektors in der reflectorSelection
+      for (let reflectorOption of reflectorSelection.children) {
+        if (reflectorOption.textContent === response.reflector) {
+          reflectorOption.classList.add('selected');
+          break;
+        }
+      }
+    }
+  } catch (error) {
+    // Ignoriere Fehler mit dem Statuscode 400 und lasse den textContent unverändert
+    if (error.status !== 400) {
+      console.error(`Fehler beim Abrufen des Reflectors:`, error);
+    }
   }
 }
 
