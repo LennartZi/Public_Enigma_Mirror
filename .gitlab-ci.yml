@@ -136,11 +136,11 @@ e2e-tests-firefox:
     - cat enigma.yaml | docker compose -f compose.e2e.yml exec -i backend tee /etc/enigma.yaml
     - docker run --env CYPRESS_MAIN_SERVICE=$MAIN_SERVICE --env browser=firefox --network=host --name e2e-tests-${CI_COMMIT_REF_SLUG} ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
 
-e2e-tests-chromium:
+e2e-tests-chrome:
   extends: .e2e-tests
   script:
     - cat enigma.yaml | docker compose -f compose.e2e.yml exec -i backend tee /etc/enigma.yaml
-    - docker run --env CYPRESS_MAIN_SERVICE=$MAIN_SERVICE --env browser=chromium --network=host --name e2e-tests-${CI_COMMIT_REF_SLUG} ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
+    - docker run --env CYPRESS_MAIN_SERVICE=$MAIN_SERVICE --env browser=chrome --network=host --name e2e-tests-${CI_COMMIT_REF_SLUG} ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     - if: $MORE_E2E != null
