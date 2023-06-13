@@ -1,9 +1,18 @@
 history: 140
 variants:
-  'B':
+  'D':
     plugboard: false
     rotors:
       installable: 2
+      'I':
+        substitution: DMTWSILRUYQNKFEJCAZBPGXOHV
+        turnover: Q
+      'II':
+        substitution: HQZGPJTMOBLNCIFDYAWVEUSRKX
+        turnover: E
+      'III':
+        substitution: UQNTLSZFMREHDPLKIBVYGJCWOA
+        turnover: V
   'I':
     plugboard: true
     entry: ABCDEFGHIJKLMNOPQRSTUVWXYZ

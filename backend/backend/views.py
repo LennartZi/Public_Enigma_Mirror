@@ -3,6 +3,7 @@ from flask import current_app as app
 from threading import Lock
 from .enigma import Enigma
 import yaml
+import ast
 
 
 def set_cookie(response, key: str, value):
@@ -217,6 +218,33 @@ def get_history():
     return jsonify({"input_history": input_history, "history": history})
 
 
+# Endpoint for setting and retrieving the plugboard
+@app.route("/plugboard", methods=["GET", "PUT"])
+def handle_plugboard():
+    if request.method == "GET":
+        plugboard_cookie = request.cookies.get("plugboard")
+        if plugboard_cookie:
+            plugboard_dict = ast.literal_eval(plugboard_cookie)
+            return jsonify(plugboard_dict)
+        else:
+            return "Plugboard cookie not set", 400
+    elif request.method == "PUT":
+        plugboard = request.get_json()["plugboard"]
+        response = app.make_response(jsonify("Plugboard updated"))
+        set_cookie(response, "plugboard", plugboard)
+        return response
+
+
+# Endpoint for resetting the Enigma
+@app.route('/reset', methods=["GET"])
+def reset_enigma():
+    response = jsonify("Enigma reset")
+    cookies = ["variant", "plugboard", "rotors", "positions", "input_history", "history", "reflector"]
+    for cookie in cookies:
+        response.set_cookie(cookie, "", expires=0)
+    return response
+
+
 single_request = Lock()
 
 
@@ -234,36 +262,39 @@ def encrypt_letter():
         variant = request.cookies.get("variant") or 'I'
         positions = request.cookies.get("positions") or '["A", "A", "A"]'
         rotors = request.cookies.get("rotors") or '["I","II","III"]'
-        ukw = request.cookies.get("reflector") or ukw_b  # ukw_b can be deleted later
+        plugboard = request.cookies.get("plugboard") or "{}"
+        ukw = request.cookies.get("reflector") or 'UKW-B'
 
         positions = json.loads(positions)
         rotors = json.loads(rotors)
-        ukw = json.loads(ukw)
 
         rotor_mapping = []
         notches = []
 
         with open("/etc/enigma.yaml", "r") as stream:
-            try:
-                rotor_config = yaml.safe_load(stream)['variants'][variant]['rotors']
-                ukw = yaml.safe_load(stream)['variants'][variant]['reflectors'][ukw]
-                for rotor in rotors:
-                    notches.append(rotor_config[rotor]['turnover'])
-                    rotor_mapping.append((rotor_config[rotor]['substitution']))
-            except yaml.YAMLError as exc:
-                print(exc)
+            data = yaml.safe_load(stream)
+
+        rotor_config = data['variants'][variant]['rotors']
+        ukw = data['variants'][variant]['reflectors'][ukw]
+        for rotor in rotors:
+            notches.append(rotor_config[rotor]['turnover'])
+            rotor_mapping.append((rotor_config[rotor]['substitution']))
+
 
         enigma = Enigma(rotor1=rotor_mapping[0], rotor2=rotor_mapping[1], rotor3=rotor_mapping[2],
                         start_pos1=positions[0], start_pos2=positions[1], start_pos3=positions[2],
                         reflector=ukw,
                         notch_rotor1=notches[0], notch_rotor2=notches[1], notch_rotor3=notches[2])
 
+        # Set the plugboard (Will be saved as dictionary) -> Important step to use apply_plugboard
+        enigma.set_plugboard(plugboard)
+
+        # Encryption process: Getting the letter -> Encrypting -> Saving the new positions
         data = request.get_json()
         letter = data.get('letter')
         input_letter = letter
         letter = enigma.encrypt_letter(letter)
         positions = enigma.get_rotor_positions()
-
         response = jsonify(letter)
         set_cookie(response, "positions", json.dumps(positions))
 
