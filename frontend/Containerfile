@@ -1,4 +1,4 @@
 FROM docker.io/library/nginx:stable-alpine
-#RUN apk update && apk upgrade # upgrade packages to fix vulnerabilities
+RUN apk update && apk upgrade # upgrade packages to fix vulnerabilities
 
 COPY src /usr/share/nginx/html

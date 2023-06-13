@@ -2,6 +2,7 @@ const variantSelect = document.getElementById('variantSelect');
 const inputHistory = document.getElementById('inputHistory');
 const outputHistory = document.getElementById('outputHistory');
 const keyboard_input = document.getElementById('keyboard_input');
+const keyboard_output = document.getElementById('keyboard_output');
 const maxHistoryLength = 140;
 const backendUrl = location.origin + '/api';
 
@@ -9,6 +10,12 @@ const rows = [
   'qwertyuiop',
   'asdfghjkl',
   'zxcvbnm'
+];
+
+const plug_row = [
+  'qwertyuio',
+  'asdfghjk',
+  'pzxcvbnml'
 ];
 
 // Senden und Empfangen von Daten vom Backend
@@ -74,18 +81,6 @@ function putRotors(position, data) {
     return putToBackend(`/rotor/${position}`, data);
 }
 
-function getReflectors() {
-    return getFromBackend(`/reflectors`);
-}
-
-function putReflectors(data) {
-    return putToBackend(`/reflector`, data);
-}
-
-function getReflector() {
-    return getFromBackend(`/reflector`);
-}
-
 // Erstellen der Tasten
 function createKeys(keyboardDiv) {
   for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
@@ -124,6 +119,7 @@ document.addEventListener('keydown', async (event) => {
     findAndHighlightKey(keyboard_input, key , true);
     const response = await putKey({letter: key})
     // Output History aktualisieren
+    findAndHighlightKey(keyboard_output, response, true);
     updateOutputHistory(response);
   }
 });
@@ -133,15 +129,16 @@ document.addEventListener('keyup', async (event) => {
   const key = event.key;
 
   findAndHighlightKey(keyboard_input, key , false);
+  findAndHighlightKey(keyboard_output, outputHistory.textContent[0], false);
 
 });
 
 
-
 // Hilfsfunktion, um die Tasten zu finden und hervorzuheben
 function findAndHighlightKey(keyboardDiv, key, highlight) {
-  const keys = keyboardDiv.getElementsByClassName('key_input');
-  const highlightClass = 'highlight';
+  const isKeyInput = keyboardDiv === keyboard_input;
+  const keys = keyboardDiv.getElementsByClassName(isKeyInput ? 'key_input' : 'key_output');
+  const highlightClass = keyboardDiv === keyboard_input ? 'highlight' : 'highlight-red';
   for (let k of keys) {
     if (k.textContent.toLowerCase() === key.toLowerCase()) {
       if (highlight) {
@@ -163,6 +160,7 @@ function addClickListener(key) {
     updateInputHistory(keyText);
     findAndHighlightKey(keyboard_input, keyText, true);
     const response = await putKey({ letter: keyText });
+    findAndHighlightKey(keyboard_output, response, true);
 
     // Update der Ausgabehistorie
     updateOutputHistory(response);
@@ -170,9 +168,11 @@ function addClickListener(key) {
     // Entfernen der Hervorhebung nach einer kurzen Verzögerung
     setTimeout(() => {
       findAndHighlightKey(keyboard_input, keyText, false);
+      findAndHighlightKey(keyboard_output, response, false);
     }, 1000);
   });
 }
+
 
 
 // Funktion zum Aktualisieren der Eingabehistorie
@@ -274,8 +274,6 @@ window.addEventListener('load', async(event) => {
   }
   await updateRotorOptions();
   await updateRotors();
-  await updateReflectorOptions();
-  await updateReflectors();
   loadHistory();
 });
 
@@ -283,9 +281,7 @@ document.getElementById('variantSelect').addEventListener('change', async(event)
   const enigmaModel = document.getElementById('variantSelect');
   await putVariant({variant: enigmaModel.value});
   await updateRotorOptions();
-  await updateReflectorOptions();
   document.cookie = 'rotors=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-  document.cookie = 'reflector=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 });
 
 
@@ -345,63 +341,21 @@ function isVariantSelected() {
   }
 }
 
+function createOutput(keyboardDiv) {
+  for (let rowIndex = 0; rowIndex < plug_row.length; rowIndex++) {
+    const row = document.createElement('div');
+    row.classList.add('row');
+    const keys = plug_row[rowIndex];
 
-async function updateReflectorOptions() {
-  try {
-    const reflectors = await getReflectors();
-    const reflectorCount = reflectors.length;
-
-    const reflectorSelection = document.getElementById('reflectorSelection');
-    reflectorSelection.innerHTML = '';
-
-    for (let i = 0; i < reflectorCount; i++) {
-      const li = document.createElement("li");
-      li.textContent = reflectors[i].name;
-      li.setAttribute("data-value", "reflector" + (i + 1));
-
-      li.addEventListener("click", async function(event) {
-        const selectedItems = reflectorSelection.querySelectorAll("li.selected");
-
-        if (event.target.classList.contains("selected")) {
-          event.target.classList.remove("selected");
-          return;
-        }
-
-        if (selectedItems.length < 1) { // Adjust this condition based on your requirements
-          event.target.classList.add("selected");
-          try {
-            const reflectorName = event.target.textContent;
-            await putReflectors({ reflector: reflectorName });
-          } catch (error) {
-            console.error('Error while sending the selected reflector to the backend:', error);
-          }
-        }
-      });
-      reflectorSelection.appendChild(li);
+    for (let i = 0; i < keys.length; i++) {
+      const key = document.createElement('div');
+      key.classList.add('key_output');
+      key.textContent = keys[i].toUpperCase();
+      row.appendChild(key);
     }
-  } catch (error) {
-    console.error('Error while updating reflector options:', error);
+    keyboardDiv.appendChild(row);
   }
+  //addKeyListeners(keyboardDiv);
 }
 
-async function updateReflectors() {
-  const reflectorSelection = document.getElementById('reflectorSelection');
-
-  try {
-    const response = await getReflector();
-    if (response && response.reflector) {
-      // Finden und Auswählen des entsprechenden Reflektors in der reflectorSelection
-      for (let reflectorOption of reflectorSelection.children) {
-        if (reflectorOption.textContent === response.reflector) {
-          reflectorOption.classList.add('selected');
-          break;
-        }
-      }
-    }
-  } catch (error) {
-    // Ignoriere Fehler mit dem Statuscode 400 und lasse den textContent unverändert
-    if (error.status !== 400) {
-      console.error(`Fehler beim Abrufen des Reflectors:`, error);
-    }
-  }
-}
+createOutput(keyboard_output);
