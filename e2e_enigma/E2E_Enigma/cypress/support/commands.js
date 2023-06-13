@@ -14,12 +14,10 @@ Cypress.Commands.add('testUserInput', (input_history, output_history, keys, inp)
 Cypress.Commands.add('checkHistory', (input_history, output_history, inp) => {
     //Output Test
     cy.get(output_history).invoke('text').then((text) => {
-        cy.wait(65)
         expect(text).to.have.length(inp.length)
       });
     //Input History Test
     cy.get(input_history).invoke('text').then((text) => {
-        cy.wait(65)
         expect(text).to.equal(inp.split('').reverse().join(""))
       });  
 
@@ -60,7 +58,6 @@ Cypress.Commands.add('setupTest', (url, model_selector,model) => {
     cy.setModel(model_selector, model)
     cy.wait(65)
     cy.setRotors()
-    cy.wait(65)
     cy.setReflectors()
     cy.wait(65)
 })
