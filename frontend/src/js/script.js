@@ -85,7 +85,6 @@ function putRotors(position, data) {
     return putToBackend(`/rotor/${position}`, data);
 }
 
-<<<<<<< frontend/src/js/script.js
 function getReflectors() {
     return getFromBackend(`/reflectors`);
 }
