@@ -86,6 +86,10 @@ function putRotors(position, data) {
     return putToBackend(`/rotor/${position}`, data);
 }
 
+function reset() {
+  return putToBackend('/reset');
+}
+
 function getReflectors() {
     return getFromBackend(`/reflectors`);
 }
@@ -270,6 +274,12 @@ async function updateRotorOptions() {
   try {
     const rotors = await getRotors();
     const rotorCount = rotors.length;
+    console.log(rotors);
+    if (rotors[1] === 400) {
+
+        console.error('Error while fetching rotors:', rotors[0]);
+        return;
+    }
 
     const rotorSelection = document.getElementById('rotorSelection');
     const selectedRotorList = document.getElementById('selectedRotor');
@@ -350,8 +360,10 @@ async function updateRotorOptions() {
 window.addEventListener('load', async(event) => {
   await VariantsDropdown();
   const variant = await getVariant();
-  if (variant !== undefined) {
+  if (variant[1] !== 400) {
     document.getElementById('variantSelect').value = variant;
+  }else{
+    console.log(variant[0]);
   }
   await updateRotorOptions();
   await updateRotors();
@@ -454,6 +466,7 @@ function isVariantSelected() {
     return true;
   }
 }
+
 
 async function updateReflectorOptions() {
   try {
@@ -622,7 +635,7 @@ function disconnectKeys(key) {
   const connectionObject = Object.fromEntries(connectionTextContentPairs);
 
   // Wrap the connectionObject in a "plugboard" object
-  const finalObject = { plugboard: connectionObject };
+  const finalObject = {plugboard: connectionObject};
 
   putPlug(finalObject).then(r => console.log(r));
 }
