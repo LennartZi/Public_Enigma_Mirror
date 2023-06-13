@@ -262,9 +262,9 @@ def encrypt_letter():
         variant = request.cookies.get("variant") or 'I'
         positions = request.cookies.get("positions") or '["A", "A", "A"]'
         rotors = request.cookies.get("rotors") or '["I","II","III"]'
-        ukw = request.cookies.get("reflector") or "UKW-B"  # ukw_b can be deleted later
-
         plugboard = request.cookies.get("plugboard") or "{}"
+        ukw = request.cookies.get("reflector") or 'UKW-B'
+
         positions = json.loads(positions)
         rotors = json.loads(rotors)
 
@@ -272,15 +272,14 @@ def encrypt_letter():
         notches = []
 
         with open("/etc/enigma.yaml", "r") as stream:
-            try:
-                data = yaml.safe_load(stream)
-                rotor_config = data['variants'][variant]['rotors']
-                ukw = data['variants'][variant]['reflectors'][ukw]
-                for rotor in rotors:
-                    notches.append(rotor_config[rotor]['turnover'])
-                    rotor_mapping.append(rotor_config[rotor]['substitution'])
-            except yaml.YAMLError as exc:
-                print(exc)
+            data = yaml.safe_load(stream)
+
+        rotor_config = data['variants'][variant]['rotors']
+        ukw = data['variants'][variant]['reflectors'][ukw]
+        for rotor in rotors:
+            notches.append(rotor_config[rotor]['turnover'])
+            rotor_mapping.append((rotor_config[rotor]['substitution']))
+
 
         enigma = Enigma(rotor1=rotor_mapping[0], rotor2=rotor_mapping[1], rotor3=rotor_mapping[2],
                         start_pos1=positions[0], start_pos2=positions[1], start_pos3=positions[2],
