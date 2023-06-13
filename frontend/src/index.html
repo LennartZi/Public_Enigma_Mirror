@@ -15,38 +15,24 @@
       </select></div>
     </div>
     <div id="selectRotor" class="variantSelect">
-      <label for="rotorSelection" class="name">Rotor-Auswahl:</label>
+      <label for="rotorSelection">Rotor-Auswahl:</label>
       <div>
         <ol id="rotorSelection" class="rotor-selection"></ol>
       </div>
     </div>
-    <div id="selectedRotorList" class="variantSelect">
-      <label for="selectedRotor" class="name">Ausgewählte Rotoren:</label>
-      <div>
-        <ol id="selectedRotor" class="selected-rotor">
-          <div class="rotor-container">
-            <li><span>X</span></li>
-            <select class="rotor-substitutions"></select>
-          </div>
-          <div class="rotor-container">
-            <li><span>X</span></li>
-            <select class="rotor-substitutions"></select>
-          </div>
-          <div class="rotor-container">
-            <li><span>X</span></li>
-            <select class="rotor-substitutions"></select>
-          </div>
-        </ol>
+    <div id="selectedRotorList" class="rotor-selection">
+        <label for="selectedRotor">Ausgewählte Rotoren:</label>
+        <div>
+          <ol id="selectedRotor" class="rotor-selection">
+            <li>X</li>
+            <li>X</li>
+            <li>X</li>
+          </ol>
+        </div>
       </div>
-    </div>
-    <div id="selectUKW" class="variantSelect">
-      <label for="reflectorSelection" class="name">UKW-Auswahl:</label>
-      <div>
-        <ol id="reflectorSelection" class="rotor-selection"></ol>
-      </div>
-    </div>
   </div>
   <div id="container2">
+    <div id="keyboard_output" class="keyboard"></div>
     <h1>Output</h1>
     <div id="outputHistory" class="input_output_text"></div>
   </div>
@@ -55,7 +41,13 @@
     <h1>Input</h1>
     <div id="inputHistory" class="input_output_text"></div>
   </div>
+  <div id="container4" class="container">
+      <div id="inputContainer_plug">
+        <div id="keyboard_plug" class="keyboard"></div>
+      </div>
+  </div>
 </div>
   <script src="js/script.js"></script>
 </body>
 </html>
+
