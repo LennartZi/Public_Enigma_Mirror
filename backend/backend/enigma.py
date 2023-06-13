@@ -27,7 +27,7 @@ class Enigma:
         represents a connection between two letters, indicating that they will be swapped during the encryption process.
         The resulting dictionary should include both forward and backward connections, ensuring bidirectional swapping.
         """
-        plugboard = ast.literal_eval(plugboard)
+        plugboard = ast.literal_eval(plugboard.replace("\\054", ","))
         self.plugboard = {}
 
         for pair in plugboard.items():
@@ -141,7 +141,7 @@ class Enigma:
         self.step_rotors()
 
         # Plugboard goes here
-        self.apply_plugboard(letter)
+        letter = self.apply_plugboard(letter)
 
         # reflector <- Third rotor <- Second rotor  <- First rotor <- input
         letter = self.encrypt_forward(letter)
@@ -152,7 +152,7 @@ class Enigma:
         letter = self.encrypt_backward(letter)
 
         # Plugboard goes here
-        self.apply_plugboard(letter)
+        letter = self.apply_plugboard(letter)
 
         return letter
 
