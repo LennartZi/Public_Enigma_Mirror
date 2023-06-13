@@ -46,8 +46,18 @@ Cypress.Commands.add('setRotors', () => {
 
 })
 
+Cypress.Commands.add('setReflectors', () => {
+    cy.get('ol#reflectorSelection li:first').click()
+    cy.get('li[data-value="reflector1"].selected').invoke('text').then((text) => {
+        expect(text).to.equal('UKW-A')
+      });
+})
+
 Cypress.Commands.add('setupTest', (url, model_selector,model) => {
     cy.visit(url)
     cy.setModel(model_selector, model)
+    cy.wait(65)
     cy.setRotors()
+    cy.setReflectors()
+    cy.wait(65)
 })

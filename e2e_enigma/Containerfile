@@ -1,8 +1,9 @@
-FROM cypress/browsers:node16.16.0-chrome107-ff107-edge
+FROM docker.io/cypress/browsers:node16.16.0-chrome107-ff107-edge
+ENV browser=electron
 
 COPY E2E_Enigma /workdir
 WORKDIR /workdir
 
 RUN npm ci
 
-CMD ["npx", "cypress", "run", "--browser", "firefox", "--headless", "--reporter", "junit"]
+CMD ["npx", "cypress", "run", "--headless", "--reporter", "junit", "--browser", "${browser}"]

@@ -2,13 +2,24 @@ const variantSelect = document.getElementById('variantSelect');
 const inputHistory = document.getElementById('inputHistory');
 const outputHistory = document.getElementById('outputHistory');
 const keyboard_input = document.getElementById('keyboard_input');
+const keyboard_output = document.getElementById('keyboard_output');
+const keyboard_plug = document.getElementById('keyboard_plug');
+
 const maxHistoryLength = 140;
 const backendUrl = location.origin + '/api';
+const connections = {};
+let selectedKeys = [];
 
 const rows = [
   'qwertyuiop',
   'asdfghjkl',
   'zxcvbnm'
+];
+
+const plug_row = [
+  'qwertyuio',
+  'asdfghjk',
+  'pzxcvbnml'
 ];
 
 // Senden und Empfangen von Daten vom Backend
@@ -74,6 +85,7 @@ function putRotors(position, data) {
     return putToBackend(`/rotor/${position}`, data);
 }
 
+<<<<<<< frontend/src/js/script.js
 function getReflectors() {
     return getFromBackend(`/reflectors`);
 }
@@ -84,6 +96,13 @@ function putReflectors(data) {
 
 function getReflector() {
     return getFromBackend(`/reflector`);
+}
+function putPlug(data) {
+    return putToBackend(`/plugboard`, data);
+}
+
+function getPlug() {
+    return getFromBackend(`/plugboard`);
 }
 
 // Erstellen der Tasten
@@ -111,6 +130,26 @@ function createKeys(keyboardDiv) {
 createKeys(keyboard_input);
 
 
+function createOutput(keyboardDiv) {
+  for (let rowIndex = 0; rowIndex < plug_row.length; rowIndex++) {
+    const row = document.createElement('div');
+    row.classList.add('row');
+    const keys = plug_row[rowIndex];
+
+    for (let i = 0; i < keys.length; i++) {
+      const key = document.createElement('div');
+      key.classList.add('key_output');
+      key.textContent = keys[i].toUpperCase();
+      row.appendChild(key);
+    }
+    keyboardDiv.appendChild(row);
+  }
+  //addKeyListeners(keyboardDiv);
+}
+
+createOutput(keyboard_output);
+
+
 // Event-Listener zum Abfangen von Tastenanschlägen
 document.addEventListener('keydown', async (event) => {
   if (isVariantSelected()) return;
@@ -123,6 +162,7 @@ document.addEventListener('keydown', async (event) => {
     updateInputHistory(key);
     findAndHighlightKey(keyboard_input, key , true);
     const response = await putKey({letter: key})
+    findAndHighlightKey(keyboard_output, response, true);
     // Output History aktualisieren
     updateOutputHistory(response);
   }
@@ -133,6 +173,7 @@ document.addEventListener('keyup', async (event) => {
   const key = event.key;
 
   findAndHighlightKey(keyboard_input, key , false);
+  findAndHighlightKey(keyboard_output, outputHistory.textContent[0], false);
 
 });
 
@@ -140,8 +181,9 @@ document.addEventListener('keyup', async (event) => {
 
 // Hilfsfunktion, um die Tasten zu finden und hervorzuheben
 function findAndHighlightKey(keyboardDiv, key, highlight) {
-  const keys = keyboardDiv.getElementsByClassName('key_input');
-  const highlightClass = 'highlight';
+  const isKeyInput = keyboardDiv === keyboard_input;
+  const keys = keyboardDiv.getElementsByClassName(isKeyInput ? 'key_input' : 'key_output');
+  const highlightClass = keyboardDiv === keyboard_input ? 'highlight' : 'highlight-red';
   for (let k of keys) {
     if (k.textContent.toLowerCase() === key.toLowerCase()) {
       if (highlight) {
@@ -157,12 +199,12 @@ function findAndHighlightKey(keyboardDiv, key, highlight) {
 // Funktion zum Hinzufügen des Mausklick-Event-Listeners
 function addClickListener(key) {
   key.addEventListener('click', async () => {
-    console.log(isVariantSelected())
     if (isVariantSelected()) return;
     const keyText = key.textContent;
     updateInputHistory(keyText);
     findAndHighlightKey(keyboard_input, keyText, true);
     const response = await putKey({ letter: keyText });
+    findAndHighlightKey(keyboard_output, response, true);
 
     // Update der Ausgabehistorie
     updateOutputHistory(response);
@@ -170,6 +212,7 @@ function addClickListener(key) {
     // Entfernen der Hervorhebung nach einer kurzen Verzögerung
     setTimeout(() => {
       findAndHighlightKey(keyboard_input, keyText, false);
+      findAndHighlightKey(keyboard_output, response, false);
     }, 1000);
   });
 }
@@ -276,6 +319,7 @@ window.addEventListener('load', async(event) => {
   await updateRotors();
   await updateReflectorOptions();
   await updateReflectors();
+  loadPlug();
   loadHistory();
 });
 
@@ -337,14 +381,13 @@ async function updateRotors() {
 function isVariantSelected() {
   const rotorSelection = document.getElementById('rotorSelection');
   const selectedRotors = rotorSelection.querySelectorAll("li.selected");
-  console.log(selectedRotors.length)
+
 
   // Wenn kein Variante ausgewählt ist oder keine Rotoren ausgewählt sind, gebe true zurück
   if (variantSelect.value === '' || selectedRotors.length < 3 || variantSelect.value === 'B' && selectedRotors.length < 2) {
     return true;
   }
 }
-
 
 async function updateReflectorOptions() {
   try {
@@ -404,4 +447,149 @@ async function updateReflectors() {
       console.error(`Fehler beim Abrufen des Reflectors:`, error);
     }
   }
+}
+
+function createPlug(keyboardDiv, keysConfig) {
+  for (let rowIndex = 0; rowIndex < keysConfig.length; rowIndex++) {
+    const row = document.createElement('div');
+    row.classList.add('row');
+    const keys = keysConfig[rowIndex];
+
+    for (let i = 0; i < keys.length; i++) {
+      const key = document.createElement('div');
+      key.classList.add('key_plug');
+      key.textContent = keys[i].toUpperCase();
+      key.addEventListener('click', () => {
+          handlePlugClick(key);});
+      row.appendChild(key);
+    }
+    keyboardDiv.appendChild(row);
+  }
+}
+
+createPlug(keyboard_plug, plug_row);
+
+
+function handlePlugClick(key) {
+  // Wenn die Taste bereits verbunden ist, trenne sie
+  if (connections[key.textContent]) {
+    disconnectKeys(key);
+    return;
+  }
+
+  // Wenn die maximale Anzahl von Verbindungen erreicht ist, kehre frühzeitig zurück
+  if (Object.keys(connections).length >= 10) {
+    return;
+  }
+
+  // Wechsle die 'selected'-Klasse für die geklickte Taste und aktualisiere das ausgewählte Tastenarray
+  toggleSelectedClass(key);
+  updateSelectedKeys(key);
+
+  // Verbinde die Tasten, wenn zwei Tasten ausgewählt sind
+  if (selectedKeys.length === 2) {
+    const [key1, key2] = selectedKeys;
+    const color = getRandomColor();
+    key1.style.backgroundColor = color;
+    key2.style.backgroundColor = color;
+    connectKeys(key1, key2);
+  }
+}
+
+function loadPlug() {
+  getPlug().then(response => {
+    if (response) {
+      const uniqueEntries = [];
+      for (const [key, value] of Object.entries(response)) {
+        // Überprüfen, ob das Paar bereits im Array vorhanden ist, aber in umgekehrter Reihenfolge
+        if (!uniqueEntries.find(([k, v]) => k === value && v === key)) {
+          uniqueEntries.push([key, value]);
+        }
+      }
+
+      for (const [key, value] of uniqueEntries) {
+        const color = getRandomColor();
+
+        const keyElements = Array.from(document.querySelectorAll('.key_plug'));
+        const keyElement = keyElements.find(element => element.textContent === key);
+        const valueElement = keyElements.find(element => element.textContent === value);
+
+        if (keyElement && valueElement) {
+          toggleSelectedClass(keyElement);
+          toggleSelectedClass(valueElement);
+          keyElement.style.backgroundColor = color;
+          valueElement.style.backgroundColor = color;
+          connectKeys(keyElement, valueElement);
+        }
+      }
+    }
+  });
+}
+
+function disconnectKeys(key) {
+  const connectedKey = connections[key.textContent].key;
+  delete connections[key.textContent];
+  delete connections[connectedKey.textContent];
+  key.style.backgroundColor = "";
+  connectedKey.style.backgroundColor = "";
+  toggleSelectedClass(key);
+  toggleSelectedClass(connectedKey);
+
+  // Update the connections object format after disconnecting keys
+  const connectionEntries = Object.entries(connections);
+  const connectionTextContentPairs = connectionEntries.map(([k, v]) => [k, v.key.textContent]);
+  const connectionObject = Object.fromEntries(connectionTextContentPairs);
+
+  // Wrap the connectionObject in a "plugboard" object
+  const finalObject = { plugboard: connectionObject };
+
+  putPlug(finalObject).then(r => console.log(r));
+}
+
+function connectKeys(key1, key2) {
+  connections[key1.textContent] = { key: key2};
+  connections[key2.textContent] = { key: key1};
+  selectedKeys = [];
+
+  const connectionEntries = Object.entries(connections);
+  const connectionTextContentPairs = connectionEntries.map(([k, v]) => [k, v.key.textContent]);
+  const connectionObject = Object.fromEntries(connectionTextContentPairs);
+  const finalObject = { plugboard: connectionObject };
+  putPlug(finalObject).then(r => console.log(r));
+}
+
+function toggleSelectedClass(key) {
+  console.log(`Toggling selected class for key: ${key.textContent}`);
+  key.classList.toggle('selected');
+  console.log(`Key classes after toggle: ${key.classList}`);
+}
+
+function updateSelectedKeys(key) {
+  if (selectedKeys.includes(key)) {
+    selectedKeys = selectedKeys.filter(k => k !== key);
+  } else {
+    selectedKeys.push(key);
+  }
+}
+
+const availableColors = [
+  '#FF0000', // Rot
+  '#00FF00', // Grün
+  '#0000FF', // Blau
+  '#FFFF00', // Gelb
+  '#FF00FF', // Magenta
+];
+
+function getRandomColor() {
+  if (availableColors.length === 0) {
+    throw new Error('Es sind keine Farben mehr verfügbar.');
+  }
+
+  const randomIndex = Math.floor(Math.random() * availableColors.length);
+  const color = availableColors[randomIndex];
+
+  // Entfernen Sie die verwendete Farbe aus dem Array, um Duplikate zu verhindern
+  availableColors.splice(randomIndex, 1);
+
+  return color;
 }
