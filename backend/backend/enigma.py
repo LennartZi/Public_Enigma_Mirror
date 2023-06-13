@@ -1,6 +1,7 @@
 from .rotor import Rotor, index_from_letter, letter_from_index
 import ast
 
+
 class Enigma:
     def __init__(self, rotor1, rotor2, start_pos1, start_pos2, reflector, notch_rotor1, notch_rotor2,
                  plugboard=None, rotor3=None, start_pos3=None,  notch_rotor3=None):

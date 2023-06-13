@@ -1,4 +1,4 @@
-from backend.enigma import Enigma
+from backend.enigma import Enigma, next_letter
 import pytest
 
 
@@ -19,13 +19,15 @@ def enigma_machine():
         reflector=['Y', 'R', 'U', 'H', 'Q', 'S', 'L', 'D', 'P', 'X', 'N', 'G', 'O', 'K', 'M', 'I', 'E', 'B', 'F', 'Z',
                    'C', 'W', 'V', 'J', 'A', 'T'],
 
-        notch_rotor1='Q', notch_rotor2='E', notch_rotor3='V')
+        notch_rotor1='Q', notch_rotor2='E', notch_rotor3='V',
+        plugboard=None)
 
     enigma_machine.set_rotor_positions('A', 'A', 'A')
 
     yield enigma_machine
 
     # teardown code
+    plugboard = None
     enigma_machine.set_rotor_positions('A', 'A', 'A')
 
 
@@ -56,6 +58,44 @@ def two_rotor_enigma():
     # teardown code
     two_rotor_enigma.set_rotor_positions('A', 'A')
 
+
+def test_get_rotor_positions(enigma_machine):
+    enigma_machine.set_rotor_positions('X', 'V', 'B')
+    positions = enigma_machine.get_rotor_positions()
+    assert positions == ['X', 'V', 'B']
+    # These two tests seem a bit stupid since they do the same thing
+
+
+def test_set_rotor_position(enigma_machine):
+    enigma_machine.set_rotor_positions('X', 'V', 'B')
+    positions = enigma_machine.get_rotor_positions()
+    assert positions == ['X', 'V', 'B']
+    # These two tests seem a bit stupid since they do the same thing
+
+
+def test_next_letter():
+    assert next_letter('F') == 'G'
+    assert next_letter('Z') == 'A'
+
+
+def test_apply_plugboard(enigma_machine):
+    enigma_machine.plugboard = {'A': 'B', 'B': 'A'}
+
+    result1 = enigma_machine.apply_plugboard("A")
+    result2 = enigma_machine.apply_plugboard("B")
+
+    assert result1 == "B"
+    assert result2 == "A"
+
+
+def test_set_plugboard(enigma_machine):
+    plugboard = "{'A': 'B', 'C': 'D', 'F': 'L', 'X': 'M'}"
+    enigma_machine.set_plugboard(plugboard)
+
+    assert enigma_machine.plugboard == {'A': 'B', 'B': 'A',
+                                        'C': 'D', 'D': 'C',
+                                        'F': 'L', 'L': 'F',
+                                        'X': 'M', 'M': 'X'}
 
 def test_step_one_rotor(enigma_machine):
     # Test one rotor stepping
