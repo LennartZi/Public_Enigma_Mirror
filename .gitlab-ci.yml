@@ -91,7 +91,7 @@ containerize-e2e-tests:
   after_script:
     - podman rmi ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
 
-e2e-test:
+.e2e-tests:
   stage: e2e
   needs:
     - containerize-backend
@@ -101,7 +101,6 @@ e2e-test:
   image: docker:24-dind
   before_script:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
-  script:
     - |
       echo -e "version: '2'
       services:
@@ -111,12 +110,9 @@ e2e-test:
           image: ${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG}
         reverse-proxy:
           image: ${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG}
-          ports: [80]" > compose.e2e.yml
-    - cat compose.e2e.yml
+          ports: [80]" | tee compose.e2e.yml
     - docker compose -f compose.e2e.yml up --detach
-    - cat enigma.yaml | docker compose -f compose.e2e.yml exec -i backend tee /etc/enigma.yaml
     - export MAIN_SERVICE=$(docker compose -f compose.e2e.yml port reverse-proxy 80)
-    - docker run --env CYPRESS_MAIN_SERVICE=$MAIN_SERVICE --network=host --name e2e-tests-${CI_COMMIT_REF_SLUG} ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
   after_script:
     - docker-compose -f compose.e2e.yml down --rmi all || true
     - docker cp e2e-tests-${CI_COMMIT_REF_SLUG}:/workdir/test-results.xml e2e-test-results.xml || true
@@ -133,6 +129,22 @@ e2e-test:
     reports:
       junit: e2e-test-results.xml
     expire_in: 1 day
+
+e2e-tests-firefox:
+  extends: .e2e-tests
+  script:
+    - cat enigma.yaml | docker compose -f compose.e2e.yml exec -i backend tee /etc/enigma.yaml
+    - docker run --env CYPRESS_MAIN_SERVICE=$MAIN_SERVICE --env browser=firefox --network=host --name e2e-tests-${CI_COMMIT_REF_SLUG} ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
+
+e2e-tests-chromium:
+  extends: .e2e-tests
+  script:
+    - cat enigma.yaml | docker compose -f compose.e2e.yml exec -i backend tee /etc/enigma.yaml
+    - docker run --env CYPRESS_MAIN_SERVICE=$MAIN_SERVICE --env browser=chromium --network=host --name e2e-tests-${CI_COMMIT_REF_SLUG} ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $MORE_E2E != null
+    - when: never
 
 include:
   - template: Security/Container-Scanning.gitlab-ci.yml
@@ -213,8 +225,6 @@ remove-app-containers:
 
 remove-e2e-tests-container:
   extends: .delete-container
-  needs:
-    - e2e-test
   script:
     - /bin/skopeo delete docker://${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
 
