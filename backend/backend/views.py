@@ -39,7 +39,7 @@ def handle_variant():
         if variant_cookie:
             return jsonify(variant_cookie)
         else:
-            return "Variant cookie not set", 400
+            return jsonify("Variant cookie not set", 400)
     elif request.method == "PUT":
         variant = request.get_json()["variant"]
         response = app.make_response(jsonify("Variant " + variant + " set!"))
@@ -74,7 +74,7 @@ def get_rotors():
 
     variant = data['variants'].get(variant_cookie)
     if not variant:
-        return 'Variant not found in YAML', 400
+        return jsonify('Variant not found in YAML', 400)
 
     rotors = []
     rotor_info = variant['rotors']

@@ -81,6 +81,10 @@ function putRotors(position, data) {
     return putToBackend(`/rotor/${position}`, data);
 }
 
+function reset() {
+  return putToBackend('/reset');
+}
+
 // Erstellen der Tasten
 function createKeys(keyboardDiv) {
   for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
@@ -212,6 +216,12 @@ async function updateRotorOptions() {
   try {
     const rotors = await getRotors();
     const rotorCount = rotors.length;
+    console.log(rotors);
+    if (rotors[1] === 400) {
+
+        console.error('Error while fetching rotors:', rotors[0]);
+        return;
+    }
 
     const rotorSelection = document.getElementById('rotorSelection');
     rotorSelection.innerHTML = '';
@@ -269,8 +279,10 @@ async function updateRotorOptions() {
 window.addEventListener('load', async(event) => {
   await VariantsDropdown();
   const variant = await getVariant();
-  if (variant !== undefined) {
+  if (variant[1] !== 400) {
     document.getElementById('variantSelect').value = variant;
+  }else{
+    console.log(variant[0]);
   }
   await updateRotorOptions();
   await updateRotors();
