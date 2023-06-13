@@ -55,15 +55,6 @@
   justify-content: center;
 }
 
-#container4 {
-  grid-row: 4;
-  grid-column: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
 .keyboard {
   display: flex;
   flex-direction: column;
@@ -90,28 +81,8 @@
   margin: 5px;
 }
 
-.key_output {
-  font-size: 40px;
-  font-weight: bolder;
-  font-family: monospace;
-  display: flex;
-  width: 60px;
-  height: 60px;
-  align-items: center;
-  justify-content: center;
-  border: 8px solid black;
-  border-radius: 50px;
-  user-select: none;
-  cursor: default;
-  margin: 5px;
-}
-
 .highlight {
   background-color: yellow;
-}
-
-.highlight-red {
-  background-color: red;
 }
 
 
@@ -136,9 +107,9 @@ h2 {
 .rotor-selection {
   display: flex;
   flex-direction: row;
+  align-self: center;
   list-style-type: none;
-  margin: 0;
-  max-height: 100px; /* Optional: Begrenzt die Höhe der Liste */
+  width: 250px;
   overflow-y: auto; /* Optional: Fügt eine Scrollbar hinzu, wenn die Höhe überschritten wird */
 }
 .rotor-selection li {
@@ -157,38 +128,34 @@ h2 {
   padding: 20px;
 }
 
-#inputContainer_plug {
+.rotor-substitutions {
   display: flex;
-  flex-wrap: wrap;
-  width: 600px;
-  background-color: #555;
-  padding: 10px;
-  border-radius: 10px;
-  margin: 20px;
-  justify-content: center;
+  flex-direction: row;
+  list-style-type: none;
+  margin: 5px;
+  max-height: 100px; /* Optional: Begrenzt die Höhe der Liste */
+  overflow-y: auto; /* Optional: Fügt eine Scrollbar hinzu, wenn die Höhe überschritten wird */
 }
 
-.key_plug {
-  font-size: 16px;
-  font-weight: bold;
-  font-family: monospace;
+.rotor-container {
   display: flex;
-  width: 50px;
-  height: 50px;
   align-items: center;
   justify-content: center;
-  border: 2px solid black;
-  background-color: #fff;
-  user-select: none;
-  cursor: pointer;
-  margin: 5px;
-  border-radius: 50%;
+  flex-direction: column;
 }
 
-.selected {
-  background-color: darkgray;
+.name {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  width: 200px;
 }
 
-.unselected {
-  background-color: white;
+.selected-rotor {
+  display: flex;
+  flex-direction: row;
+  align-self: center;
+  list-style-type: none;
+  width: 250px;
+  overflow-y: auto; /* Optional: Fügt eine Scrollbar hinzu, wenn die Höhe überschritten wird */
 }
