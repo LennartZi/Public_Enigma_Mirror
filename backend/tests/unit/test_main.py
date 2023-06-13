@@ -4,6 +4,9 @@ import pytest
 
 @pytest.fixture()
 def enigma_machine():
+    """
+    Enigma M3 with rotors: I, II, III reflector: UKW-B and no Plugboard
+    """
     enigma_machine = Enigma(
         rotor1=['E', 'K', 'M', 'F', 'L', 'G', 'D', 'Q', 'V', 'Z', 'N', 'T', 'O', 'W', 'Y', 'H', 'X', 'U', 'S', 'P', 'A',
                 'I', 'B', 'R', 'C', 'J'],
@@ -33,6 +36,9 @@ def enigma_machine():
 
 @pytest.fixture()
 def two_rotor_enigma():
+    """
+    Two rotor enigma, currently just an M3 with rotors I, II reflector UKW-B, and no Plugboard
+    """
     # TODO: Change rotors and notches to fit, write more test than just the one
     two_rotor_enigma = Enigma(
         rotor1=['E', 'K', 'M', 'F', 'L', 'G', 'D', 'Q', 'V', 'Z', 'N', 'T', 'O', 'W', 'Y', 'H', 'X', 'U', 'S', 'P',
