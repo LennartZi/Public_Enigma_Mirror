@@ -119,7 +119,7 @@ def set_rotor(rotornr):
             return 'Variant not found in YAML', 400
 
         valid_rotors = variant['rotors'].keys()
-        if rotor not in valid_rotors:
+        if rotor not in valid_rotors and rotor is not None:
             return 'Invalid rotor for the selected variant', 400
 
         rotors[rotornr] = rotor

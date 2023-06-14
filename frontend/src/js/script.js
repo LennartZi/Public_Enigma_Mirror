@@ -87,7 +87,7 @@ function putRotors(position, data) {
 }
 
 function reset() {
-  return putToBackend('/reset');
+  return getFromBackend('/reset');
 }
 
 function getReflectors() {
@@ -168,7 +168,8 @@ createOutput(keyboard_output);
 
 // Event-Listener zum Abfangen von Tastenanschlägen
 document.addEventListener('keydown', async (event) => {
-  if (isVariantSelected()) return;
+
+  if (await isVariantSelected()) return;
   const key = event.key;
 
   // Prüfe, ob der gedrückte Buchstabe in den `rows` enthalten ist
@@ -185,9 +186,8 @@ document.addEventListener('keydown', async (event) => {
 });
 
 document.addEventListener('keyup', async (event) => {
-  if (isVariantSelected()) return;
+  if (await isVariantSelected()) return;
   const key = event.key;
-
   findAndHighlightKey(keyboard_input, key , false);
   findAndHighlightKey(keyboard_output, outputHistory.textContent[0], false);
 
@@ -215,7 +215,7 @@ function findAndHighlightKey(keyboardDiv, key, highlight) {
 // Funktion zum Hinzufügen des Mausklick-Event-Listeners
 function addClickListener(key) {
   key.addEventListener('click', async () => {
-    if (isVariantSelected()) return;
+    if (await isVariantSelected()) return;
     const keyText = key.textContent;
     updateInputHistory(keyText);
     findAndHighlightKey(keyboard_input, keyText, true);
@@ -274,7 +274,6 @@ async function updateRotorOptions() {
   try {
     const rotors = await getRotors();
     const rotorCount = rotors.length;
-    console.log(rotors);
     if (rotors[1] === 400) {
 
         console.error('Error while fetching rotors:', rotors[0]);
@@ -297,13 +296,16 @@ async function updateRotorOptions() {
 
         if (event.target.classList.contains("selected")) {
           event.target.classList.remove("selected");
-
+          let itemCounter = 0;
           for (let item of selectedRotorList.children) {
             if (item.querySelector('span').textContent === event.target.textContent) {
               item.querySelector('span').textContent = 'X';
               item.querySelector('select').innerHTML = '';
+              await putRotors(itemCounter, { rotor: null });
+              await putKeySetting(itemCounter, {position: null});
               break;
             }
+            itemCounter++;
           }
           return;
         }
@@ -330,23 +332,28 @@ async function updateRotorOptions() {
                 console.error('Rotor not found:', selectedRotorName);
                 return;
               }
-
+              try {
+                const rotorName = event.target.textContent;
+                console.log(rotorName);
+                await putRotors(rotorPosition, { rotor: rotorName });
+              } catch (error) {
+                console.error('Error while sending the selected rotor to the backend:', error);
+              }
               // Use `selectedRotor.substitution` instead of `rotors[i].substitution`
-              selectedRotor.substitution.split('').forEach(letter => {
+              selectedRotor.substitution.split('').forEach((letter, index) => {
                 const option = document.createElement('option');
-                option.value = letter;
-                option.text = letter;
+                option.value = String (letter);
+                option.text = String (letter);
                 dropdown.appendChild(option);
-              });
+                if (index === 0) {
+                  try {
+                    putKeySetting(rotorPosition, {position: letter});
+                  } catch (error) {
+                    console.error('Error while sending the first substitution to the backend:', error);
+                  }
+                }});
               break;
             }
-          }
-
-          try {
-            const rotorName = event.target.textContent;
-            await putRotors(rotorPosition, { rotor: rotorName });
-          } catch (error) {
-            console.error('Error while sending the selected rotor to the backend:', error);
           }
         }
       });
@@ -374,13 +381,18 @@ window.addEventListener('load', async(event) => {
 });
 
 document.getElementById('variantSelect').addEventListener('change', async(event) => {
+  document.cookie = 'rotors=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  document.cookie = 'reflector=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  document.cookie = 'positions=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  document.cookie = 'history=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  document.cookie = 'input_history=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  outputHistory.textContent = "";
+  inputHistory.textContent = "";
   const enigmaModel = document.getElementById('variantSelect');
   await putVariant({variant: enigmaModel.value});
   await updateRotorOptions();
   await updateReflectorOptions();
-  document.cookie = 'rotors=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-  document.cookie = 'reflector=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-  document.cookie = 'positions=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+
 });
 
 
@@ -390,7 +402,6 @@ variantSelect.addEventListener('change', function() {
 
   // Set the content of all li elements in the selectedRotorList to 'X'
   for (let item of selectedRotorList.children) {
-    console.log(item);
     item.querySelector('span').textContent = 'X';
     item.querySelector('select').innerHTML = '';
   }
@@ -456,13 +467,15 @@ async function updateRotors() {
         }
     }
 }
-function isVariantSelected() {
+async function isVariantSelected() {
   const rotorSelection = document.getElementById('rotorSelection');
   const selectedRotors = rotorSelection.querySelectorAll("li.selected");
-
+  const installableRotors = await getInstallableRotors();
 
   // Wenn kein Variante ausgewählt ist oder keine Rotoren ausgewählt sind, gebe true zurück
-  if (variantSelect.value === '' || selectedRotors.length < 3 || variantSelect.value === 'B' && selectedRotors.length < 2) {
+  if (variantSelect.value === '' || selectedRotors.length < installableRotors) {
+    console.log(selectedRotors.length);
+    console.log(installableRotors);
     return true;
   }
 }
@@ -486,6 +499,7 @@ async function updateReflectorOptions() {
 
         if (event.target.classList.contains("selected")) {
           event.target.classList.remove("selected");
+          document.cookie = 'reflector=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
           return;
         }
 
@@ -637,7 +651,7 @@ function disconnectKeys(key) {
   // Wrap the connectionObject in a "plugboard" object
   const finalObject = {plugboard: connectionObject};
 
-  putPlug(finalObject).then(r => console.log(r));
+  putPlug(finalObject).then();
 }
 
 function connectKeys(key1, key2) {
@@ -649,13 +663,13 @@ function connectKeys(key1, key2) {
   const connectionTextContentPairs = connectionEntries.map(([k, v]) => [k, v.key.textContent]);
   const connectionObject = Object.fromEntries(connectionTextContentPairs);
   const finalObject = { plugboard: connectionObject };
-  putPlug(finalObject).then(r => console.log(r));
+  putPlug(finalObject).then();
 }
 
 function toggleSelectedClass(key) {
-  console.log(`Toggling selected class for key: ${key.textContent}`);
+
   key.classList.toggle('selected');
-  console.log(`Key classes after toggle: ${key.classList}`);
+
 }
 
 function updateSelectedKeys(key) {
@@ -675,9 +689,6 @@ const availableColors = [
 ];
 
 function getRandomColor() {
-  if (availableColors.length === 0) {
-    throw new Error('Es sind keine Farben mehr verfügbar.');
-  }
 
   const randomIndex = Math.floor(Math.random() * availableColors.length);
   const color = availableColors[randomIndex];
