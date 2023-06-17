@@ -37,13 +37,15 @@ Cypress.Commands.add('setRotors', () => {
     cy.get('ol#selectedRotor .rotor-container:first span').invoke('text').then((text) => {
         expect(text).to.equal('I')
       });
+    cy.wait(65)
     cy.get('ol#selectedRotor .rotor-container:last span').invoke('text').then((text) => {
         expect(text).to.equal("II")
       });
+    cy.wait(65)
     cy.get('ol#selectedRotor .rotor-container:first').next().find('span').invoke('text').then((text) => {
         expect(text).to.equal("V")
       });
-
+    cy.wait(65)
 })
 
 Cypress.Commands.add('setReflectors', () => {
