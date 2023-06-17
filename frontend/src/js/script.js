@@ -2,6 +2,7 @@ const variantSelect = document.getElementById('variantSelect');
 const inputHistory = document.getElementById('inputHistory');
 const outputHistory = document.getElementById('outputHistory');
 const keyboard_input = document.getElementById('keyboard_input');
+const rotorSubstitutionSelects = document.querySelectorAll('.rotor-substitutions');
 const keyboard_output = document.getElementById('keyboard_output');
 const keyboard_plug = document.getElementById('keyboard_plug');
 
@@ -85,6 +86,10 @@ function putRotors(position, data) {
     return putToBackend(`/rotor/${position}`, data);
 }
 
+function reset() {
+  return getFromBackend('/reset');
+}
+
 function getReflectors() {
     return getFromBackend(`/reflectors`);
 }
@@ -102,6 +107,18 @@ function putPlug(data) {
 
 function getPlug() {
     return getFromBackend(`/plugboard`);
+}
+
+function putKeySetting(position, data) {
+    return putToBackend(`/rotor/${position}/position`, data);
+}
+
+function getKeySetting(position) {
+    return getFromBackend(`/rotor/${position}/position`);
+}
+
+function getInstallableRotors() {
+  return getFromBackend(`/rotors/installable`);
 }
 
 // Erstellen der Tasten
@@ -151,7 +168,8 @@ createOutput(keyboard_output);
 
 // Event-Listener zum Abfangen von Tastenanschlägen
 document.addEventListener('keydown', async (event) => {
-  if (isVariantSelected()) return;
+
+  if (await isVariantSelected()) return;
   const key = event.key;
 
   // Prüfe, ob der gedrückte Buchstabe in den `rows` enthalten ist
@@ -168,9 +186,8 @@ document.addEventListener('keydown', async (event) => {
 });
 
 document.addEventListener('keyup', async (event) => {
-  if (isVariantSelected()) return;
+  if (await isVariantSelected()) return;
   const key = event.key;
-
   findAndHighlightKey(keyboard_input, key , false);
   findAndHighlightKey(keyboard_output, outputHistory.textContent[0], false);
 
@@ -198,7 +215,7 @@ function findAndHighlightKey(keyboardDiv, key, highlight) {
 // Funktion zum Hinzufügen des Mausklick-Event-Listeners
 function addClickListener(key) {
   key.addEventListener('click', async () => {
-    if (isVariantSelected()) return;
+    if (await isVariantSelected()) return;
     const keyText = key.textContent;
     updateInputHistory(keyText);
     findAndHighlightKey(keyboard_input, keyText, true);
@@ -250,12 +267,23 @@ async function VariantsDropdown() {
   }
 }
 
+
+
+
 async function updateRotorOptions() {
   try {
     const rotors = await getRotors();
     const rotorCount = rotors.length;
+    if (rotors[1] === 400) {
+
+        console.error('Error while fetching rotors:', rotors[0]);
+        return;
+    }
 
     const rotorSelection = document.getElementById('rotorSelection');
+    const selectedRotorList = document.getElementById('selectedRotor');
+    const rotorSubstitutionSelects = document.querySelectorAll('.rotor-substitutions');
+
     rotorSelection.innerHTML = '';
 
     for (let i = 0; i < rotorCount; i++) {
@@ -265,38 +293,67 @@ async function updateRotorOptions() {
 
       li.addEventListener("click", async function(event) {
         const selectedItems = rotorSelection.querySelectorAll("li.selected");
-        const selectedRotorList = document.getElementById('selectedRotor');
 
         if (event.target.classList.contains("selected")) {
           event.target.classList.remove("selected");
-
+          let itemCounter = 0;
           for (let item of selectedRotorList.children) {
-            if (item.textContent === event.target.textContent) {
-              item.textContent = 'X';
+            if (item.querySelector('span').textContent === event.target.textContent) {
+              item.querySelector('span').textContent = 'X';
+              item.querySelector('select').innerHTML = '';
+              await putRotors(itemCounter, { rotor: null });
+              await putKeySetting(itemCounter, {position: null});
               break;
             }
+            itemCounter++;
           }
           return;
         }
-
-        if (selectedItems.length < 3) {
+        const installableRotors = await getInstallableRotors();
+        if (selectedItems.length < installableRotors) {
           event.target.classList.add("selected");
 
           // Find the index of the first 'X' item
           let rotorPosition;
           for (let i = 0; i < selectedRotorList.children.length; i++) {
-            if (selectedRotorList.children[i].textContent === 'X') {
-              selectedRotorList.children[i].textContent = event.target.textContent;
+            if (selectedRotorList.children[i].querySelector('span').textContent === 'X') {
+              selectedRotorList.children[i].querySelector('span').textContent = event.target.textContent;
               rotorPosition = i;
+
+              // Fill the dropdown menu with the substitution of the selected rotor
+              const dropdown = rotorSubstitutionSelects[i]; // Adjusted
+
+              dropdown.innerHTML = ''; // Clear the dropdown menu
+
+              const selectedRotorName = event.target.textContent;
+              const selectedRotor = rotors.find(rotor => rotor.name === selectedRotorName);
+
+              if (!selectedRotor) {
+                console.error('Rotor not found:', selectedRotorName);
+                return;
+              }
+              try {
+                const rotorName = event.target.textContent;
+                console.log(rotorName);
+                await putRotors(rotorPosition, { rotor: rotorName });
+              } catch (error) {
+                console.error('Error while sending the selected rotor to the backend:', error);
+              }
+              // Use `selectedRotor.substitution` instead of `rotors[i].substitution`
+              selectedRotor.substitution.split('').forEach((letter, index) => {
+                const option = document.createElement('option');
+                option.value = String (letter);
+                option.text = String (letter);
+                dropdown.appendChild(option);
+                if (index === 0) {
+                  try {
+                    putKeySetting(rotorPosition, {position: letter});
+                  } catch (error) {
+                    console.error('Error while sending the first substitution to the backend:', error);
+                  }
+                }});
               break;
             }
-          }
-
-          try {
-            const rotorName = event.target.textContent;
-            await putRotors(rotorPosition, { rotor: rotorName });
-          } catch (error) {
-            console.error('Error while sending the selected rotor to the backend:', error);
           }
         }
       });
@@ -307,12 +364,13 @@ async function updateRotorOptions() {
   }
 }
 
-
 window.addEventListener('load', async(event) => {
   await VariantsDropdown();
   const variant = await getVariant();
-  if (variant !== undefined) {
+  if (variant[1] !== 400) {
     document.getElementById('variantSelect').value = variant;
+  }else{
+    console.log(variant[0]);
   }
   await updateRotorOptions();
   await updateRotors();
@@ -323,12 +381,18 @@ window.addEventListener('load', async(event) => {
 });
 
 document.getElementById('variantSelect').addEventListener('change', async(event) => {
+  document.cookie = 'rotors=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  document.cookie = 'reflector=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  document.cookie = 'positions=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  document.cookie = 'history=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  document.cookie = 'input_history=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  outputHistory.textContent = "";
+  inputHistory.textContent = "";
   const enigmaModel = document.getElementById('variantSelect');
   await putVariant({variant: enigmaModel.value});
   await updateRotorOptions();
   await updateReflectorOptions();
-  document.cookie = 'rotors=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-  document.cookie = 'reflector=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+
 });
 
 
@@ -338,13 +402,15 @@ variantSelect.addEventListener('change', function() {
 
   // Set the content of all li elements in the selectedRotorList to 'X'
   for (let item of selectedRotorList.children) {
-    item.textContent = 'X';
+    item.querySelector('span').textContent = 'X';
+    item.querySelector('select').innerHTML = '';
   }
 
   // Deselect all selected items in the rotorSelection list
   const selectedItems = rotorSelection.querySelectorAll("li.selected");
   for (let item of selectedItems) {
     item.classList.remove('selected');
+
   }
 });
 
@@ -353,12 +419,37 @@ variantSelect.addEventListener('change', function() {
 async function updateRotors() {
     const selectedRotorList = document.getElementById('selectedRotor');
     const rotorSelection = document.getElementById('rotorSelection');
+    const rotorSubstitutionSelects = document.querySelectorAll('.rotor-substitutions'); // New
+    const rotors = await getRotors(); // Fetch all rotors once and reuse this data
 
     for (let i = 0; i < 3; i++) {
         try {
             const response = await getRotor(i);
+
             if (response && response.rotor) {
-                selectedRotorList.children[i].textContent = response.rotor;
+                selectedRotorList.children[i].querySelector('span').textContent = response.rotor;
+
+                // Populate dropdown with substitution
+                const dropdown = rotorSubstitutionSelects[i]; // Adjusted
+                const rotorData = rotors.find(rotor => rotor.name === response.rotor);
+                if (rotorData && rotorData.substitution) {
+                  dropdown.innerHTML = '';
+                  for (let char of rotorData.substitution) {
+                    const option = document.createElement('option');
+                    option.value = char;
+                    option.text = char;
+                    dropdown.appendChild(option);
+                  }
+                }
+
+                const response_setting = await getKeySetting(i);
+                let key = "Rotor " + i + " position";
+                if (response_setting[key]) {
+                  selectedRotorList.children[i].querySelector('select').value = response_setting[key];
+                } else {
+                  console.error(`Konnte den Schlüssel '${key}' nicht im Response-Objekt finden.`);
+                }
+
 
                 // Finden und Auswählen des entsprechenden Rotors in der rotorSelection
                 for (let rotorOption of rotorSelection.children) {
@@ -376,17 +467,19 @@ async function updateRotors() {
         }
     }
 }
-
-function isVariantSelected() {
+async function isVariantSelected() {
   const rotorSelection = document.getElementById('rotorSelection');
   const selectedRotors = rotorSelection.querySelectorAll("li.selected");
-
+  const installableRotors = await getInstallableRotors();
 
   // Wenn kein Variante ausgewählt ist oder keine Rotoren ausgewählt sind, gebe true zurück
-  if (variantSelect.value === '' || selectedRotors.length < 3 || variantSelect.value === 'B' && selectedRotors.length < 2) {
+  if (variantSelect.value === '' || selectedRotors.length < installableRotors) {
+    console.log(selectedRotors.length);
+    console.log(installableRotors);
     return true;
   }
 }
+
 
 async function updateReflectorOptions() {
   try {
@@ -406,6 +499,7 @@ async function updateReflectorOptions() {
 
         if (event.target.classList.contains("selected")) {
           event.target.classList.remove("selected");
+          document.cookie = 'reflector=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
           return;
         }
 
@@ -446,6 +540,21 @@ async function updateReflectors() {
       console.error(`Fehler beim Abrufen des Reflectors:`, error);
     }
   }
+}
+
+
+// Füge einen Event-Listener zu jedem Dropdown hinzu
+for (let i = 0; i < rotorSubstitutionSelects.length; i++) {
+  const dropdown = rotorSubstitutionSelects[i];
+  dropdown.addEventListener('change', async (event) => {
+    // Wenn eine Option ausgewählt wird, senden Sie die ausgewählte Position an das Backend
+    const selectedPosition = event.target.value;
+    try {
+      await putKeySetting(i, {position: selectedPosition});
+    } catch (error) {
+      console.error(`Fehler beim Senden der ausgewählten Position '${selectedPosition}' des Dropdowns ${i} an das Backend:`, error);
+    }
+  });
 }
 
 function createPlug(keyboardDiv, keysConfig) {
@@ -540,9 +649,9 @@ function disconnectKeys(key) {
   const connectionObject = Object.fromEntries(connectionTextContentPairs);
 
   // Wrap the connectionObject in a "plugboard" object
-  const finalObject = { plugboard: connectionObject };
+  const finalObject = {plugboard: connectionObject};
 
-  putPlug(finalObject).then(r => console.log(r));
+  putPlug(finalObject).then();
 }
 
 function connectKeys(key1, key2) {
@@ -554,13 +663,13 @@ function connectKeys(key1, key2) {
   const connectionTextContentPairs = connectionEntries.map(([k, v]) => [k, v.key.textContent]);
   const connectionObject = Object.fromEntries(connectionTextContentPairs);
   const finalObject = { plugboard: connectionObject };
-  putPlug(finalObject).then(r => console.log(r));
+  putPlug(finalObject).then();
 }
 
 function toggleSelectedClass(key) {
-  console.log(`Toggling selected class for key: ${key.textContent}`);
+
   key.classList.toggle('selected');
-  console.log(`Key classes after toggle: ${key.classList}`);
+
 }
 
 function updateSelectedKeys(key) {
@@ -580,9 +689,6 @@ const availableColors = [
 ];
 
 function getRandomColor() {
-  if (availableColors.length === 0) {
-    throw new Error('Es sind keine Farben mehr verfügbar.');
-  }
 
   const randomIndex = Math.floor(Math.random() * availableColors.length);
   const color = availableColors[randomIndex];
