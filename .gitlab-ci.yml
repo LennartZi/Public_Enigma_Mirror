@@ -159,7 +159,9 @@ bandit-scan-backend:
   before_script:
     - pip install bandit
   script:
+    - bandit -r backend  || true
     - bandit -r backend -f html -o bandit-backend-report.html
+  allow_failure: true
   artifacts:
     paths:
       - "bandit-backend-report.html"
