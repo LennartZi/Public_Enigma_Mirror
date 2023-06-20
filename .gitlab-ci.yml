@@ -159,7 +159,7 @@ bandit-scan-backend:
   before_script:
     - pip install bandit
   script:
-    - bandit -r backend -c backend/bandit.yaml -f html -o bandit-backend-report.html
+    - bandit -r backend -c backend/pyproject.toml -f html -o bandit-backend-report.html
   allow_failure: true
   artifacts:
     when: always
