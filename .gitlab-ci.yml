@@ -9,8 +9,8 @@ stages:
   - e2e
   - scan
   - scan_results
-  - cleanup
   - release
+  - cleanup
 
 unit-test-backend:
   stage: test
@@ -228,18 +228,19 @@ container_scanning_results_reverse-proxy:
 .delete-container:
   stage: cleanup
   dependencies: []
-  image: 
-    name: quay.io/skopeo/stable:latest
-    entrypoint: [""]
+  image: alpine:latest
   before_script:
-    - /bin/skopeo login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+    - apk add --no-cache curl
+    - curl -L https://github.com/regclient/regclient/releases/latest/download/regctl-linux-amd64 > /bin/regctl
+    - chmod 755 /bin/regctl
+    - regctl registry login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
 
 remove-app-containers:
   extends: .delete-container
   script:
-    - /bin/skopeo delete docker://${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG}
-    - /bin/skopeo delete docker://${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG}
-    - /bin/skopeo delete docker://${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG}
+    - regctl tag rm ${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG}
+    - regctl tag rm ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG}
+    - regctl tag rm ${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG}
   except:
     variables:
       - $CI_COMMIT_TAG
@@ -247,7 +248,7 @@ remove-app-containers:
 remove-e2e-tests-container:
   extends: .delete-container
   script:
-    - /bin/skopeo delete docker://${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
+    - regctl tag rm ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
 
 release:
   stage: release
@@ -262,19 +263,35 @@ release:
         --description "A docker image is available at ${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG} & ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG} or with the latest tag"
         --tag-name "${CI_COMMIT_TAG}"
 
-add-latest-tag:
+.add-tag:
   stage: release
-  dependencies: []
-  rules:
-    - if: $CI_COMMIT_TAG != null
-  needs:
-    - 'release'
   image: 
     name: quay.io/skopeo/stable:latest
     entrypoint: [""]
   before_script:
     - /bin/skopeo login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+
+add-latest-tag:
+  extends: .add-tag
+  rules:
+    - if: $CI_COMMIT_TAG != null
+  dependencies: []
+  needs:
+    - 'release'
   script:
     - /bin/skopeo copy docker://${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG} docker://${CI_REGISTRY_IMAGE}/frontend:latest
     - /bin/skopeo copy docker://${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG} docker://${CI_REGISTRY_IMAGE}/backend:latest
     - /bin/skopeo copy docker://${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG} docker://${CI_REGISTRY_IMAGE}/reverse-proxy:latest
+
+add-nightly-tag:
+  extends: .add-tag
+  rules:
+    - if: $IS_NIGHTLY != null
+  needs:
+    - containerize-backend
+    - containerize-frontend
+    - containerize-reverse-proxy
+  script:
+    - /bin/skopeo copy docker://${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG} docker://${CI_REGISTRY_IMAGE}/frontend:nightly
+    - /bin/skopeo copy docker://${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG} docker://${CI_REGISTRY_IMAGE}/backend:nightly
+    - /bin/skopeo copy docker://${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG} docker://${CI_REGISTRY_IMAGE}/reverse-proxy:nightly
