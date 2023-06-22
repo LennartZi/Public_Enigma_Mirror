@@ -229,7 +229,7 @@ remove-app-containers:
 remove-e2e-tests-container:
   extends: .delete-container
   script:
-    - /regctl tag rm ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
+    - regctl tag rm ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
 
 release:
   stage: release
