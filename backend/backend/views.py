@@ -70,7 +70,7 @@ def get_rotors():
         return 'Variant cookie not set', 400
 
     with open("/etc/enigma.yaml", "r") as file:
-        data = yaml.load(file, Loader=yaml.SafeLoader)
+        data = yaml.safe_load(file)
 
     variant = data['variants'].get(variant_cookie)
     if not variant:
@@ -112,7 +112,7 @@ def set_rotor(rotornr):
         rotor = request.get_json()['rotor']
 
         with open("/etc/enigma.yaml", "r") as file:
-            data = yaml.load(file, Loader=yaml.SafeLoader)
+            data = yaml.safe_load(file)
 
         variant = data['variants'].get(variant_cookie)
         if not variant:
@@ -159,7 +159,7 @@ def get_reflectors():
         return 'Variant cookie not set', 400
 
     with open("/etc/enigma.yaml", "r") as file:
-        data = yaml.load(file, Loader=yaml.SafeLoader)
+        data = yaml.safe_load(file)
 
     variant = data['variants'].get(variant_cookie)
     if not variant:
@@ -195,7 +195,7 @@ def set_reflector():
         reflector = request.get_json()['reflector']
 
         with open("/etc/enigma.yaml", "r") as file:
-            data = yaml.load(file, Loader=yaml.SafeLoader)
+            data = yaml.safe_load(file)
 
         variant = data['variants'].get(variant_cookie)
         if not variant:
