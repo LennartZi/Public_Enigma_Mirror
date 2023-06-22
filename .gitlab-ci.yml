@@ -1,5 +1,6 @@
 variables:
   DOCKER_DRIVER: overlay2
+  GIT_DEPTH: 0
 
 stages:
   - test
@@ -150,6 +151,24 @@ e2e-tests-firefox:
 
 include:
   - template: Security/Container-Scanning.gitlab-ci.yml
+
+bandit-scan-backend:
+  stage: scan
+  image: python:3.11-alpine
+  needs: []
+  before_script:
+    - pip install bandit
+  script:
+    - bandit -r backend -c backend/pyproject.toml -f html -o bandit-backend-report.html
+  allow_failure: true
+  artifacts:
+    when: always
+    paths:
+      - "bandit-backend-report.html"
+  only:
+    changes:
+      - "backend/*"
+      - "backend/backend/*"
 
 container_scanning:
   stage: scan

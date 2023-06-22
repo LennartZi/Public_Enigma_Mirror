@@ -10,3 +10,5 @@ dependencies = [
   "PyYaml == 6.0",
 ]
 
+[tool.bandit]
+exclude_dirs = ["tests"]
