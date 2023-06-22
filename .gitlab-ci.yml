@@ -8,8 +8,8 @@ stages:
   - e2e
   - scan
   - scan_results
-  - cleanup
   - release
+  - cleanup
 
 unit-test-backend:
   stage: test
@@ -243,19 +243,35 @@ release:
         --description "A docker image is available at ${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG} & ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG} or with the latest tag"
         --tag-name "${CI_COMMIT_TAG}"
 
-add-latest-tag:
+.add-tag:
   stage: release
-  dependencies: []
-  rules:
-    - if: $CI_COMMIT_TAG != null
-  needs:
-    - 'release'
   image: 
     name: quay.io/skopeo/stable:latest
     entrypoint: [""]
   before_script:
     - /bin/skopeo login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+
+add-latest-tag:
+  extends: .add-tag
+  rules:
+    - if: $CI_COMMIT_TAG != null
+  dependencies: []
+  needs:
+    - 'release'
   script:
     - /bin/skopeo copy docker://${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG} docker://${CI_REGISTRY_IMAGE}/frontend:latest
     - /bin/skopeo copy docker://${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG} docker://${CI_REGISTRY_IMAGE}/backend:latest
     - /bin/skopeo copy docker://${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG} docker://${CI_REGISTRY_IMAGE}/reverse-proxy:latest
+
+add-nightly-tag:
+  extends: .add-tag
+  rules:
+    - if: $IS_NIGHTLY != null
+  needs:
+    - containerize-backend
+    - containerize-frontend
+    - containerize-reverse-proxy
+  script:
+    - /bin/skopeo copy docker://${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG} docker://${CI_REGISTRY_IMAGE}/frontend:nightly
+    - /bin/skopeo copy docker://${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG} docker://${CI_REGISTRY_IMAGE}/backend:nightly
+    - /bin/skopeo copy docker://${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG} docker://${CI_REGISTRY_IMAGE}/reverse-proxy:nightly
