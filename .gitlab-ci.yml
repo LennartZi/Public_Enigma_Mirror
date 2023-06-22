@@ -211,16 +211,16 @@ container_scanning_results_reverse-proxy:
   dependencies: []
   image:
     name: ghcr.io/regclient/regctl:latest
-    entrypoint: ["/regctl"]
+    entrypoint: [""]
   before_script:
-    - registry login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+    - /regctl registry login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
 
 remove-app-containers:
   extends: .delete-container
   script:
-    - tag rm ${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG}
-    - tag rm ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG}
-    - tag rm ${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG}
+    - /regctl tag rm ${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG}
+    - /regctl tag rm ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_SLUG}
+    - /regctl tag rm ${CI_REGISTRY_IMAGE}/reverse-proxy:${CI_COMMIT_REF_SLUG}
   except:
     variables:
       - $CI_COMMIT_TAG
@@ -228,7 +228,7 @@ remove-app-containers:
 remove-e2e-tests-container:
   extends: .delete-container
   script:
-    - tag rm ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
+    - /regctl tag rm ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
 
 release:
   stage: release
