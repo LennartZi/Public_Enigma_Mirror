@@ -209,7 +209,9 @@ container_scanning_results_reverse-proxy:
 .delete-container:
   stage: cleanup
   dependencies: []
-  image: ghcr.io/regclient/regctl:latest
+  image:
+    name: ghcr.io/regclient/regctl:latest
+    entrypoint: ["/regctl"]
   before_script:
     - registry login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
 
