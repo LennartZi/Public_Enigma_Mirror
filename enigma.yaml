@@ -1,18 +1,21 @@
 history: 140
 variants:
-  'D':
+  'B (A-133 modified)':
     plugboard: false
+    entry: ABCDEFGHIJKLMNOPQRSTUVWXYZ
     rotors:
-      installable: 2
+      installable: 3
       'I':
-        substitution: DMTWSILRUYQNKFEJCAZBPGXOHV
-        turnover: Q
+        substitution: PSBGWXQJDHOUCFRTEZVINLYMKA
+        turnover: G
       'II':
-        substitution: HQZGPJTMOBLNCIFDYAWVEUSRKX
-        turnover: E
+        substitution: CHNSYWADMOTRZXBIGEKQUPFLVJ
+        turnover: G
       'III':
-        substitution: UQNTLSZFMREHDPLKIBVYGJCWOA
-        turnover: V
+        substitution: WVQIAXRJBZSPCFYUNTHDOMEKGL
+        turnover: G
+    reflectors:
+      'UKW-A': LDGBWNCPSKJAVFZHXUIRMQOTEY
   'I':
     plugboard: true
     entry: ABCDEFGHIJKLMNOPQRSTUVWXYZ
