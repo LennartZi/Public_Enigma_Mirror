@@ -182,6 +182,7 @@ document.addEventListener('keydown', async (event) => {
     findAndHighlightKey(keyboard_output, response, true);
     // Output History aktualisieren
     updateOutputHistory(response);
+    await updateRotorPositions();
   }
 });
 
@@ -219,17 +220,19 @@ function addClickListener(key) {
     const keyText = key.textContent;
     updateInputHistory(keyText);
     findAndHighlightKey(keyboard_input, keyText, true);
-    const response = await putKey({ letter: keyText });
-    findAndHighlightKey(keyboard_output, response, true);
-
-    // Update der Ausgabehistorie
-    updateOutputHistory(response);
 
     // Entfernen der Hervorhebung nach einer kurzen Verzögerung
     setTimeout(() => {
       findAndHighlightKey(keyboard_input, keyText, false);
       findAndHighlightKey(keyboard_output, response, false);
     }, 1000);
+
+    const response = await putKey({ letter: keyText });
+    findAndHighlightKey(keyboard_output, response, true);
+
+    // Update der Ausgabehistorie
+    updateOutputHistory(response);
+    await updateRotorPositions();
   });
 }
 
@@ -467,6 +470,28 @@ async function updateRotors() {
         }
     }
 }
+
+async function updateRotorPositions() {
+    const selectedRotorList = document.getElementById('selectedRotor');
+
+    for (let i = 0; i < 3; i++) {
+        try {
+            const response_setting = await getKeySetting(i);
+            let key = "Rotor " + i + " position";
+            if (response_setting[key]) {
+              selectedRotorList.children[i].querySelector('select').value = response_setting[key];
+            } else {
+              console.error(`Konnte den Schlüssel '${key}' nicht im Response-Objekt finden.`);
+            }
+        } catch (error) {
+            // Ignoriere Fehler mit dem Statuscode 400 und lasse den textContent unverändert
+            if (error.status !== 400) {
+                console.error(`Fehler beim Abrufen des Rotors an der Position ${i}:`, error);
+            }
+        }
+    }
+}
+
 async function isVariantSelected() {
   const rotorSelection = document.getElementById('rotorSelection');
   const selectedRotors = rotorSelection.querySelectorAll("li.selected");
