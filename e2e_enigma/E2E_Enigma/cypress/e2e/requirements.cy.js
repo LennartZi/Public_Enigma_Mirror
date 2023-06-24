@@ -13,7 +13,7 @@ let api_encrypt = url + '/api/encrypt'
 let api_positions = url + '/api/rotor/0/position'
 
 let model_selector = "#variantSelect"
-let model = ["M3", "I", "D"]
+let model = ["M3", "I", "B (A-133 modified)"]
 
 let plugboard = "#keyboard_plug"
 let rotor_sub = '.rotor-substitutions'
