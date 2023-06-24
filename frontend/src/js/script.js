@@ -228,8 +228,9 @@ function addClickListener(key) {
     updateInputHistory(keyText);
     findAndHighlightKey(keyboard_input, keyText, true);
 
+    let response = '';
     try {
-      const response = await putKey({ letter: keyText });
+      response = await putKey({ letter: keyText });
       findAndHighlightKey(keyboard_output, response, true);
 
       // Update der Ausgabehistorie
