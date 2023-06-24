@@ -165,6 +165,7 @@ function createOutput(keyboardDiv) {
 
 createOutput(keyboard_output);
 
+const keyboard_pressed_to_lamp = new Map();
 
 // Event-Listener zum Abfangen von Tastenanschlägen
 document.addEventListener('keydown', async (event) => {
@@ -176,22 +177,28 @@ document.addEventListener('keydown', async (event) => {
   const isValidKey = rows.some(row => row.includes(key.toLowerCase()));
 
   if (!event.repeat && isValidKey) {
-    updateInputHistory(key);
-    findAndHighlightKey(keyboard_input, key , true);
-    const response = await putKey({letter: key})
-    findAndHighlightKey(keyboard_output, response, true);
-    // Output History aktualisieren
-    updateOutputHistory(response);
-    await updateRotorPositions();
+    try {
+      updateInputHistory(key);
+      findAndHighlightKey(keyboard_input, key , true);
+      const response = await putKey({letter: key})
+      keyboard_pressed_to_lamp.set(key, response);
+      findAndHighlightKey(keyboard_output, response, true);
+      // Output History aktualisieren
+      updateOutputHistory(response);
+      await updateRotorPositions();
+    } catch (error) {
+      console.error(`Fehler:`, error);
+    }
   }
 });
 
 document.addEventListener('keyup', async (event) => {
   if (await isVariantSelected()) return;
   const key = event.key;
+  const lamp = keyboard_pressed_to_lamp.get(key)
+  keyboard_pressed_to_lamp.delete(key)
   findAndHighlightKey(keyboard_input, key , false);
-  findAndHighlightKey(keyboard_output, outputHistory.textContent[0], false);
-
+  findAndHighlightKey(keyboard_output, lamp, false);
 });
 
 
@@ -221,18 +228,22 @@ function addClickListener(key) {
     updateInputHistory(keyText);
     findAndHighlightKey(keyboard_input, keyText, true);
 
+    try {
+      const response = await putKey({ letter: keyText });
+      findAndHighlightKey(keyboard_output, response, true);
+
+      // Update der Ausgabehistorie
+      updateOutputHistory(response);
+      await updateRotorPositions();
+    } catch (error) {
+      console.error(`Fehler:`, error);
+    }
+
     // Entfernen der Hervorhebung nach einer kurzen Verzögerung
     setTimeout(() => {
       findAndHighlightKey(keyboard_input, keyText, false);
       findAndHighlightKey(keyboard_output, response, false);
     }, 1000);
-
-    const response = await putKey({ letter: keyText });
-    findAndHighlightKey(keyboard_output, response, true);
-
-    // Update der Ausgabehistorie
-    updateOutputHistory(response);
-    await updateRotorPositions();
   });
 }
 
