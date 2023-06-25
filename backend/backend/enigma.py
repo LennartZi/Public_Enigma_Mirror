@@ -70,7 +70,7 @@ class Enigma:
 
             rotor.step_rotor()
 
-            if position != rotor.notch:  # If we weren't on the notch we don't move the next rotor
+            if position not in rotor.notch:  # If we weren't on the notch we don't move the next rotor
                 break
 
     def encrypt_forward(self, letter):
