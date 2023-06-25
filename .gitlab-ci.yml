@@ -1,5 +1,6 @@
 variables:
   DOCKER_DRIVER: overlay2
+  GIT_DEPTH: 0
 
 stages:
   - test
@@ -86,7 +87,7 @@ containerize-reverse-proxy:
 containerize-e2e-tests:
   extends: .containerize
   script:
-    - podman build e2e_enigma -t ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
+    - podman build e2e_enigma -t ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG} --build-arg registry=registry.mygit.th-deg.de/jd17123/enigma
     - podman push ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
   after_script:
     - podman rmi ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
@@ -150,6 +151,42 @@ e2e-tests-firefox:
 
 include:
   - template: Security/Container-Scanning.gitlab-ci.yml
+
+bandit-scan-backend:
+  stage: scan
+  image: python:3.11-alpine
+  needs: []
+  before_script:
+    - pip install bandit
+  script:
+    - bandit -r backend -c backend/pyproject.toml -f html -o bandit-backend-report.html
+  allow_failure: true
+  artifacts:
+    when: always
+    paths:
+      - "bandit-backend-report.html"
+  only:
+    changes:
+      - "backend/*"
+      - "backend/backend/*"
+
+dlint-backend:
+  stage: scan
+  image: python:3.11-alpine
+  needs: []
+  before_script:
+    - pip install dlint
+  script:
+    - flake8 --select=DUO --tee --output-file=dlint-backend-report.txt backend
+  allow_failure: true
+  artifacts:
+    when: always
+    paths:
+      - "dlint-backend-report.txt"
+  only:
+    changes:
+      - "backend/*"
+      - "backend/backend/*"
 
 container_scanning:
   stage: scan

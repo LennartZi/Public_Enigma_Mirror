@@ -1,4 +1,5 @@
-FROM docker.io/cypress/browsers:node16.16.0-chrome107-ff107-edge
+ARG registry=docker.io
+FROM ${registry}/cypress/browsers:node16.16.0-chrome107-ff107-edge
 ENV browser=electron
 
 COPY E2E_Enigma /workdir
