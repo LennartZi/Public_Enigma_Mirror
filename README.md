@@ -1,5 +1,9 @@
 # Enigma
 
+[![pipeline status](https://mygit.th-deg.de/jd17123/enigma/badges/develop/pipeline.svg)](https://mygit.th-deg.de/jd17123/enigma/-/commits/develop)
+[![coverage report](https://mygit.th-deg.de/jd17123/enigma/badges/develop/coverage.svg)](https://mygit.th-deg.de/jd17123/enigma/-/commits/develop)
+[![Latest Release](https://mygit.th-deg.de/jd17123/enigma/-/badges/release.svg)](https://mygit.th-deg.de/jd17123/enigma/-/releases)
+
 `docker` can be replaced with `podman`.
 
 ## Dev
