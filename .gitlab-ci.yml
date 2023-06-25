@@ -170,6 +170,24 @@ bandit-scan-backend:
       - "backend/*"
       - "backend/backend/*"
 
+dlint-backend:
+  stage: scan
+  image: python:3.11-alpine
+  needs: []
+  before_script:
+    - pip install dlint
+  script:
+    - flake8 --select=DUO --tee --output-file=dlint-backend-report.txt backend
+  allow_failure: true
+  artifacts:
+    when: always
+    paths:
+      - "dlint-backend-report.txt"
+  only:
+    changes:
+      - "backend/*"
+      - "backend/backend/*"
+
 container_scanning:
   stage: scan
   when: manual
