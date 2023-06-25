@@ -86,8 +86,9 @@ function putRotors(position, data) {
     return putToBackend(`/rotor/${position}`, data);
 }
 
-function reset() {
-  return getFromBackend('/reset');
+async function reset() {
+  await getFromBackend('/reset');
+  location.reload();
 }
 
 function getReflectors() {
