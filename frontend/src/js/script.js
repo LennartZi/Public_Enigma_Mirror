@@ -181,13 +181,21 @@ document.addEventListener('keydown', async (event) => {
       updateInputHistory(key);
       findAndHighlightKey(keyboard_input, key , true);
       const response = await putKey({letter: key})
-      keyboard_pressed_to_lamp.set(key, response);
-      findAndHighlightKey(keyboard_output, response, true);
+
+      if (!keyboard_pressed_to_lamp.has(key)) {
+        keyboard_pressed_to_lamp.set(key, response);
+        findAndHighlightKey(keyboard_output, response, true);
+      } else if (keyboard_pressed_to_lamp.get(key) == null) {
+        keyboard_pressed_to_lamp.delete(key)
+      }
       // Output History aktualisieren
       updateOutputHistory(response);
       await updateRotorPositions();
     } catch (error) {
       console.error(`Fehler:`, error);
+      if (keyboard_pressed_to_lamp.has(key) || keyboard_pressed_to_lamp.get(key) == null) {
+        keyboard_pressed_to_lamp.delete(key)
+      }
     }
   }
 });
@@ -195,9 +203,13 @@ document.addEventListener('keydown', async (event) => {
 document.addEventListener('keyup', async (event) => {
   if (await isVariantSelected()) return;
   const key = event.key;
+  findAndHighlightKey(keyboard_input, key , false);
+  if (!keyboard_pressed_to_lamp.has(key)) {
+    keyboard_pressed_to_lamp.set(key, null);
+    return;
+  }
   const lamp = keyboard_pressed_to_lamp.get(key)
   keyboard_pressed_to_lamp.delete(key)
-  findAndHighlightKey(keyboard_input, key , false);
   findAndHighlightKey(keyboard_output, lamp, false);
 });
 
