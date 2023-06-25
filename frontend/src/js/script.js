@@ -165,6 +165,7 @@ function createOutput(keyboardDiv) {
 
 createOutput(keyboard_output);
 
+const keyboard_pressed_to_lamp = new Map();
 
 // Event-Listener zum Abfangen von Tastenanschlägen
 document.addEventListener('keydown', async (event) => {
@@ -176,12 +177,26 @@ document.addEventListener('keydown', async (event) => {
   const isValidKey = rows.some(row => row.includes(key.toLowerCase()));
 
   if (!event.repeat && isValidKey) {
-    updateInputHistory(key);
-    findAndHighlightKey(keyboard_input, key , true);
-    const response = await putKey({letter: key})
-    findAndHighlightKey(keyboard_output, response, true);
-    // Output History aktualisieren
-    updateOutputHistory(response);
+    try {
+      updateInputHistory(key);
+      findAndHighlightKey(keyboard_input, key , true);
+      const response = await putKey({letter: key})
+
+      if (!keyboard_pressed_to_lamp.has(key)) {
+        keyboard_pressed_to_lamp.set(key, response);
+        findAndHighlightKey(keyboard_output, response, true);
+      } else if (keyboard_pressed_to_lamp.get(key) == null) {
+        keyboard_pressed_to_lamp.delete(key)
+      }
+      // Output History aktualisieren
+      updateOutputHistory(response);
+      await updateRotorPositions();
+    } catch (error) {
+      console.error(`Fehler:`, error);
+      if (keyboard_pressed_to_lamp.has(key) || keyboard_pressed_to_lamp.get(key) == null) {
+        keyboard_pressed_to_lamp.delete(key)
+      }
+    }
   }
 });
 
@@ -189,8 +204,13 @@ document.addEventListener('keyup', async (event) => {
   if (await isVariantSelected()) return;
   const key = event.key;
   findAndHighlightKey(keyboard_input, key , false);
-  findAndHighlightKey(keyboard_output, outputHistory.textContent[0], false);
-
+  if (!keyboard_pressed_to_lamp.has(key)) {
+    keyboard_pressed_to_lamp.set(key, null);
+    return;
+  }
+  const lamp = keyboard_pressed_to_lamp.get(key)
+  keyboard_pressed_to_lamp.delete(key)
+  findAndHighlightKey(keyboard_output, lamp, false);
 });
 
 
@@ -219,11 +239,18 @@ function addClickListener(key) {
     const keyText = key.textContent;
     updateInputHistory(keyText);
     findAndHighlightKey(keyboard_input, keyText, true);
-    const response = await putKey({ letter: keyText });
-    findAndHighlightKey(keyboard_output, response, true);
 
-    // Update der Ausgabehistorie
-    updateOutputHistory(response);
+    let response = '';
+    try {
+      response = await putKey({ letter: keyText });
+      findAndHighlightKey(keyboard_output, response, true);
+
+      // Update der Ausgabehistorie
+      updateOutputHistory(response);
+      await updateRotorPositions();
+    } catch (error) {
+      console.error(`Fehler:`, error);
+    }
 
     // Entfernen der Hervorhebung nach einer kurzen Verzögerung
     setTimeout(() => {
@@ -467,6 +494,28 @@ async function updateRotors() {
         }
     }
 }
+
+async function updateRotorPositions() {
+    const selectedRotorList = document.getElementById('selectedRotor');
+
+    for (let i = 0; i < 3; i++) {
+        try {
+            const response_setting = await getKeySetting(i);
+            let key = "Rotor " + i + " position";
+            if (response_setting[key]) {
+              selectedRotorList.children[i].querySelector('select').value = response_setting[key];
+            } else {
+              console.error(`Konnte den Schlüssel '${key}' nicht im Response-Objekt finden.`);
+            }
+        } catch (error) {
+            // Ignoriere Fehler mit dem Statuscode 400 und lasse den textContent unverändert
+            if (error.status !== 400) {
+                console.error(`Fehler beim Abrufen des Rotors an der Position ${i}:`, error);
+            }
+        }
+    }
+}
+
 async function isVariantSelected() {
   const rotorSelection = document.getElementById('rotorSelection');
   const selectedRotors = rotorSelection.querySelectorAll("li.selected");
