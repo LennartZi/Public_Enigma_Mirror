@@ -87,10 +87,10 @@ describe('Variant Select', () => {
         cy.setModel(model_selector, model[1])
         cy.setRotors()
 
-        cy.get('body').trigger('keydown', { keycode: 81 }) // q
+        cy.get('body').trigger('keydown', { keycode: 81, key: 'q', eventConstructor: 'KeyboardEvent' }) // q
         cy.wait(100)
         cy.get(lamps).contains("U").should('have.class', 'highlight-red')
-        cy.get('body').trigger('keyup', { keycode: 81 })
+        cy.get('body').trigger('keyup', { keycode: 81, key: 'q', eventConstructor: 'KeyboardEvent' })
         cy.wait(200)
     })
   })
