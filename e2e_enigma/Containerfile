@@ -8,4 +8,4 @@ RUN mkdir /workdir/reports
 
 RUN npm ci
 
-CMD ["npx", "cypress", "run", "--headless", "--reporter", "junit", "--reporter-options", "mochaFile=/workdir/reports/e2e-test-[hash].xml,toConsole=true", "--browser", "${browser}"]
+CMD ["npx", "cypress", "run", "--headless", "--reporter", "junit", "--reporter-options", "mochaFile=/workdir/reports/e2e-test-[hash].xml", "--browser", "${browser}"]

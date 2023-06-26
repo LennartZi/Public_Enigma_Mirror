@@ -19,31 +19,28 @@ let plugboard = "#keyboard_plug"
 let rotor_sub = '.rotor-substitutions'
 
 
+if (Cypress.env().has('CUSTOM_ENIGMA_TEST')) {
 describe('Conditional Test for Custom Enigma', ()=>{
 describe('Variant Select', () => {
     it('Selects The Variant', () => {
-      if(Cypress.env('CUSTOM_ENIGMA_TEST')=='enabled'){
       cy.visit(url)
       cy.setModel(model_selector, custom_model)
       cy.wait(200)
-    }
     })
   })
 
   describe('Rotor Select', () => {
     it('Selects the Rotors', () => {
-      if(Cypress.env('CUSTOM_ENIGMA_TEST')=='enabled'){
       cy.visit(url)
       cy.setModel(model_selector, custom_model)
       cy.setRotors()
 
-      cy.wait(200)}
+      cy.wait(200)
     })
   })
 
   describe('Keyboard Click', () => {
     it('Tests the Keyboard Highlight', () => {
-      if(Cypress.env('CUSTOM_ENIGMA_TEST')=='enabled'){
         cy.visit(url)
         cy.setModel(model_selector, custom_model)
         cy.setRotors()
@@ -51,7 +48,7 @@ describe('Variant Select', () => {
         cy.get(keys).contains("Q").click().then(() => {
             cy.get(keys).contains("Q").should('have.class', 'highlight')
         });
-        cy.wait(200)}
+        cy.wait(200)
     })
   })
 
@@ -84,7 +81,6 @@ describe('Variant Select', () => {
 
   describe('Lamppanel Press', () => {
     it('Tests the Lamppanel Highlight', () => {
-      if(Cypress.env('CUSTOM_ENIGMA_TEST')=='enabled'){
         cy.visit(url)
         cy.setModel(model_selector, custom_model)
         cy.setRotors()
@@ -92,14 +88,13 @@ describe('Variant Select', () => {
         cy.get('body').type('{Q}').then(() => {
             cy.get(lamps).contains("U").should('have.class', 'highlight-red')
         });
-        cy.wait(200)}
+        cy.wait(200)
     })
   })
 
 
   describe('Cookies', () => {
     it('Cookies', () => {
-      if(Cypress.env('CUSTOM_ENIGMA_TEST')=='enabled'){
       cy.visit(url)
       cy.setCookie('variant', 'I')
       cy.setCookie('input_history', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
@@ -116,7 +111,7 @@ describe('Variant Select', () => {
         cy.get(input_history).invoke('text').then((text) => {
           expect(text).to.equal('PQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
         }); 
-        cy.wait(200)}
+        cy.wait(200)
     })
   })
 
@@ -124,7 +119,6 @@ describe('Variant Select', () => {
 
   describe('Plugboard', () => {
     it('Tests the Plugboard', () => {
-      if(Cypress.env('CUSTOM_ENIGMA_TEST')=='enabled'){
         //Mit dieser Konfiguration kommt beim Q klicken am Beginn U Raus
         cy.visit(url)
         cy.setModel(model_selector, custom_model)
@@ -145,13 +139,11 @@ describe('Variant Select', () => {
         });
 
         cy.wait(200)
-      }
     })
   })
 
   describe('Ring Settings', () => {
     it('Tests the Rotor Substitution and Reflector', () => {
-      if(Cypress.env('CUSTOM_ENIGMA_TEST')=='enabled'){
         cy.visit(url)
         cy.setModel(model_selector, custom_model)
         cy.setRotors()
@@ -175,14 +167,13 @@ describe('Variant Select', () => {
         cy.wait(200)
         cy.get('#reflectorSelection li').first().not('have.class', 'selected')
 
-        cy.wait(200)}
+        cy.wait(200)
     })
   })
 
 
   describe('Retain State', () => {
     it('Tests if State is loaded with Cookies', () => {
-      if(Cypress.env('CUSTOM_ENIGMA_TEST')=='enabled'){
       cy.visit(url)
 
       cy.setCookie('variant', 'M3')
@@ -226,7 +217,6 @@ describe('Variant Select', () => {
   cy.get(input_history).invoke('text').then((text) => {
     expect(text).to.have.length(0)
     });  
-  }
     })
   })
 
@@ -234,7 +224,6 @@ describe('Variant Select', () => {
   //Encryption
 describe('Full User Interaction', () => {
     it('Full User Interaction', () => {
-      if(Cypress.env('CUSTOM_ENIGMA_TEST')=='enabled'){
       cy.setupTest(url, model_selector, custom_model)
   
       cy.testUserInput(input_history,output_history, keys, usr_input)
@@ -243,14 +232,12 @@ describe('Full User Interaction', () => {
       cy.get(output_history).invoke('text').then((text) => {
         encr_output = text
       });
-    }
     })
   })
   
   // Decryption
   describe('User Interaction Decryption', () => {
     it('User Types the Encrypted '+usr_input, () => {
-      if(Cypress.env('CUSTOM_ENIGMA_TEST')=='enabled'){
       cy.setupTest(url, model_selector, custom_model)
       //Da ein neuer Buchstabe immer links in die History und nicht rechts vom alten geschrieben wird,
       //muss Encrypteter String reversed werden fuer den Input
@@ -260,7 +247,7 @@ describe('Full User Interaction', () => {
       cy.get(output_history).invoke('text').then((text) => {
       expect(text).to.equal(usr_input.split('').reverse().join(""))
       });
-    }
     })
   })
 })
+}
