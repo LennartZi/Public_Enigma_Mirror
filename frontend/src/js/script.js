@@ -472,9 +472,11 @@ async function isVariantSelected() {
   const rotorSelection = document.getElementById('rotorSelection');
   const selectedRotors = rotorSelection.querySelectorAll("li.selected");
   const installableRotors = await getInstallableRotors();
+  const reflectorSelection = document.getElementById('reflectorSelection').querySelector('.selected');
+
 
   // Wenn kein Variante ausgewählt ist oder keine Rotoren ausgewählt sind, gebe true zurück
-  if (variantSelect.value === '' || selectedRotors.length < installableRotors) {
+  if (variantSelect.value === '' || selectedRotors.length < installableRotors || !reflectorSelection) {
     console.log(selectedRotors.length);
     console.log(installableRotors);
     return true;
@@ -637,12 +639,15 @@ function loadPlug() {
 
 function disconnectKeys(key) {
   const connectedKey = connections[key.textContent].key;
+  const color = key.style.backgroundColor;
   delete connections[key.textContent];
   delete connections[connectedKey.textContent];
   key.style.backgroundColor = "";
   connectedKey.style.backgroundColor = "";
   toggleSelectedClass(key);
   toggleSelectedClass(connectedKey);
+
+  availableColors.push(color);
 
   // Update the connections object format after disconnecting keys
   const connectionEntries = Object.entries(connections);
@@ -689,13 +694,17 @@ const availableColors = [
   '#FF00FF', // Magenta
 ];
 
-function getRandomColor() {
+let usedColors = [];
 
+function getRandomColor() {
   const randomIndex = Math.floor(Math.random() * availableColors.length);
   const color = availableColors[randomIndex];
 
   // Entfernen Sie die verwendete Farbe aus dem Array, um Duplikate zu verhindern
   availableColors.splice(randomIndex, 1);
+
+  // Fügen Sie die Farbe zur Liste der verwendeten Farben hinzu
+  usedColors.push(color);
 
   return color;
 }
