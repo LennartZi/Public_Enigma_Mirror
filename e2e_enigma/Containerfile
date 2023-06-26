@@ -4,7 +4,7 @@ ENV browser=electron
 
 COPY E2E_Enigma /workdir
 WORKDIR /workdir
-RUN mkdir reports
+RUN mkdir /workdir/reports
 
 RUN npm ci
 
