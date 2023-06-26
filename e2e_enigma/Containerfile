@@ -7,4 +7,4 @@ WORKDIR /workdir
 
 RUN npm ci
 
-CMD ["npx", "cypress", "run", "--headless", "--reporter", "junit", "--browser", "${browser}"]
+CMD ["npx", "cypress", "run", "--headless", "--reporter", "junit", "--reporter-options", "mochaFile=reports/e2e-test-[hash].xml,toConsole=true", "--browser", "${browser}"]
