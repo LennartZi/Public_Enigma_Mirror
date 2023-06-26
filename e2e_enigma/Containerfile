@@ -4,7 +4,8 @@ ENV browser=electron
 
 COPY E2E_Enigma /workdir
 WORKDIR /workdir
+RUN mkdir reports
 
 RUN npm ci
 
-CMD ["npx", "cypress", "run", "--headless", "--reporter", "junit", "--reporter-options", "mochaFile=reports/e2e-test-[hash].xml,toConsole=true", "--browser", "${browser}"]
+CMD ["npx", "cypress", "run", "--headless", "--reporter", "junit", "--reporter-options", "mochaFile=/workdir/reports/e2e-test-[hash].xml,toConsole=true", "--browser", "${browser}"]
