@@ -122,8 +122,7 @@ containerize-e2e-tests:
     - docker cp ${CI_JOB_NAME}-${CI_JOB_ID}:/workdir/cypress/videos . || true
     - docker cp ${CI_JOB_NAME}-${CI_JOB_ID}:/workdir/cypress/screenshots . || true
     - docker rm ${CI_JOB_NAME}-${CI_JOB_ID} || true
-    - docker rmi enigma/e2e-tests:${CI_COMMIT_REF_SLUG} || true
-    - docker rmi ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG} || true
+    - docker rmi ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG} --force || true
   artifacts:
     when: always
     paths:
