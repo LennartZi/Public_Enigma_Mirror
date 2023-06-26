@@ -250,4 +250,10 @@ describe('Full User Interaction', () => {
     })
   })
 })
+} else {
+describe('Blank Test as non custom', () => {
+    it('Does nothing', () => {
+      cy.visit(url)
+    })
+  })
 }
