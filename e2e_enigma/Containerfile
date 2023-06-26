@@ -1,6 +1,7 @@
 ARG registry=docker.io
 FROM ${registry}/cypress/browsers:node16.16.0-chrome107-ff107-edge
 ENV browser=electron
+ENV spec=cypress/e2e/default/*
 
 COPY E2E_Enigma /workdir
 WORKDIR /workdir
@@ -8,4 +9,4 @@ RUN mkdir /workdir/reports
 
 RUN npm ci
 
-CMD ["npx", "cypress", "run", "--headless", "--reporter", "junit", "--reporter-options", "mochaFile=/workdir/reports/e2e-test-[hash].xml", "--browser", "${browser}"]
+CMD ["npx", "cypress", "run", "--headless", "--reporter", "junit", "--reporter-options", "mochaFile=/workdir/reports/e2e-test-[hash].xml", "--browser", "${browser}", "--spec", "${spec}"]

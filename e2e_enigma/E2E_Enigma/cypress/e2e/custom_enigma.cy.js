@@ -19,7 +19,6 @@ let plugboard = "#keyboard_plug"
 let rotor_sub = '.rotor-substitutions'
 
 
-if (Cypress.env().has('CUSTOM_ENIGMA_TEST')) {
 describe('Conditional Test for Custom Enigma', ()=>{
 describe('Variant Select', () => {
     it('Selects The Variant', () => {
@@ -250,10 +249,3 @@ describe('Full User Interaction', () => {
     })
   })
 })
-} else {
-describe('Blank Test as non custom', () => {
-    it('Does nothing', () => {
-      cy.visit(url)
-    })
-  })
-}

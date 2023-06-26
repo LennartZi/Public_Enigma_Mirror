@@ -143,7 +143,7 @@ e2e-tests-custom-enigma:
   extends: .e2e-tests
   script:
     - cat custom_enigma.yaml | docker compose -f compose.e2e.yml exec -i backend tee /etc/enigma.yaml
-    - docker run --env CYPRESS_MAIN_SERVICE=$MAIN_SERVICE --env browser=firefox --env CYPRESS_cUSTOM_ENIGMA_TEST --network=host --name ${CI_JOB_NAME}-${CI_JOB_ID} ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
+    - docker run --env CYPRESS_MAIN_SERVICE=$MAIN_SERVICE --env browser=firefox --env spec=cypress/e2e/custom_enigma.cy.js --network=host --name ${CI_JOB_NAME}-${CI_JOB_ID} ${CI_REGISTRY_IMAGE}/e2e-tests:${CI_COMMIT_REF_SLUG}
 
 e2e-tests-chrome:
   extends: .e2e-tests
