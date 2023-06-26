@@ -6,13 +6,21 @@ variants:
     rotors:
       installable: 3
       'I':
-        substitution: PSBGWXQJDHOUCFRTEZVINLYMKA
-        turnover: G
+        substitution: EKMFLGDQVZNTOWYHXUSPAIBRCJ
+        turnover: Q
       'II':
-        substitution: CHNSYWADMOTRZXBIGEKQUPFLVJ
-        turnover: G
+        substitution: AJDKSIRUXBLHWTMCQGZNPYFVOE
+        turnover: E
       'III':
-        substitution: WVQIAXRJBZSPCFYUNTHDOMEKGL
-        turnover: G
+        substitution: BDFHJLCPRTXVZNYEIWGAKMUSQO
+        turnover: V
+      'IV':
+        substitution: ESOVPZJAYQUIRHXLNFTGKDCMWB
+        turnover: J
+      'V':
+        substitution: VZBRGITYUPSDNHLXAWMJQOFECK
+        turnover: Z
     reflectors:
-      'UKW-A': LDGBWNCPSKJAVFZHXUIRMQOTEY
+      'UKW-A': EJMZALYXVBWFCRQUONTSPIKHGD
+      'UKW-B': YRUHQSLDPXNGOKMIEBFZCWVJAT
+      'UKW-C': FVPJIAOYEDRZXWGCTKUQSBNMHL
