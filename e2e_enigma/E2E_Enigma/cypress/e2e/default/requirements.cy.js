@@ -87,9 +87,10 @@ describe('Variant Select', () => {
         cy.setModel(model_selector, model[1])
         cy.setRotors()
 
-        cy.get('body').type('{Q}').then(() => {
-            cy.get(lamps).contains("U").should('have.class', 'highlight-red')
-        });
+        cy.get('body').trigger('keydown', { keycode: 81 }) // q
+        cy.wait(100)
+        cy.get(lamps).contains("U").should('have.class', 'highlight-red')
+        cy.get('body').trigger('keyup', { keycode: 81 })
         cy.wait(200)
     })
   })
