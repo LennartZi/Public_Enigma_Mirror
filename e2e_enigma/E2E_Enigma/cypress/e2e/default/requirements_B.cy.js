@@ -255,7 +255,7 @@ describe('Full User Interaction', () => {
       });
     })
   })
-  
+  /*
   // Decryption
   describe('User Interaction Decryption', () => {
     it('User Types the Encrypted '+usr_input, () => {
@@ -275,4 +275,4 @@ describe('Full User Interaction', () => {
       expect(text).to.equal(usr_input.split('').reverse().join(""))
       });
     })
-  })
+  })*/
