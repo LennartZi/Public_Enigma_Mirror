@@ -4,7 +4,7 @@ requires = ["setuptools", "wheel"]
 
 [project]
 name = "backend"
-version = "0.2.0"
+version = "1.0.0"
 dependencies = [
   "Flask == 2.2",
   "PyYaml == 6.0",
