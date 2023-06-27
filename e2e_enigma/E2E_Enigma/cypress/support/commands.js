@@ -27,7 +27,7 @@ Cypress.Commands.add('setModel', (element, inp) => {
     cy.get(element).select(inp)
 })
 
-Cypress.Commands.add('setRotors', () => {
+Cypress.Commands.add('setRotors', (first, second, last) => {
     //cy.get("#rotor1").click()
     cy.get('ol#rotorSelection li:first').click()
     cy.get('ol#rotorSelection li:last').click()
@@ -35,15 +35,15 @@ Cypress.Commands.add('setRotors', () => {
 
     //cy.get('ol#selectedRotor li:first').should("have.value", "I")
     cy.get('ol#selectedRotor .rotor-container:first span').invoke('text').then((text) => {
-        expect(text).to.equal('I')
+        expect(text).to.equal(first)
       });
     cy.wait(200)
     cy.get('ol#selectedRotor .rotor-container:last span').invoke('text').then((text) => {
-        expect(text).to.equal("II")
+        expect(text).to.equal(last)
       });
     cy.wait(200)
     cy.get('ol#selectedRotor .rotor-container:first').next().find('span').invoke('text').then((text) => {
-        expect(text).to.equal("V")
+        expect(text).to.equal(second)
       });
     cy.wait(200)
 })
