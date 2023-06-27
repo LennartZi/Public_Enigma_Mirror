@@ -82,7 +82,7 @@ def get_is_plugboard():
 def get_rotors():
     variant_cookie = request.cookies.get('variant')
     if not variant_cookie:
-        return 'Variant cookie not set', 400
+        return jsonify('Variant cookie not set', 400)
 
     with open("/etc/enigma.yaml", "r") as file:
         data = yaml.safe_load(file)
@@ -171,7 +171,7 @@ def rotor_position(rotornr):
 def get_reflectors():
     variant_cookie = request.cookies.get('variant')
     if not variant_cookie:
-        return 'Variant cookie not set', 400
+        return jsonify('Variant cookie not set', 400)
 
     with open("/etc/enigma.yaml", "r") as file:
         data = yaml.safe_load(file)
@@ -242,7 +242,7 @@ def handle_plugboard():
             plugboard_dict = ast.literal_eval(plugboard_cookie)
             return jsonify(plugboard_dict)
         else:
-            return "Plugboard cookie not set", 400
+            return jsonify("Plugboard cookie not set", 400)
     elif request.method == "PUT":
         plugboard = request.get_json()["plugboard"]
         response = app.make_response(jsonify("Plugboard updated"))

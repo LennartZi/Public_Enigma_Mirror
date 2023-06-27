@@ -88,6 +88,7 @@ function putRotors(position, data) {
 
 async function reset() {
   await getFromBackend('/reset');
+  checkPlugboard();
   location.reload();
 }
 
@@ -120,6 +121,10 @@ function getKeySetting(position) {
 
 function getInstallableRotors() {
   return getFromBackend(`/rotors/installable`);
+}
+
+function usePlugboard() {
+  return getFromBackend(`/variant/plugboard`);
 }
 
 // Erstellen der Tasten
@@ -303,8 +308,6 @@ async function updateRotorOptions() {
     const rotors = await getRotors();
     const rotorCount = rotors.length;
     if (rotors[1] === 400) {
-
-        console.error('Error while fetching rotors:', rotors[0]);
         return;
     }
 
@@ -404,6 +407,7 @@ window.addEventListener('load', async(event) => {
   await updateRotors();
   await updateReflectorOptions();
   await updateReflectors();
+  checkPlugboard();
   loadPlug();
   loadHistory();
 });
@@ -420,6 +424,7 @@ document.getElementById('variantSelect').addEventListener('change', async(event)
   await putVariant({variant: enigmaModel.value});
   await updateRotorOptions();
   await updateReflectorOptions();
+  checkPlugboard();
 
 });
 
@@ -638,7 +643,7 @@ function handlePlugClick(key) {
   }
 
   // Wenn die maximale Anzahl von Verbindungen erreicht ist, kehre frühzeitig zurück
-  if (Object.keys(connections).length >= 10) {
+  if (Object.keys(connections).length >= 20) {
     return;
   }
 
@@ -741,6 +746,13 @@ const availableColors = [
   '#0000FF', // Blau
   '#FFFF00', // Gelb
   '#FF00FF', // Magenta
+  '#FF7F00', // Orange
+  '#008080', // Teal
+  '#800080', // Lila
+  '#800000', // Maroon
+  '#008000', // Dunkelgrün
+  '#000080', // Dunkelblau
+  '#808000', // Olive
 ];
 
 let usedColors = [];
@@ -756,4 +768,24 @@ function getRandomColor() {
   usedColors.push(color);
 
   return color;
+}
+
+function checkPlugboard() {
+  usePlugboard()
+    .then((result) => {
+      const container4 = document.getElementById('container4');
+      if (result[1] === 400) {
+        container4.style.display = 'none';
+        return;
+      }
+      if (result) {
+        container4.style.display = 'flex';
+      } else {
+        container4.style.display = 'none';
+      }
+    })
+    .catch((error) => {
+      console.error("Fehler bei der Kommunikation mit dem Backend:", error);
+      // Sie können hier zusätzliche Fehlerbehandlungen durchführen.
+    });
 }
