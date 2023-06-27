@@ -145,19 +145,7 @@ describe('Variant Select', () => {
         cy.get('#reflectorSelection li').first().click()
         cy.wait(200)
 
-        //U zu Y Verbinden
-        cy.get(plugboard).contains('S').click()
-        cy.get(plugboard).contains('Y').click()
-
-        //Q Klicken
-        cy.get(keys).contains("Q").click().then(()=>{
-
-          cy.wait(200)
-          //Checken ob Output statt U jetzt Y rauskommt wegen Plugboard setting
-          cy.get(output_history).invoke('text').then((text) => {
-          expect(text).to.equal('Y')
-        }); 
-        });
+        cy.get('#container4').should('have.attr', 'style', 'display: none;')
 
         cy.wait(200)
 
