@@ -43,6 +43,7 @@ describe('Variant Select', () => {
         cy.visit(url)
         cy.setModel(model_selector, custom_model)
         cy.setRotors('I', 'V', 'II')
+        cy.setReflectors()
 
         cy.get(keys).contains("Q").click().then(() => {
             cy.get(keys).contains("Q").should('have.class', 'highlight')
@@ -56,9 +57,10 @@ describe('Variant Select', () => {
         cy.visit(url)
         cy.setModel(model_selector, custom_model)
         cy.setRotors('I', 'V', 'II')
+        cy.setReflectors()
 
         cy.get(keys).contains("Q").click().then(() => {
-            cy.get(lamps).contains("U").should('have.class', 'highlight-red')
+            cy.get(lamps).contains("G").should('have.class', 'highlight-red')
           });
             cy.wait(400)
     })
@@ -71,6 +73,7 @@ describe('Variant Select', () => {
         cy.visit(url)
         cy.setModel(model_selector, custom_model)
         cy.setRotors('I', 'V', 'II')
+        cy.setReflectors()
         
         cy.get('body').trigger('keydown', { keycode: 81, key: 'q', eventConstructor: 'KeyboardEvent' }) // q
         cy.wait(100)
@@ -85,10 +88,11 @@ describe('Variant Select', () => {
         cy.visit(url)
         cy.setModel(model_selector, custom_model)
         cy.setRotors('I', 'V', 'II')
+        cy.setReflectors()
 
         cy.get('body').trigger('keydown', { keycode: 81, key: 'q', eventConstructor: 'KeyboardEvent' }) // q
         cy.wait(100)
-        cy.get(lamps).contains("U").should('have.class', 'highlight-red')
+        cy.get(lamps).contains("G").should('have.class', 'highlight-red')
         cy.get('body').trigger('keyup', { keycode: 81, key: 'q', eventConstructor: 'KeyboardEvent' })
         cy.wait(200)
     })
@@ -106,6 +110,7 @@ describe('Variant Select', () => {
       cy.wait(200)
       cy.setModel(model_selector, custom_model)
       cy.setRotors('I', 'V', 'II')
+      cy.setReflectors()
       cy.get(keys).contains("Q").click()
         cy.wait(200)
         cy.get(keys).contains("P").click()
@@ -125,9 +130,10 @@ describe('Variant Select', () => {
         cy.visit(url)
         cy.setModel(model_selector, custom_model)
         cy.setRotors('I', 'V', 'II')
+        cy.setReflectors()
 
-        //U zu Y Verbinden
-        cy.get(plugboard).contains('U').click()
+        //G zu Y Verbinden
+        cy.get(plugboard).contains('G').click()
         cy.get(plugboard).contains('Y').click()
 
         //Q Klicken
@@ -229,6 +235,7 @@ describe('Full User Interaction', () => {
       cy.visit(url)
       cy.setModel(model_selector, custom_model)
       cy.setRotors('I', 'V', 'II')
+      cy.setReflectors()
   
       cy.testUserInput(input_history,output_history, keys, usr_input)
       cy.checkHistory(input_history, output_history, usr_input)
@@ -245,6 +252,7 @@ describe('Full User Interaction', () => {
       cy.visit(url)
       cy.setModel(model_selector, custom_model)
       cy.setRotors('I', 'V', 'II')
+      cy.setReflectors()
       //Da ein neuer Buchstabe immer links in die History und nicht rechts vom alten geschrieben wird,
       //muss Encrypteter String reversed werden fuer den Input
       encr_output = encr_output.split('').reverse().join("")

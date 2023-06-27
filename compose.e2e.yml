@@ -6,23 +6,23 @@ services:
       args:
         context: local
     image: localhost/backend:latest
-    cpus: 0.2
+    # cpus: 0.2
   frontend:
     build:
       context: frontend
       dockerfile: Containerfile
     image: localhost/frontend:latest
-    cpus: 0.1
+    # cpus: 0.1
   reverse-proxy:
     build:
       context: reverse-proxy
       dockerfile: Containerfile
     image: localhost/reverse-proxy:latest
-    cpus: 0.1
+    # cpus: 0.1
   e2e-tests:
     build:
       context: e2e_enigma
       dockerfile: Containerfile
     image: localhost/e2e-tests:latest
     network_mode: host
-    cpus: 0.2
+    # cpus: 0.2
