@@ -41,6 +41,7 @@ describe('Variant Select', () => {
         cy.visit(url)
         cy.setModel(model_selector, model)
         cy.setRotors('I', 'VIII', 'II')
+        cy.setReflectors('UKW-B')
 
         cy.get(keys).contains("Q").click().then(() => {
             cy.get(keys).contains("Q").should('have.class', 'highlight')
@@ -54,6 +55,7 @@ describe('Variant Select', () => {
         cy.visit(url)
         cy.setModel(model_selector, model)
         cy.setRotors('I', 'VIII', 'II')
+        cy.setReflectors('UKW-B')
 
         cy.get(keys).contains("Q").click().then(() => {
             cy.get(lamps).contains("O").should('have.class', 'highlight-red')
@@ -68,6 +70,7 @@ describe('Variant Select', () => {
         cy.visit(url)
         cy.setModel(model_selector, model)
         cy.setRotors('I', 'VIII', 'II')
+        cy.setReflectors('UKW-B')
         
         cy.get('body').trigger('keydown', { keycode: 81, key: 'q', eventConstructor: 'KeyboardEvent' }) // q
         cy.wait(100)
@@ -82,6 +85,7 @@ describe('Variant Select', () => {
         cy.visit(url)
         cy.setModel(model_selector, model)
         cy.setRotors('I', 'VIII', 'II')
+        cy.setReflectors('UKW-B')
 
         cy.get('body').trigger('keydown', { keycode: 81, key: 'q', eventConstructor: 'KeyboardEvent' }) // q
         cy.wait(100)
@@ -104,6 +108,7 @@ describe('Variant Select', () => {
       cy.wait(200)
       cy.setModel(model_selector, model)
       cy.setRotors('I', 'VIII', 'II')
+      cy.setReflectors('UKW-B')
       cy.get(keys).contains("Q").click()
         cy.wait(200)
         cy.get(keys).contains("P").click()
@@ -124,6 +129,7 @@ describe('Variant Select', () => {
         cy.visit(url)
         cy.setModel(model_selector, model)
         cy.setRotors('I', 'VIII', 'II')
+        cy.setReflectors('UKW-B')
 
         //U zu Y Verbinden
         cy.get(plugboard).contains('O').click()
@@ -230,6 +236,7 @@ describe('Full User Interaction', () => {
       cy.visit(url)
       cy.setModel(model_selector, model)
       cy.setRotors('I', 'VIII', 'II')
+      cy.setReflectors('UKW-B')
   
       cy.testUserInput(input_history,output_history, keys, usr_input)
       cy.checkHistory(input_history, output_history, usr_input)
@@ -246,6 +253,7 @@ describe('Full User Interaction', () => {
       cy.visit(url)
       cy.setModel(model_selector, model)
       cy.setRotors('I', 'VIII', 'II')
+      cy.setReflectors('UKW-B')
       //Da ein neuer Buchstabe immer links in die History und nicht rechts vom alten geschrieben wird,
       //muss Encrypteter String reversed werden fuer den Input
       encr_output = encr_output.split('').reverse().join("")

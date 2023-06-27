@@ -69,10 +69,10 @@ Cypress.Commands.add('setRotorsCustom', () => {
   cy.wait(200)
 })
 
-Cypress.Commands.add('setReflectors', () => {
+Cypress.Commands.add('setReflectors', (rotor_name = 'UKW-A') => {
     cy.get('ol#reflectorSelection li:first').click()
     cy.get('li[data-value="reflector1"].selected').invoke('text').then((text) => {
-        expect(text).to.equal('UKW-A')
+        expect(text).to.equal(rotor_name)
       });
 })
 
