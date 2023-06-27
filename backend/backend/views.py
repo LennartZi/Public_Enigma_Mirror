@@ -62,6 +62,21 @@ def get_installable_rotors():
             return 'Error loading variants', 500
 
 
+@app.route('/variant/plugboard', methods=['GET'])
+def get_is_plugboard():
+    variant_cookie = request.cookies.get('variant')
+    if not variant_cookie:
+        return 'Variant cookie not set', 400
+
+    with open("/etc/enigma.yaml", "r") as stream:
+        try:
+            data = yaml.safe_load(stream)
+            plugboard = data['variants'][variant_cookie]['plugboard']
+            return jsonify(plugboard)
+        except yaml.YAMLError as exc:
+            return 'Error loading variants', 500
+
+
 # Endpoint for getting the available rotors
 @app.route('/rotors', methods=['GET'])
 def get_rotors():

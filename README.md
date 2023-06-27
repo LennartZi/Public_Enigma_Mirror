@@ -29,6 +29,8 @@ docker-compose -f compose.yml -f compose.e2e.yml up
 docker-compose -f compose.yml -f compose.e2e.yml down
 ```
 
+The e2e tests with the custom enigma can be achieved with only the `compose.e2e_custom.yml` file.
+
 ## Prod
 
 ```console
