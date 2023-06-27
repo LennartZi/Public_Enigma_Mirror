@@ -13,7 +13,7 @@ let api_encrypt = url + '/api/encrypt'
 let api_positions = url + '/api/rotor/0/position'
 
 let model_selector = "#variantSelect"
-let model = ["M3", "I", "B (A-133 modified)"]
+let model = "M3"
 
 let plugboard = "#keyboard_plug"
 let rotor_sub = '.rotor-substitutions'
@@ -21,12 +21,7 @@ let rotor_sub = '.rotor-substitutions'
 describe('Variant Select', () => {
     it('Selects The Variant', () => {
       cy.visit(url)
-
-
-      for (let i = 0; i < model.length; i++){
-      cy.setModel(model_selector, model[i])
-      }
-
+      cy.setModel(model_selector, model)
       cy.wait(200)
     })
   })
@@ -34,8 +29,8 @@ describe('Variant Select', () => {
   describe('Rotor Select', () => {
     it('Selects the Rotors', () => {
       cy.visit(url)
-      cy.setModel(model_selector, model[1])
-      cy.setRotors()
+      cy.setModel(model_selector, model)
+      cy.setRotors('I', 'VIII', 'II')
 
       cy.wait(200)
     })
@@ -44,8 +39,8 @@ describe('Variant Select', () => {
   describe('Keyboard Click', () => {
     it('Tests the Keyboard Highlight', () => {
         cy.visit(url)
-        cy.setModel(model_selector, model[1])
-        cy.setRotors()
+        cy.setModel(model_selector, model)
+        cy.setRotors('I', 'VIII', 'II')
 
         cy.get(keys).contains("Q").click().then(() => {
             cy.get(keys).contains("Q").should('have.class', 'highlight')
@@ -57,39 +52,41 @@ describe('Variant Select', () => {
   describe('Lamppanel Click', () => {
     it('Tests the Lamppanel Highlight', () => {
         cy.visit(url)
-        cy.setModel(model_selector, model[1])
-        cy.setRotors()
+        cy.setModel(model_selector, model)
+        cy.setRotors('I', 'VIII', 'II')
 
         cy.get(keys).contains("Q").click().then(() => {
-            cy.get(lamps).contains("U").should('have.class', 'highlight-red')
+            cy.get(lamps).contains("O").should('have.class', 'highlight-red')
           });
             cy.wait(200)
     })
   })
 
-  //Broken Test
-  /*
+  
   describe('Keyboard Press', () => {
     it('Tests the Keyboard Highlight', () => {
         cy.visit(url)
-        cy.setModel(model_selector, model[1])
-        cy.setRotors()
+        cy.setModel(model_selector, model)
+        cy.setRotors('I', 'VIII', 'II')
         
-        cy.get('body').type('{Q}').then(() => {
-            cy.get(keys).contains("Q").should('have.class', 'highlight')
-        });
+        cy.get('body').trigger('keydown', { keycode: 81, key: 'q', eventConstructor: 'KeyboardEvent' }) // q
+        cy.wait(100)
+        cy.get(keys).contains("Q").should('have.class', 'highlight')
+        cy.get('body').trigger('keyup', { keycode: 81, key: 'q', eventConstructor: 'KeyboardEvent' })
+        cy.wait(200)
     })
-  })*/
+  })
 
   describe('Lamppanel Press', () => {
     it('Tests the Lamppanel Highlight', () => {
         cy.visit(url)
-        cy.setModel(model_selector, model[1])
-        cy.setRotors()
+        cy.setModel(model_selector, model)
+        cy.setRotors('I', 'VIII', 'II')
 
-        cy.get('body').type('{Q}').then(() => {
-            cy.get(lamps).contains("U").should('have.class', 'highlight-red')
-        });
+        cy.get('body').trigger('keydown', { keycode: 81, key: 'q', eventConstructor: 'KeyboardEvent' }) // q
+        cy.wait(100)
+        cy.get(lamps).contains("O").should('have.class', 'highlight-red')
+        cy.get('body').trigger('keyup', { keycode: 81, key: 'q', eventConstructor: 'KeyboardEvent' })
         cy.wait(200)
     })
   })
@@ -99,14 +96,14 @@ describe('Variant Select', () => {
     it('Cookies', () => {
       
       cy.visit(url)
-      cy.setCookie('variant', 'I')
+      cy.setCookie('variant', 'M3')
       cy.setCookie('input_history', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
       cy.setCookie('history', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
       cy.wait(200)
       cy.reload()
       cy.wait(200)
-      cy.setModel(model_selector, model[1])
-      cy.setRotors()
+      cy.setModel(model_selector, model)
+      cy.setRotors('I', 'VIII', 'II')
       cy.get(keys).contains("Q").click()
         cy.wait(200)
         cy.get(keys).contains("P").click()
@@ -125,11 +122,11 @@ describe('Variant Select', () => {
 
         //Mit dieser Konfiguration kommt beim Q klicken am Beginn U Raus
         cy.visit(url)
-        cy.setModel(model_selector, model[1])
-        cy.setRotors()
+        cy.setModel(model_selector, model)
+        cy.setRotors('I', 'VIII', 'II')
 
         //U zu Y Verbinden
-        cy.get(plugboard).contains('U').click()
+        cy.get(plugboard).contains('O').click()
         cy.get(plugboard).contains('Y').click()
 
         //Q Klicken
@@ -150,8 +147,8 @@ describe('Variant Select', () => {
   describe('Ring Settings', () => {
     it('Tests the Rotor Substitution and Reflector', () => {
         cy.visit(url)
-        cy.setModel(model_selector, model[1])
-        cy.setRotors()
+        cy.setModel(model_selector, model)
+        cy.setRotors('I', 'VIII', 'II')
 
         //cy.get(rotor_sub).contains('E').select('O')
         cy.get('ol#selectedRotor .rotor-substitutions:first').select("K")
@@ -225,3 +222,38 @@ describe('Variant Select', () => {
 
     })
   })
+
+
+    //Encryption
+describe('Full User Interaction', () => {
+    it('Full User Interaction', () => {
+      cy.visit(url)
+      cy.setModel(model_selector, model)
+      cy.setRotors('I', 'VIII', 'II')
+  
+      cy.testUserInput(input_history,output_history, keys, usr_input)
+      cy.checkHistory(input_history, output_history, usr_input)
+  
+      cy.get(output_history).invoke('text').then((text) => {
+        encr_output = text
+      });
+    })
+  })
+  
+  // Decryption
+  describe('User Interaction Decryption', () => {
+    it('User Types the Encrypted '+usr_input, () => {
+      cy.visit(url)
+      cy.setModel(model_selector, model)
+      cy.setRotors('I', 'VIII', 'II')
+      //Da ein neuer Buchstabe immer links in die History und nicht rechts vom alten geschrieben wird,
+      //muss Encrypteter String reversed werden fuer den Input
+      encr_output = encr_output.split('').reverse().join("")
+      cy.testUserInput(input_history,output_history, keys, encr_output)
+  
+      cy.get(output_history).invoke('text').then((text) => {
+      expect(text).to.equal(usr_input.split('').reverse().join(""))
+      });
+    })
+  })
+

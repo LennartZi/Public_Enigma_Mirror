@@ -1,0 +1,26 @@
+history: 140
+variants:
+  'Custom Model':
+    plugboard: true
+    entry: ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    rotors:
+      installable: 3
+      'I':
+        substitution: EKMFLGDQVZNTOWYHXUSPAIBRCJ
+        turnover: Q
+      'II':
+        substitution: AJDKSIRUXBLHWTMCQGZNPYFVOE
+        turnover: E
+      'III':
+        substitution: BDFHJLCPRTXVZNYEIWGAKMUSQO
+        turnover: V
+      'IV':
+        substitution: ESOVPZJAYQUIRHXLNFTGKDCMWB
+        turnover: J
+      'V':
+        substitution: VZBRGITYUPSDNHLXAWMJQOFECK
+        turnover: Z
+    reflectors:
+      'UKW-A': EJMZALYXVBWFCRQUONTSPIKHGD
+      'UKW-B': YRUHQSLDPXNGOKMIEBFZCWVJAT
+      'UKW-C': FVPJIAOYEDRZXWGCTKUQSBNMHL
