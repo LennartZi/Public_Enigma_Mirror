@@ -57,6 +57,7 @@ describe('Variant Select', () => {
         cy.visit(url)
         cy.setModel(model_selector, custom_model)
         cy.setRotors('I', 'V', 'II')
+        cy.setReflectors()
 
         cy.get(keys).contains("Q").click().then(() => {
             cy.get(lamps).contains("G").should('have.class', 'highlight-red')
@@ -109,6 +110,7 @@ describe('Variant Select', () => {
       cy.wait(200)
       cy.setModel(model_selector, custom_model)
       cy.setRotors('I', 'V', 'II')
+      cy.setReflectors()
       cy.get(keys).contains("Q").click()
         cy.wait(200)
         cy.get(keys).contains("P").click()
