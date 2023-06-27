@@ -291,7 +291,7 @@ def encrypt_letter():
 
         rotor_config = data['variants'][variant]['rotors']
         ukw = data['variants'][variant]['reflectors'][ukw]
-        plugboard_enabled = data['variants'][variant_cookie]['plugboard']
+        plugboard_enabled = data['variants'][variant]['plugboard']
         for rotor in rotors:
             notches.append(rotor_config[rotor]['turnover'])
             rotor_mapping.append((rotor_config[rotor]['substitution']))
