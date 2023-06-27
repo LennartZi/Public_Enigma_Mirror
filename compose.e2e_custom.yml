@@ -1,0 +1,38 @@
+version: "2"
+services:
+  backend:
+    build:
+      context: backend
+      dockerfile: Containerfile
+      args:
+        context: local
+    image: localhost/backend:latest
+    volumes:
+      - type: bind
+        source: ./custom_enigma.yaml
+        target: /etc/enigma.yaml
+        read_only: true
+    # cpus: 0.2
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Containerfile
+    image: localhost/frontend:latest
+    # cpus: 0.1
+  reverse-proxy:
+    build:
+      context: reverse-proxy
+      dockerfile: Containerfile
+    image: localhost/reverse-proxy:latest
+    # cpus: 0.1
+    ports:
+      - 8000:80
+  e2e-tests:
+    build:
+      context: e2e_enigma
+      dockerfile: Containerfile
+    image: localhost/e2e-tests:latest
+    network_mode: host
+    environment:
+      - spec=cypress/e2e/custom_enigma.cy.js
+    # cpus: 0.2

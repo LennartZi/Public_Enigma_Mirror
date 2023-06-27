@@ -62,12 +62,27 @@ def get_installable_rotors():
             return 'Error loading variants', 500
 
 
+@app.route('/variant/plugboard', methods=['GET'])
+def get_is_plugboard():
+    variant_cookie = request.cookies.get('variant')
+    if not variant_cookie:
+        return jsonify('Variant cookie not set', 400)
+
+    with open("/etc/enigma.yaml", "r") as stream:
+        try:
+            data = yaml.safe_load(stream)
+            plugboard_enabled = data['variants'][variant_cookie]['plugboard']
+            return jsonify(plugboard_enabled)
+        except yaml.YAMLError as exc:
+            return 'Error loading variants', 500
+
+
 # Endpoint for getting the available rotors
 @app.route('/rotors', methods=['GET'])
 def get_rotors():
     variant_cookie = request.cookies.get('variant')
     if not variant_cookie:
-        return 'Variant cookie not set', 400
+        return jsonify('Variant cookie not set', 400)
 
     with open("/etc/enigma.yaml", "r") as file:
         data = yaml.safe_load(file)
@@ -156,7 +171,7 @@ def rotor_position(rotornr):
 def get_reflectors():
     variant_cookie = request.cookies.get('variant')
     if not variant_cookie:
-        return 'Variant cookie not set', 400
+        return jsonify('Variant cookie not set', 400)
 
     with open("/etc/enigma.yaml", "r") as file:
         data = yaml.safe_load(file)
@@ -227,7 +242,7 @@ def handle_plugboard():
             plugboard_dict = ast.literal_eval(plugboard_cookie)
             return jsonify(plugboard_dict)
         else:
-            return "Plugboard cookie not set", 400
+            return jsonify("Plugboard cookie not set", 400)
     elif request.method == "PUT":
         plugboard = request.get_json()["plugboard"]
         response = app.make_response(jsonify("Plugboard updated"))
@@ -276,6 +291,7 @@ def encrypt_letter():
 
         rotor_config = data['variants'][variant]['rotors']
         ukw = data['variants'][variant]['reflectors'][ukw]
+        plugboard_enabled = data['variants'][variant]['plugboard']
         for rotor in rotors:
             notches.append(rotor_config[rotor]['turnover'])
             rotor_mapping.append((rotor_config[rotor]['substitution']))
@@ -286,8 +302,9 @@ def encrypt_letter():
                         reflector=ukw,
                         notch_rotor1=notches[0], notch_rotor2=notches[1], notch_rotor3=notches[2])
 
-        # Set the plugboard (Will be saved as dictionary) -> Important step to use apply_plugboard
-        enigma.set_plugboard(plugboard)
+        if plugboard_enabled:
+            # Set the plugboard (Will be saved as dictionary) -> Important step to use apply_plugboard
+            enigma.set_plugboard(plugboard)
 
         # Encryption process: Getting the letter -> Encrypting -> Saving the new positions
         data = request.get_json()
